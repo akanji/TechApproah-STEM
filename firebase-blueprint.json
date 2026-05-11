@@ -1,0 +1,43 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Stores user profile data and gamification stats.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique identity of the user." },
+        "displayName": { "type": "string", "description": "Display name of the user." },
+        "email": { "type": "string", "description": "Email address of the user." },
+        "photoURL": { "type": "string", "description": "URL to the user's avatar." },
+        "xp": { "type": "number", "description": "Experience points earned across labs." },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "xp", "createdAt", "updatedAt"]
+    },
+    "LabProgress": {
+      "title": "Lab Progress",
+      "description": "Tracks completion and performance for specific labs.",
+      "type": "object",
+      "properties": {
+        "labId": { "type": "string", "description": "Unique identifier for the lab module." },
+        "userId": { "type": "string", "description": "The user who owns this progress record." },
+        "completed": { "type": "boolean", "description": "Whether the lab has been finished." },
+        "score": { "type": "number", "description": "Quiz or performance score." },
+        "lastAttemptAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["labId", "userId", "completed", "score", "lastAttemptAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile document."
+    },
+    "/users/{userId}/progress/{labId}": {
+      "schema": "LabProgress",
+      "description": "Progress records for specific labs associated with a user."
+    }
+  }
+}

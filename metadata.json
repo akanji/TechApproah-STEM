@@ -1,0 +1,6 @@
+{
+  "name": "TechApproach STEM Studio",
+  "description": "An interactive STEM learning platform powered by high-reasoning Gemini AI, real-time voice study partners, and scientific video generation.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["AI Chat", "Voice Conversation", "Video Generation", "Audio Transcription"]
+}
