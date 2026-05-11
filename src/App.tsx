@@ -10,219 +10,8 @@ import { MediaLab } from "./components/MediaLab";
 import { AudioTranscriber } from "./components/AudioTranscriber";
 import { LabEngine } from "./components/LabEngine";
 import { LabContent } from "./components/LabContent";
-
-const SUBJECTS = [
-  { id: "physics", icon: "⚛️", name: "Physics", color: "#1a6fdb", bg: "#e6f1fb", topics: ["Mechanics","Thermodynamics","Electricity & Magnetism","Modern Physics"], desc: "From Newton's laws to quantum ideas" },
-  { id: "chemistry", icon: "🧪", name: "Chemistry", color: "#0f6e56", bg: "#e1f5ee", topics: ["Foundations","Stoichiometry","Thermochemistry","Materials"], desc: "Atoms, reactions, and real materials" },
-  { id: "biology", icon: "🧬", name: "Biology", color: "#3b6d11", bg: "#eaf3de", topics: ["Cell Biology","Genetics","Physiology","Biotech"], desc: "Life systems and bioengineering" },
-  { id: "math", icon: "∫", name: "Math for Engineers", color: "#854f0b", bg: "#faeeda", topics: ["Pre-Calculus","Calculus","Linear Algebra","Statistics"], desc: "The language of engineering" },
-  { id: "ee", icon: "⚡", name: "Electrical Engineering", color: "#993556", bg: "#fbeaf0", topics: ["Circuit Basics","DC Circuits","AC Basics","Digital Logic"], desc: "Circuits, signals, and electronics" },
-  { id: "mech", icon: "⚙️", name: "Mechanical Engineering", color: "#5f5e5a", bg: "#f1efe8", topics: ["Statics","Structural Design","Fluid Basics","Machines"], desc: "Forces, materials, and machines" },
-];
-
-const MODULES: {[key: string]: any[]} = {
-  physics: [
-    { id: 1, title: "Scalars, Vectors & Units", duration: "12 min", xp: 150, completed: true },
-    { id: 2, title: "Kinematics in 1D and 2D", duration: "18 min", xp: 200, completed: true },
-    { 
-      id: 3, 
-      title: "Newton's Second Law (F=ma)", 
-      duration: "20 min", 
-      xp: 250, 
-      completed: false, 
-      active: true, 
-      labType: "physics",
-      content: {
-        lab_id: "physics_001",
-        title: "Newton's Second Law",
-        ai_notes: {
-          definition: "The acceleration of an object as produced by a net force is directly proportional to the magnitude of the net force.",
-          formulas: ["F = ma", "a = F/m"],
-          units: "Newton (N), Kilogram (kg), m/s²",
-          quiz: [
-            {q: "If force doubles and mass stays same, what happens to acceleration?", a: "It doubles"},
-            {q: "What is the unit of Force?", a: "Newton"}
-          ]
-        },
-        resources: [
-          {type: "video", url: "https://youtube.com/watch?v=kKKM8Y-u7ds", desc: "Visualizing F=ma"},
-          {type: "sim", url: "https://phet.colorado.edu/sims/html/forces-and-motion-basics/latest/forces-and-motion-basics_en.html", desc: "PhET Forces & Motion"}
-        ]
-      }
-    },
-    { 
-      id: 4, 
-      title: "Heat Transfer & Specific Heat", 
-      duration: "25 min", 
-      xp: 300, 
-      completed: false, 
-      labType: "thermo",
-      content: {
-        lab_id: "thermo_003",
-        title: "Heat Transfer & Specific Heat",
-        ai_notes: {
-          topic: "Thermodynamics",
-          definition: "Specific heat is the amount of heat per unit mass required to raise the temperature by one degree Celsius.",
-          formulas: ["Q = mcΔT"],
-          units: "Joules (J), kg, °C",
-          notes: {
-            definition: "Specific heat (c) varies by material. Water has a notably high capacity (4186 J/kg°C), making it an excellent heat sink.",
-            formula_triangle: "Q / (m * c * ΔT)",
-            real_world: "The high specific heat of water regulates Earth's climate and prevents rapid temperature spikes.",
-            common_mistake: "Mixing up Mass (m) in kg vs grams. Always check consistency of units."
-          },
-          quiz: [
-            {q: "What is the unit of Specific Heat Capacity?", a: "J/kg°C"},
-            {q: "If mass increases, does it require more or less energy for the same temp change?", a: "More energy"}
-          ]
-        },
-        resources: [
-          {type: "video", url: "https://www.youtube.com/watch?v=kYI9FmHozYw", desc: "Specific Heat Capacity Explained"},
-          {type: "link", url: "https://openstax.org/details/books/university-physics-volume-2", desc: "OpenStax University Physics Vol 2"},
-          {type: "sim", url: "https://phet.colorado.edu/en/simulations/energy-forms-and-changes", desc: "Energy Forms & Changes PhET"}
-        ]
-      }
-    },
-  ],
-  ee: [
-    { 
-      id: 1, 
-      title: "Ohm's Law: V = IR", 
-      duration: "15 min", 
-      xp: 200, 
-      completed: false, 
-      active: true, 
-      labType: "ee",
-      content: {
-        lab_id: "elec_002",
-        title: "Ohm's Law",
-        ai_notes: {
-          topic: "Ohm's Law",
-          notes: {
-            definition: "Ohm's Law states that the current through a conductor between two points is directly proportional to the voltage across the two points.",
-            formula_triangle: "V over I and R",
-            real_world: "Dimmer switches, volume knobs, and battery chargers.",
-            common_mistake: "Forgetting that resistance usually increases with temperature in real-world bulbs."
-          },
-          quiz: [
-            {q: "What is the primary relationship expressed by Ohm's Law?", a: "V = IR"},
-            {q: "If voltage is constant and resistance increases, what happens to current?", a: "Current decreases"}
-          ]
-        },
-        resources: [
-          {type: "link", url: "https://www.allaboutcircuits.com/textbook/direct-current/chpt-2/voltage-current-resistance-relate/", desc: "AllAboutCircuits Guide"},
-          {type: "sim", url: "https://phet.colorado.edu/en/simulations/circuit-construction-kit-dc", desc: "Interactive PhET DC Kit"}
-        ]
-      }
-    },
-    { id: 2, title: "Series & Parallel Circuits", duration: "20 min", xp: 300, completed: false },
-  ],
-  biology: [
-    { 
-      id: 1, 
-      title: "DNA Synthesis & Matching", 
-      duration: "20 min", 
-      xp: 400, 
-      completed: false, 
-      active: true, 
-      labType: "bio",
-      content: {
-        lab_id: "bio_001",
-        title: "DNA Basics",
-        validation: {
-          status: "validated",
-          findings: [
-            "Biological Logic: Transcription pairing (A-U, T-A, C-G) is 100% accurate.",
-            "UI Interaction: State-driven 'Success' message triggers only on perfect sequence matching.",
-            "Error Prevention: Interaction logic prevents invalid bases (like T) from being injected into mRNA strand."
-          ]
-        },
-        ai_notes: {
-          topic: "Genetics",
-          definition: "Transcription is the master process where genomic DNA is copied into messenger RNA (mRNA). This allows the genetic 'blueprint' to leave the nucleus without damaging the original source.",
-          formulas: ["A → U (Uracil Replacement)", "T → A", "C → G", "G → C", "3 Nucleotides = 1 Codon"],
-          units: "Nitrogenous Bases / Codons",
-          notes: {
-            definition: "Transcription: Genetic information flows from DNA → RNA. Translation: mRNA codons are read by ribosomes to assemble amino acids into proteins.",
-            formula_triangle: "3 Nucleotides = 1 Codon = 1 Amino Acid",
-            real_world: "mRNA vaccines (like COVID-19) deliver synthesized mRNA directly to cells, using these transcription principles to trigger immune responses.",
-            common_mistake: "Thymine (T) exists ONLY in DNA. In RNA, Uracil (U) takes its place completely. Forgetting this leads to incorrect protein synthesis models."
-          },
-          quiz: [
-            {q: "Which Nitrogenous base is unique to RNA?", a: "Uracil (U)"},
-            {q: "How many nucleotides make up a single codon?", a: "Three (3)"},
-            {q: "True or False: Transcription happens in the Ribosome.", a: "False. It happens in the Nucleus; Translation happens in Ribosomes."}
-          ]
-        },
-        resources: [
-          {type: "video", url: "https://www.youtube.com/watch?v=8m6hHRIKwxY", desc: "DNA Transcription Animation"},
-          {type: "link", url: "https://vcell.ndsu.edu/animations/transcription/movie-flash.htm", desc: "Virtual Cell Synthesis"}
-        ]
-      }
-    },
-  ],
-  mech: [
-    { 
-      id: 1, 
-      title: "Structural Bridge Design", 
-      duration: "30 min", 
-      xp: 600, 
-      completed: false, 
-      active: true, 
-      labType: "structural",
-      content: {
-        lab_id: "mech_001",
-        title: "Virtual Lab 5: Bridge Design & Stress Testing",
-        validation: {
-          status: "validated",
-          findings: [
-            "Engineering Logic: Stress/Strain relationship follows Hooke's Law.",
-            "Material Accuracy: Material constants for Steel (200 GPa) and Yield Strength (250 MPa) are verified.",
-            "Safety Protocol: The 'Structural Failure' state correctly triggers when the Safety Factor falls below 1.0."
-          ]
-        },
-        ai_notes: {
-          topic: "Structural Engineering",
-          definition: "Structural integrity testing calculates the internal resistance (Stress) and deformation (Strain) of materials under external loads.",
-          formulas: ["Stress (σ) = Force / Area", "Strain (ε) = Stress / E (Young's Modulus)", "Safety Factor = Yield Strength / Actual Stress"],
-          units: "Pascals (Pa), Newtons (N), m²",
-          notes: {
-            definition: "Young’s Modulus (E) is a measure of the stiffness of an elastic material. It defines the relationship between stress and strain.",
-            formula_triangle: "σ = F/A | ε = σ/E",
-            real_world: "Building skyscrapers, suspension bridges, and aircraft wings requires precise calculation of these factors to prevent catastrophic failure.",
-            common_mistake: "Assuming the bridge breaks only at peak load. Cyclic loading and fatigue can cause failure even below yield strength in real-world scenarios."
-          },
-          quiz: [
-            {q: "What is the formula for Stress (σ)?", a: "Force / Area"},
-            {q: "What does Young's Modulus (E) measure?", a: "Stiffness of an elastic material"},
-            {q: "True or False: Increasing 'Area' (A) reduces the Stress (σ) on a beam.", a: "True"}
-          ]
-        },
-        resources: [
-          {type: "video", url: "https://www.youtube.com/watch?v=XhS6_K_9I4A", desc: "Understanding Young's Modulus"},
-          {type: "link", url: "https://skyciv.com/free-resources/beam-stress-calculator/", desc: "External Stress Calculator"}
-        ]
-      }
-    },
-  ]
-};
-
-const RESOURCES = [
-  { name: "PhET Interactive Simulations", url: "https://phet.colorado.edu/", desc: "Physics and Chemistry visuals" },
-  { name: "Khan Academy Engineering", url: "https://www.khanacademy.org/science/electrical-engineering", desc: "Foundational EE concepts" },
-  { name: "OpenStax University Physics", url: "https://openstax.org/details/books/university-physics-volume-1", desc: "Verified OER Textbooks" },
-];
-
-const BADGES = [
-  { id: 1, name: "Mechanics Master", icon: "🏆", earned: true, desc: "Complete all mechanics modules" },
-  { id: 2, name: "Circuit Builder", icon: "⚡", earned: true, desc: "Build 5 virtual circuits" },
-  { id: 3, name: "Data Detective", icon: "🔍", earned: false, desc: "Analyze 3 datasets" },
-  { id: 4, name: "Code Wizard", icon: "🧙", earned: false, desc: "Complete Python track" },
-  { id: 5, name: "Lab Pioneer", icon: "🔬", earned: true, desc: "Finish 3 mini-projects" },
-  { id: 6, name: "Streak Champion", icon: "🔥", earned: false, desc: "30-day streak" },
-];
-
 import { UserProvider, useUser } from "./components/UserContext";
+import { SUBJECTS, MODULES, BADGES, NAV_ITEMS, RESOURCES } from "./constants";
 
 export default function App() {
   return (
@@ -233,9 +22,9 @@ export default function App() {
 }
 
 function AppContent() {
-  const [page, setPage] = useState("home");
-  const { user, profile, progress, login, logout, xp: userXp } = useUser();
-  const [activeSubject, setActiveSubject] = useState<string | null>(null);
+  const [page, setPage] = useState(() => localStorage.getItem("eng_page") || "home");
+  const { user, profile, progress, login, logout } = useUser();
+  const [activeSubject, setActiveSubject] = useState<string | null>(() => localStorage.getItem("eng_subject") || null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeModule, setActiveModule] = useState<number | null>(null);
   const [studyMode, setStudyMode] = useState<"theory" | "lab">("theory");
@@ -244,15 +33,17 @@ function AppContent() {
   const [xp, setXp] = useState(1840);
   const [streak, setStreak] = useState(12);
 
-  const activeModuleData = activeSubject ? MODULES[activeSubject]?.find(m => m.id === activeModule) : null;
+  useEffect(() => {
+    localStorage.setItem("eng_page", page);
+  }, [page]);
 
-  const navItems = [
-    { id: "home", label: "Home", icon: Home },
-    { id: "subjects", label: "Library", icon: BookOpen },
-    { id: "projects", label: "Labs", icon: Microscope },
-    { id: "progress", label: "Stats", icon: BarChart3 },
-    { id: "community", label: "Forums", icon: MessageSquare },
-  ];
+  useEffect(() => {
+    if (activeSubject) localStorage.setItem("eng_subject", activeSubject);
+    else localStorage.removeItem("eng_subject");
+  }, [activeSubject]);
+
+// Data moved to constants.ts
+  const activeModuleData = activeSubject ? MODULES[activeSubject]?.find((m: any) => m.id === activeModule) : null;
 
   // Simulation Panel
   function SimulationPanel({ onClose }: { onClose: () => void }) {
@@ -401,10 +192,15 @@ function AppContent() {
   );
 
   const SubjectsPage = () => {
-    const filteredSubjects = SUBJECTS.filter(s => 
-      s.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      s.topics.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
+    const filteredSubjects = SUBJECTS.filter(s => {
+      const matchesSubject = s.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            s.topics.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      const modules = MODULES[s.id] || [];
+      const matchesModules = modules.some(m => m.title.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      return matchesSubject || matchesModules;
+    });
 
     return (
       <div className="space-y-6">
@@ -413,29 +209,36 @@ function AppContent() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#484f58]" size={16} />
               <input 
-                placeholder="Search subjects, topics, equations..." 
+                placeholder="Search subjects, labs, or topics..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-[#161b22] border border-[#30363d] rounded-xl py-3 pl-10 pr-4 text-sm text-white outline-none focus:border-blue-500/40" 
               />
             </div>
             <div className="grid grid-cols-1 gap-4">
-              {filteredSubjects.map(s => (
-                <div 
-                  key={s.id} 
-                  onClick={() => setActiveSubject(s.id)}
-                  className="bg-[#161b22] border border-[#30363d] rounded-2xl p-5 flex items-center gap-5 cursor-pointer hover:border-blue-500/30 transition-all group"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-[#0d162d] border border-blue-500/10 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
-                    {s.icon}
+              {filteredSubjects.length > 0 ? (
+                filteredSubjects.map(s => (
+                  <div 
+                    key={s.id} 
+                    onClick={() => setActiveSubject(s.id)}
+                    className="bg-[#161b22] border border-[#30363d] rounded-2xl p-5 flex items-center gap-5 cursor-pointer hover:border-blue-500/30 transition-all group"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-[#0d162d] border border-blue-500/10 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+                      {s.icon}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-white font-bold">{s.name}</h3>
+                      <p className="text-[#8b949e] text-xs mt-1">{s.desc}</p>
+                    </div>
+                    <ChevronRight size={18} className="text-[#484f58] group-hover:text-blue-400 transition-colors" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-white font-bold">{s.name}</h3>
-                    <p className="text-[#8b949e] text-xs mt-1">{s.desc}</p>
-                  </div>
-                  <ChevronRight size={18} className="text-[#484f58] group-hover:text-blue-400 transition-colors" />
+                ))
+              ) : (
+                <div className="p-12 text-center border border-dashed border-[#30363d] rounded-2xl">
+                  <Search size={32} className="mx-auto mb-3 opacity-20 text-white" />
+                  <p className="text-[#8b949e] text-sm">No labs found matching "{searchQuery}"</p>
                 </div>
-              ))}
+              )}
             </div>
           </>
         ) : activeModule ? (
@@ -794,10 +597,16 @@ function AppContent() {
 
         {/* Navigation Bar */}
         <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-[#161b22]/90 backdrop-blur-xl border-t border-[#30363d] px-2 py-3 flex justify-around z-40">
-          {navItems.map(item => (
+          {NAV_ITEMS.map((item: any) => (
             <button 
               key={item.id} 
-              onClick={() => { setPage(item.id); if(item.id !== "subjects") { setActiveSubject(null); setActiveModule(null); } }}
+              onClick={() => { 
+                setPage(item.id); 
+                if (item.id !== "subjects") { 
+                  setActiveSubject(null); 
+                  setActiveModule(null); 
+                } 
+              }}
               className={`flex flex-col items-center gap-1 min-w-[64px] transition-all ${page === item.id ? "text-blue-400" : "text-[#484f58] hover:text-[#8b949e]"}`}
             >
               <div className={`p-1.5 rounded-xl transition-all ${page === item.id ? "bg-blue-400/10" : ""}`}>
