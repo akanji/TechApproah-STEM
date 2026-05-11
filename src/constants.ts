@@ -1,4 +1,4 @@
-import { Home, BookOpen, Microscope, BarChart3, MessageSquare, Zap, Flame, Trophy } from "lucide-react";
+import { Home, BookOpen, Microscope, BarChart3, MessageSquare, Zap, Flame, Trophy, ShieldCheck } from "lucide-react";
 
 export const SUBJECTS = [
   { 
@@ -150,5 +150,7 @@ export const NAV_ITEMS = [
   { id: "subjects", icon: BookOpen, label: "Curriculum" },
   { id: "projects", icon: Microscope, label: "Projects" },
   { id: "analytics", icon: BarChart3, label: "Analytics" },
+  { id: "resources", icon: Zap, label: "Study Hub" },
+  { id: "specialist", icon: ShieldCheck, label: "Specialist" },
   { id: "community", icon: MessageSquare, label: "Forum" },
 ];

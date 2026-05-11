@@ -1,0 +1,71 @@
+{
+  "Data Titan (Enterprise)": [
+    {
+      "name": "Titan Intelligence",
+      "description": "Enterprise-grade AI for field service management and predictive analytics.",
+      "capability": "Predictive Operations Framework",
+      "use_case": "Optimizing fleet dispatch and forecasting demand.",
+      "url": "https://www.servicetitan.com/titan-intelligence",
+      "secure": true,
+      "internal_lab_bridge": "Connects to Analytics Lab for real-world enterprise data simulation."
+    },
+    {
+      "name": "Ask Titan (Governance)",
+      "description": "Secure, internal AI assistant for governance and company policy queries.",
+      "capability": "AI Governance Engine",
+      "use_case": "Automating policy compliance and safe data handling.",
+      "url": "https://www.servicetitan.com/product/titan-intelligence",
+      "secure": true,
+      "internal_lab_bridge": "Used for verifying lab protocols against safety standards."
+    }
+  ],
+  "Physics & Bridge Master": [
+    {
+      "name": "NVIDIA PhysicsNeMo",
+      "description": "Generative AI for physics-informed chemistry and materials science.",
+      "capability": "Digital Twin Framework",
+      "use_case": "Automating fluid dynamics and material prediction.",
+      "url": "https://developer.nvidia.com/nemo",
+      "secure": false,
+      "internal_lab_bridge": "Advanced upgrade for the Bridge Stress Testing lab."
+    },
+    {
+      "name": "SimScale (Physics AI)",
+      "description": "Cloud-based engineering simulation platform with Physics AI capabilities.",
+      "capability": "Cloud Simulation Engine",
+      "use_case": "FEA and CFD simulation for complex structures.",
+      "url": "https://www.simscale.com/",
+      "secure": false,
+      "internal_lab_bridge": "Professional path for fluid dynamics modules."
+    },
+    {
+      "name": "Ansys SimAI",
+      "description": "Physics AI for ultra-fast simulation results based on historical data.",
+      "capability": "High-Speed Solver",
+      "use_case": "Accelerating design iterations for automotive and aerospace.",
+      "url": "https://www.ansys.com/products/simulation-ai",
+      "secure": false,
+      "internal_lab_bridge": "Integrates with Projectile Dynamics for aero-drag simulation."
+    }
+  ],
+  "Circuit & Productivity": [
+    {
+      "name": "Flux AI",
+      "description": "The first AI-powered PCB design tool for professional hardware teams.",
+      "capability": "PCB Copilot",
+      "use_case": "Automating schematic reviews and routing.",
+      "url": "https://www.flux.ai/",
+      "secure": false,
+      "internal_lab_bridge": "Export Ohm's Law circuits directly to professional schematics."
+    },
+    {
+      "name": "Circuit Mind",
+      "description": "AI software for the design of electronic systems.",
+      "capability": "Architecture Optimizer",
+      "use_case": "Generating optimal schematics from high-level specs.",
+      "url": "https://www.circuitmind.io/",
+      "secure": false,
+      "internal_lab_bridge": "Master step after finishing the Logic Gate simulator."
+    }
+  ]
+}

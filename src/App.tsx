@@ -11,6 +11,8 @@ import { AudioTranscriber } from "./components/AudioTranscriber";
 import { LabEngine } from "./components/LabEngine";
 import { LabContent } from "./components/LabContent";
 import { UserProvider, useUser } from "./components/UserContext";
+import { ResourceHub } from "./components/ResourceHub";
+import { SpecialistHub } from "./components/SpecialistHub";
 import { SUBJECTS, MODULES, BADGES, NAV_ITEMS, RESOURCES } from "./constants";
 
 export default function App() {
@@ -565,7 +567,10 @@ function AppContent() {
               {page === "home" && <HomePage />}
               {page === "subjects" && <SubjectsPage />}
               {page === "projects" && <ProjectsPage />}
+              {page === "resources" && <ResourceHub />}
+              {page === "specialist" && <SpecialistHub />}
               {page === "progress" && <ProgressPage />}
+              {page === "analytics" && <ProgressPage />}
               {page === "community" && <CommunityPage />}
             </motion.div>
           </AnimatePresence>

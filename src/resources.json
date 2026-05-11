@@ -1,0 +1,114 @@
+[
+  {
+    "id": "uSVBfyHBiDU",
+    "title": "NotebookLM Intro",
+    "description": "Tutorial for Beginners: Master AI-driven research.",
+    "insights": {
+      "summary": [
+        "Upload personal docs to create an AI-powered knowledge base.",
+        "Generate audio overviews and deep study guides automatically.",
+        "Cite sources directly from your provided materials for accuracy."
+      ],
+      "deep_dive": [
+        "How does NotebookLM maintain grounding in specific user sources?",
+        "What are the best practices for structuring data before uploading to NotebookLM?"
+      ]
+    }
+  },
+  {
+    "id": "Pr9oRVtAqCM",
+    "title": "AI Engineering Books",
+    "description": "Best books for beginners: The foundational reading list.",
+    "insights": {
+      "summary": [
+        "Curated list of essential literature for budding AI engineers.",
+        "Focus on both theoretical math and practical implementation.",
+        "Recommendations span from LLM architectures to MLOps."
+      ],
+      "deep_dive": [
+        "Why is understanding foundational linear algebra critical for modern AI engineering?",
+        "Which book is recommended for transitioning from software dev to AI specialist?"
+      ]
+    }
+  },
+  {
+    "id": "GZB2h5Te8ko",
+    "title": "Student Tools",
+    "description": "Ultimate Tool for Engineering: Essential for STEM students.",
+    "insights": {
+      "summary": [
+        "Overview of high-impact productivity tools for engineering students.",
+        "Integration of AI tools into standard academic workflows.",
+        "Comparison of simulation vs. calculation software suites."
+      ],
+      "deep_dive": [
+        "How can students automate their formula derivation using AI tools?",
+        "What is the 'Ultimate Tool' mentioned and how does it save engineering hours?"
+      ]
+    }
+  },
+  {
+    "id": "nIDRIYaNHdw",
+    "title": "Data Science Toolkit",
+    "description": "Tools I Actually Use: Building a professional stack.",
+    "insights": {
+      "summary": [
+        "Practical guide to the industry-standard data science environment.",
+        "Emphasis on libraries like Pandas, Scikit-learn, and PyTorch.",
+        "Workflow tips for Jupyter vs. VS Code environments."
+      ],
+      "deep_dive": [
+        "What are the non-negotiable tools in a 2026 data scientist's daily stack?",
+        "How does the toolkit change when moving from research to production?"
+      ]
+    }
+  },
+  {
+    "id": "W69hp6vcsr0",
+    "title": "Career Growth",
+    "description": "4 Tools to make you irreplaceable: AI career strategy.",
+    "insights": {
+      "summary": [
+        "Identifying specific high-leverage skills in the AI economy.",
+        "Four tools that amplify professional output and decision making.",
+        "Strategies for continuous learning in a rapidly changing field."
+      ],
+      "deep_dive": [
+        "Which 'soft skills' are most amplified by the tools discussed?",
+        "How does one measure 'irreplaceability' in an automated workforce?"
+      ]
+    }
+  },
+  {
+    "id": "pAD0JeirrMY",
+    "title": "2026 AI Roadmap",
+    "description": "Ex-Google/Microsoft advice: Your future in AI.",
+    "insights": {
+      "summary": [
+        "Predictive roadmap for the AI landscape reaching into 2026.",
+        "Advice from top-tier big tech engineers on where to focus energy.",
+        "Emergence of Agentic AI and its impact on the job market."
+      ],
+      "deep_dive": [
+        "What is the single most important skill to master by 2026 according to the experts?",
+        "How should one pivot their learning if they are just starting today?"
+      ]
+    }
+  },
+  {
+    "id": "CN5mSS7ZgHw",
+    "title": "Academic Context",
+    "description": "AI for Engineering Educators: Modern teaching strategies.",
+    "insights": {
+      "summary": [
+        "Challenges and opportunities of AI in engineering pedagogy.",
+        "Redefining assessment in an era of LLM-generated solutions.",
+        "Practical classroom integrations for improved student outcomes."
+      ],
+      "deep_dive": [
+        "How can educators use AI to generate more realistic lab experiments?",
+        "What is the balance between 'human intuition' and 'AI calculation' in teaching?"
+      ]
+    }
+  }
+]
