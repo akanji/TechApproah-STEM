@@ -61,6 +61,7 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     operationType,
     path
   }
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  
+  // Log the error but don't throw to prevent "Uncaught Error" crashes in logs
+  console.error('[Firestore Error Handled]:', JSON.stringify(errInfo));
 }
