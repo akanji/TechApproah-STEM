@@ -26,6 +26,24 @@ interface Resource {
   };
 }
 
+const HighlightText = ({ text, highlight }: { text: string; highlight: string }) => {
+  if (!highlight.trim()) return <>{text}</>;
+  const parts = text.split(new RegExp(`(${highlight})`, "gi"));
+  return (
+    <>
+      {parts.map((part, i) => 
+        part.toLowerCase() === highlight.toLowerCase() ? (
+          <span key={i} className="bg-blue-500/20 text-blue-300 rounded-sm px-0.5">
+            {part}
+          </span>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  );
+};
+
 export function ResourceHub() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedVideo, setSelectedVideo] = useState<Resource | null>(null);
@@ -102,9 +120,11 @@ export function ResourceHub() {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-white font-bold group-hover:text-blue-400 transition-colors uppercase tracking-tight text-sm">
-                    {video.title}
+                    <HighlightText text={video.title} highlight={searchQuery} />
                   </h3>
-                  <p className="text-[#8b949e] text-xs mt-1 leading-relaxed line-clamp-2">{video.description}</p>
+                  <p className="text-[#8b949e] text-xs mt-1 leading-relaxed line-clamp-2">
+                    <HighlightText text={video.description} highlight={searchQuery} />
+                  </p>
                   
                   <div className="mt-4 flex items-center gap-2 text-[10px] font-bold text-blue-400 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0">
                     Watch & Take AI Notes <ChevronRight size={12} />
