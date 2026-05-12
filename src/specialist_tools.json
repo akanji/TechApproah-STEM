@@ -66,6 +66,73 @@
       "url": "https://www.circuitmind.io/",
       "secure": false,
       "internal_lab_bridge": "Master step after finishing the Logic Gate simulator."
+    },
+    {
+      "name": "Electric Pal",
+      "description": "AI-specific electrical engineering app for scanning and explaining circuit problems.",
+      "capability": "Circuit Logic Parser",
+      "use_case": "Analyzing circuit diagrams and generating s-domain equations.",
+      "url": "https://electricpal.ai/",
+      "secure": true,
+      "internal_lab_bridge": "Core engine for the S-Domain Solver agent."
+    },
+    {
+      "name": "NoteGPT",
+      "description": "AI tool to condense long YouTube lectures into structured study guides and notes.",
+      "capability": "Multimodal Summarizer",
+      "use_case": "Automating the creation of circuit analysis study guides from video.",
+      "url": "https://notegpt.io/",
+      "secure": true,
+      "internal_lab_bridge": "Documentation bridge for frequency-domain lecture series."
+    }
+  ],
+  "Bio-Engineering & CRISPR": [
+    {
+      "name": "AlphaFold (Google DeepMind)",
+      "description": "AI system that predicts a protein's 3D structure from its amino acid sequence.",
+      "capability": "Protein Structure Predictor",
+      "use_case": "Accelerating drug discovery and biological research.",
+      "url": "https://deepmind.google/technologies/alphafold/",
+      "secure": false,
+      "internal_lab_bridge": "Integrates with Force Transduction for structural analysis."
+    },
+    {
+      "name": "Benchling (Bio-OS)",
+      "description": "The modern R&D cloud to unlock the power of biotechnology.",
+      "capability": "Digital Bio-Workspace",
+      "use_case": "Standardizing genetic engineering and lab workflows.",
+      "url": "https://www.benchling.com/",
+      "secure": true,
+      "internal_lab_bridge": "Export CRISPR python simulations to professional lab protocols."
+    }
+  ],
+  "Structural & Geotechnical AI": [
+    {
+      "name": "Civils.ai",
+      "description": "Information management software for the construction industry to prevent cost overruns.",
+      "capability": "Civil Engineering AI Hub",
+      "use_case": "Parsing building codes, 2D ground layer modeling, and settlement extraction.",
+      "url": "https://civils.ai/",
+      "secure": false,
+      "internal_lab_bridge": "Integrates with Geotechnical Case Studies for borehole data simulation."
+    },
+    {
+      "name": "Luma AI",
+      "description": "Imagine 3D. Create high-quality 3D assets and realistic videos via generative AI.",
+      "capability": "3D Neural Renderer",
+      "use_case": "Generating 3D explainers for concrete testing and fluid mechanics.",
+      "url": "https://lumalabs.ai/",
+      "secure": false,
+      "internal_lab_bridge": "Visual substrate for Virtual Lab Manuals."
+    },
+    {
+      "name": "Pictory AI",
+      "description": "AI video generator that creates professional-quality videos from scripts.",
+      "capability": "Script-to-Video Engine",
+      "use_case": "Automating the creation of visual lab manuals from text.",
+      "url": "https://pictory.ai/",
+      "secure": true,
+      "internal_lab_bridge": "Output bridge for technical standard summaries."
     }
   ]
 }

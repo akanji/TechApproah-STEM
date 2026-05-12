@@ -1,6 +1,6 @@
 {
   "name": "TechApproach STEM Studio",
-  "description": "An interactive STEM learning platform powered by high-reasoning Gemini AI, real-time voice study partners, and scientific video generation.",
+  "description": "An interactive STEM learning platform for Physics, EE (S-Domain/Signal Processing), Bio-Engineering, and Structural AI. Features Electric Pal circuit parsing, NoteGPT lecture condensed notes, and high-fidelity lab simulations.",
   "requestFramePermissions": ["camera", "microphone"],
   "majorCapabilities": ["AI Chat", "Voice Conversation", "Video Generation", "Audio Transcription"]
 }

@@ -9,10 +9,13 @@ import {
   Search, 
   ArrowLeft,
   X,
-  ExternalLink
+  ExternalLink,
+  Sparkles
 } from "lucide-react";
 import resourcesData from "../resources.json";
 import { useUser } from "./UserContext";
+import { useSoundEffects } from "../hooks/useSoundEffects";
+import { ai } from "../lib/gemini";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 
@@ -46,16 +49,31 @@ const HighlightText = ({ text, highlight }: { text: string; highlight: string })
 
 export function ResourceHub() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [selectedVideo, setSelectedVideo] = useState<Resource | null>(null);
+  const [aiNotes, setAiNotes] = useState<string>("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showAiNotes, setShowAiNotes] = useState(false);
   const { user, progress } = useUser();
+  const { playSound } = useSoundEffects();
 
   const filteredResources = resourcesData.filter(v => 
     v.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
     v.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleWatch = async (video: Resource) => {
+  const handleWatch = async (video: Resource, autoGenerate: boolean = false) => {
+    playSound('transition');
     setSelectedVideo(video);
+    setAiNotes("");
+    setShowAiNotes(false);
+
+    // If there's already progress with notes, load them
+    if (progress[video.id]?.notes) {
+      setAiNotes(progress[video.id].notes);
+      setShowAiNotes(true);
+    }
+
     if (user) {
       const progressRef = doc(db, 'users', user.uid, 'progress', video.id);
       try {
@@ -71,6 +89,53 @@ export function ResourceHub() {
       } catch (e) {
         handleFirestoreError(e, OperationType.WRITE, `users/${user.uid}/progress/${video.id}`);
       }
+    }
+
+    if (autoGenerate && !progress[video.id]?.notes) {
+      setTimeout(() => handleGenerateAiNotes(video), 500);
+    }
+  };
+
+  const handleGenerateAiNotes = async (videoOverride?: Resource) => {
+    const video = videoOverride || selectedVideo;
+    if (!video) return;
+    
+    setIsGenerating(true);
+    playSound('click');
+    
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: `Generate a concise, professional, bulleted summary for this engineering education video. 
+        Title: ${video.title}
+        Description: ${video.description}
+        
+        Focus on key engineering concepts, formulas mentioned, and practical applications. 
+        Use a structure similar to "Source Insight" pass.`,
+        config: {
+          systemInstruction: "You are an expert engineering professor. Summarize technical content accurately and concisely into bullet points.",
+        }
+      });
+      
+      const generatedNotes = response.text || "No notes generated.";
+      setAiNotes(generatedNotes);
+      setShowAiNotes(true);
+      playSound('success');
+
+      // Save to Firestore if user is logged in
+      if (user) {
+        const progressRef = doc(db, 'users', user.uid, 'progress', video.id);
+        await setDoc(progressRef, {
+          notes: generatedNotes,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
+    } catch (error) {
+      console.error("Gemini Error:", error);
+      setAiNotes("Failed to generate AI notes. Please try again later.");
+      setShowAiNotes(true);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -95,8 +160,28 @@ export function ResourceHub() {
         />
       </div>
 
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+        {["All", "Foundations", "Deep Tech", "Mechanics", "CRISPR"].map(cat => (
+          <button
+            key={cat}
+            onClick={() => setSelectedCategory(cat)}
+            className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border transition-all whitespace-nowrap ${
+              selectedCategory === cat 
+                ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20" 
+                : "bg-[#161b22] border-[#30363d] text-[#8b949e] hover:border-[#484f58]"
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 gap-4">
-        {filteredResources.map(video => {
+        {filteredResources.filter(v => {
+          if (selectedCategory === "All") return true;
+          return v.title.toLowerCase().includes(selectedCategory.toLowerCase()) || 
+                 v.description.toLowerCase().includes(selectedCategory.toLowerCase());
+        }).map(video => {
           const isWatched = progress[video.id]?.completed || progress[video.id]?.watched;
           return (
             <motion.div 
@@ -126,8 +211,20 @@ export function ResourceHub() {
                     <HighlightText text={video.description} highlight={searchQuery} />
                   </p>
                   
-                  <div className="mt-4 flex items-center gap-2 text-[10px] font-bold text-blue-400 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0">
-                    Watch & Take AI Notes <ChevronRight size={12} />
+                  <div className="mt-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-blue-400 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0">
+                      Watch & Take AI Notes <ChevronRight size={12} />
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleWatch(video, true);
+                      }}
+                      className="p-2 rounded-lg bg-blue-500/10 text-blue-400 opacity-0 group-hover:opacity-100 transition-all border border-blue-500/20 hover:bg-blue-500 hover:text-white"
+                      title="Generate AI Notes"
+                    >
+                      <Sparkles size={14} />
+                    </button>
                   </div>
                 </div>
                 <ChevronRight size={18} className="text-[#484f58] group-hover:text-blue-400 mt-1 transition-colors group-hover:hidden" />
@@ -168,15 +265,69 @@ export function ResourceHub() {
 
                 {/* AI Notes Layer */}
                 <div className="space-y-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400">
-                      <Zap size={20} fill="currentColor" />
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400">
+                        <Zap size={20} fill="currentColor" />
+                      </div>
+                      <div>
+                        <h3 className="text-white font-bold uppercase tracking-widest text-xs">NotebookLM Reasoning Layer</h3>
+                        <p className="text-[10px] text-[#484f58] font-mono">Source Insight Pass • 2026 AI Verified</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-white font-bold uppercase tracking-widest text-xs">NotebookLM Reasoning Layer</h3>
-                      <p className="text-[10px] text-[#484f58] font-mono">Source Insight Pass • 2026 AI Verified</p>
-                    </div>
+
+                    <button
+                      onClick={aiNotes ? () => setShowAiNotes(!showAiNotes) : handleGenerateAiNotes}
+                      disabled={isGenerating}
+                      className={`px-6 py-3 border font-bold rounded-2xl transition-all flex items-center justify-center gap-2 uppercase text-[10px] tracking-widest disabled:opacity-50 ${
+                        aiNotes 
+                          ? "bg-blue-500/10 border-blue-500/50 text-white hover:bg-blue-500/20" 
+                          : "bg-[#161b22] border-[#30363d] text-white hover:border-blue-500/50"
+                      }`}
+                    >
+                      {isGenerating ? (
+                        <>
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                          >
+                            <Zap size={14} className="text-blue-400" />
+                          </motion.div>
+                          Synthesizing...
+                        </>
+                      ) : aiNotes ? (
+                        <>
+                          {showAiNotes ? "Hide AI Notes" : "View AI Notes"} <Zap size={14} className={showAiNotes ? "text-blue-400 fill-current" : "text-blue-400"} />
+                        </>
+                      ) : (
+                        <>
+                          Generate AI Notes <Sparkles size={14} className="text-blue-400" />
+                        </>
+                      )}
+                    </button>
                   </div>
+
+                  <AnimatePresence>
+                    {showAiNotes && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="bg-blue-500/5 border border-blue-500/20 rounded-3xl p-6 mb-6">
+                          <h4 className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                            <Sparkles size={12} /> AI-Generated Perspectives
+                          </h4>
+                          <div className="prose prose-invert prose-sm max-w-none">
+                            <div className="text-sm text-[#8b949e] leading-relaxed whitespace-pre-line">
+                              {aiNotes}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   <div className="bg-[#161b22] border border-[#30363d] rounded-3xl p-6 space-y-6 shadow-xl">
                     <section className="space-y-4">

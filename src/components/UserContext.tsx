@@ -22,6 +22,8 @@ interface UserProfile {
   displayName: string;
   photoURL: string;
   xp: number;
+  specialization?: string;
+  avatarId?: string;
 }
 
 interface LabProgressRecord {
@@ -29,6 +31,8 @@ interface LabProgressRecord {
   completed: boolean;
   score: number;
   lastAttemptAt: any;
+  watched?: boolean;
+  notes?: string;
 }
 
 interface UserContextType {
@@ -39,6 +43,7 @@ interface UserContextType {
   login: () => Promise<void>;
   logout: () => Promise<void>;
   updateXP: (amount: number) => Promise<void>;
+  updateProfile: (data: Partial<UserProfile>) => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -136,8 +141,21 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateProfile = async (data: Partial<UserProfile>) => {
+    if (!user) return;
+    const userDocRef = doc(db, 'users', user.uid);
+    try {
+      await setDoc(userDocRef, {
+        ...data,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
+    }
+  };
+
   return (
-    <UserContext.Provider value={{ user, profile, progress, loading, login, logout, updateXP }}>
+    <UserContext.Provider value={{ user, profile, progress, loading, login, logout, updateXP, updateProfile }}>
       {children}
     </UserContext.Provider>
   );

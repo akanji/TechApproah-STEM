@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { BookOpen, HelpCircle, CheckCircle2, ChevronRight, Play, ExternalLink, Info, AlertTriangle, Lightbulb, ShieldCheck, Zap } from "lucide-react";
+import { BookOpen, HelpCircle, CheckCircle2, ChevronRight, Play, ExternalLink, Info, AlertTriangle, Lightbulb, ShieldCheck, Zap, Headphones } from "lucide-react";
 
 interface LabContentProps {
   data: {
@@ -21,6 +21,10 @@ interface LabContentProps {
         real_world?: string;
         common_mistake?: string;
       };
+      audio_overview?: string;
+      study_guide?: string;
+      video_prompts?: string[];
+      technical_breakdown?: string[];
       quiz: { q: string; a: string }[];
     };
     resources: { type: string; url: string; desc: string }[];
@@ -38,6 +42,7 @@ export function LabContent({ data, onComplete }: LabContentProps) {
   const aiNotes = data.ai_notes;
   const hasExtendedNotes = !!aiNotes.notes;
   const hasValidation = !!data.validation;
+  const hasMultimodal = !!(aiNotes.audio_overview || aiNotes.study_guide || aiNotes.video_prompts);
 
   const nextQuestion = () => {
     if (quizIndex < aiNotes.quiz.length - 1) {
@@ -93,6 +98,11 @@ export function LabContent({ data, onComplete }: LabContentProps) {
                       {f}
                     </div>
                   ))}
+                  {aiNotes.technical_breakdown?.map((f, i) => (
+                    <div key={i} className="px-3 py-1.5 bg-emerald-500/5 border border-emerald-500/20 rounded-lg font-mono text-[9px] text-emerald-400 uppercase">
+                      {f}
+                    </div>
+                  ))}
                   {aiNotes.units && (
                     <div className="px-3 py-1.5 bg-[#161b22] border border-[#30363d] rounded-lg font-mono text-[10px] text-[#8b949e] uppercase">
                       Units: {aiNotes.units}
@@ -109,27 +119,118 @@ export function LabContent({ data, onComplete }: LabContentProps) {
       <div className="flex border-b border-[#30363d] bg-[#161b22]">
         {[
           { id: "notes" as const, icon: BookOpen, label: "Deep Study" },
+          { id: "multimodal" as const, icon: Headphones, label: "Multimodal" },
           { id: "quiz" as const, icon: HelpCircle, label: "Active Recall" },
           { id: "resources" as const, icon: Play, label: "Verified Resources" },
           ...(hasValidation ? [{ id: "audit" as const, icon: ShieldCheck, label: "Audit" }] : []),
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 py-4 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider transition-all ${
-              activeTab === tab.id 
-                ? "text-blue-400 border-b-2 border-blue-500 bg-blue-500/5" 
-                : "text-[#8b949e] hover:text-[#c9d1d9]"
-            }`}
-          >
-            <tab.icon size={14} />
-            {tab.label}
-          </button>
-        ))}
+        ].map((tab) => {
+          if (tab.id === "multimodal" && !hasMultimodal) return null;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex-1 py-4 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-wider transition-all ${
+                activeTab === tab.id 
+                  ? "text-blue-400 border-b-2 border-blue-500 bg-blue-500/5" 
+                  : "text-[#8b949e] hover:text-[#c9d1d9]"
+              }`}
+            >
+              <tab.icon size={13} />
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="p-6 min-h-[300px]">
         <AnimatePresence mode="wait">
+          {activeTab === "multimodal" && (
+            <motion.div
+              key="multimodal"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.02 }}
+              className="space-y-8"
+            >
+              {aiNotes.audio_overview && (
+                <div className="p-6 bg-gradient-to-br from-blue-600/10 to-purple-600/10 border border-blue-500/20 rounded-3xl space-y-6 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <Headphones size={80} />
+                  </div>
+                  
+                  <div className="flex items-center gap-4 relative z-10">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-900/40">
+                      <Headphones size={24} className="text-white" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-white uppercase tracking-widest">NotebookLM AI Podcast</h4>
+                      <p className="text-[10px] text-blue-400 font-mono">Expert Discussion Script • 5:24 Duration</p>
+                    </div>
+                  </div>
+
+                  <div className="p-5 bg-black/60 rounded-2xl border border-white/5 space-y-4">
+                    <div className="flex items-center justify-between text-[9px] font-bold text-[#484f58] uppercase">
+                      <span>Audio Transcript</span>
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4].map(i => (
+                          <motion.div 
+                            key={i}
+                            animate={{ height: [4, 12, 4] }}
+                            transition={{ repeat: Infinity, duration: 0.5, delay: i * 0.1 }}
+                            className="w-0.5 bg-blue-500"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="font-mono text-[11px] text-blue-100/70 leading-relaxed max-h-48 overflow-y-auto custom-scrollbar italic pr-4">
+                      {aiNotes.audio_overview}
+                    </div>
+                  </div>
+
+                  <button className="w-full py-3 bg-white text-black rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-400 transition-colors flex items-center justify-center gap-2">
+                    Enable AI Voice Synthesis <Play size={12} fill="currentColor" />
+                  </button>
+                </div>
+              )}
+
+              {aiNotes.study_guide && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 px-1">
+                    <div className="w-1 h-4 bg-blue-500 rounded-full" />
+                    <h4 className="text-[10px] uppercase font-bold text-white tracking-[0.2em]">High-Reasoning Study Guide</h4>
+                  </div>
+                  <div className="prose prose-invert prose-sm max-w-none text-[#c9d1d9] leading-relaxed whitespace-pre-line bg-[#161b22] p-6 rounded-[32px] border border-[#30363d] shadow-2xl">
+                    {aiNotes.study_guide}
+                  </div>
+                </div>
+              )}
+
+              {aiNotes.video_prompts && aiNotes.video_prompts.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 px-1">
+                    <div className="w-1 h-4 bg-purple-500 rounded-full" />
+                    <h4 className="text-[10px] uppercase font-bold text-white tracking-[0.2em]">Veo 3.1 Visualizer Prompts</h4>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3">
+                    {aiNotes.video_prompts.map((p, i) => (
+                      <div key={i} className="group p-5 bg-purple-500/5 border border-purple-500/10 rounded-2xl flex gap-4 hover:border-purple-500/30 transition-all cursor-crosshair">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400 font-mono text-[10px] font-bold">
+                          {i+1}
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[11px] text-purple-100/60 leading-relaxed italic">"{p}"</p>
+                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="text-[8px] font-bold text-purple-500 uppercase">Input: 4K Hyper-Realistic • Cell Dynamics</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+
           {activeTab === "notes" && (
             <motion.div
               key="notes"

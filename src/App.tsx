@@ -13,6 +13,11 @@ import { LabContent } from "./components/LabContent";
 import { UserProvider, useUser } from "./components/UserContext";
 import { ResourceHub } from "./components/ResourceHub";
 import { SpecialistHub } from "./components/SpecialistHub";
+import { Pricing } from "./components/Pricing";
+import { Success } from "./components/Success";
+import { GlobalSearch } from "./components/GlobalSearch";
+import { UserProfile } from "./components/UserProfile";
+import { useSoundEffects } from "./hooks/useSoundEffects";
 import { SUBJECTS, MODULES, BADGES, NAV_ITEMS, RESOURCES } from "./constants";
 
 export default function App() {
@@ -25,15 +30,45 @@ export default function App() {
 
 function AppContent() {
   const [page, setPage] = useState(() => localStorage.getItem("eng_page") || "home");
-  const { user, profile, progress, login, logout } = useUser();
+  const { user, profile, progress, login, logout, updateXP } = useUser();
+  const { playSound } = useSoundEffects();
   const [activeSubject, setActiveSubject] = useState<string | null>(() => localStorage.getItem("eng_subject") || null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeModule, setActiveModule] = useState<number | null>(null);
   const [studyMode, setStudyMode] = useState<"theory" | "lab">("theory");
   const [showThinkingChat, setShowThinkingChat] = useState(false);
   const [showVoicePartner, setShowVoicePartner] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const [xp, setXp] = useState(1840);
   const [streak, setStreak] = useState(12);
+
+  const handleNavigate = (newPage: string, params?: any) => {
+    playSound('transition');
+    setPage(newPage);
+    if (params?.subject) setActiveSubject(params.subject);
+    if (params?.module) setActiveModule(params.module);
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowSearch(prev => !prev);
+        playSound('click');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [playSound]);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("session_id")) {
+      setPage("success");
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("eng_page", page);
@@ -521,6 +556,12 @@ function AppContent() {
             <span className="font-bold text-lg tracking-tighter uppercase">TechApproach</span>
           </div>
           <div className="flex items-center gap-2">
+            <button 
+              onClick={() => { setShowSearch(true); playSound('click'); }}
+              className="p-2 rounded-xl bg-[#161b22] border border-[#30363d] text-[#8b949e] hover:text-white transition-all"
+            >
+              <Search size={20} />
+            </button>
             {user ? (
               <div className="flex items-center gap-3">
                 <div className="hidden sm:flex flex-col items-end">
@@ -528,27 +569,30 @@ function AppContent() {
                   <span className="text-[8px] text-blue-400 font-mono">ID: {user.uid.slice(0, 6)}</span>
                 </div>
                 <button 
-                  onClick={logout}
-                  className="w-10 h-10 rounded-xl bg-[#161b22] border border-[#30363d] overflow-hidden hover:border-red-500/50 transition-all transition-colors"
+                  onClick={() => handleNavigate('profile')}
+                  className="w-10 h-10 rounded-xl bg-[#161b22] border border-[#30363d] overflow-hidden hover:border-blue-500/50 transition-all transition-colors"
                 >
-                  <img src={profile?.photoURL} alt="Profile" className="w-full h-full object-cover opacity-80 hover:opacity-100" />
+                  <img src={profile?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.uid}`} alt="Profile" className="w-full h-full object-cover opacity-80 hover:opacity-100" />
                 </button>
               </div>
             ) : (
               <button 
-                onClick={login}
+                onClick={() => { login(); playSound('click'); }}
                 className="px-4 py-2 bg-blue-600 text-white text-[10px] font-bold rounded-xl hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20 uppercase tracking-widest"
               >
                 Sign In
               </button>
             )}
             <button 
-              onClick={() => setShowThinkingChat(!showThinkingChat)}
+              onClick={() => { setShowThinkingChat(!showThinkingChat); playSound('click'); }}
               className={`p-2 rounded-xl border transition-all ${showThinkingChat ? "bg-blue-600 text-white border-blue-500" : "bg-[#161b22] border-[#30363d] text-[#8b949e] hover:text-white"}`}
             >
               <Brain size={20} />
             </button>
-            <button className="p-2 rounded-xl bg-[#161b22] border border-[#30363d] text-[#8b949e] hover:text-white transition-all">
+            <button 
+              onClick={() => handleNavigate('profile')}
+              className="p-2 rounded-xl bg-[#161b22] border border-[#30363d] text-[#8b949e] hover:text-white transition-all"
+            >
               <Settings size={20} />
             </button>
           </div>
@@ -569,12 +613,24 @@ function AppContent() {
               {page === "projects" && <ProjectsPage />}
               {page === "resources" && <ResourceHub />}
               {page === "specialist" && <SpecialistHub />}
+              {page === "pricing" && <Pricing />}
+              {page === "success" && <Success />}
+              {page === "profile" && <UserProfile />}
               {page === "progress" && <ProgressPage />}
               {page === "analytics" && <ProgressPage />}
               {page === "community" && <CommunityPage />}
             </motion.div>
           </AnimatePresence>
         </div>
+
+        <AnimatePresence>
+          {showSearch && (
+            <GlobalSearch 
+              onClose={() => setShowSearch(false)} 
+              onNavigate={handleNavigate}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Floating AI Bubbles */}
         <div className="fixed bottom-24 right-6 flex flex-col gap-3 z-50 pointer-events-none">
@@ -606,7 +662,7 @@ function AppContent() {
             <button 
               key={item.id} 
               onClick={() => { 
-                setPage(item.id); 
+                handleNavigate(item.id);
                 if (item.id !== "subjects") { 
                   setActiveSubject(null); 
                   setActiveModule(null); 

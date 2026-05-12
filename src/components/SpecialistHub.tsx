@@ -10,7 +10,9 @@ import {
   ChevronRight,
   ArrowUpRight,
   Zap,
-  Globe
+  Globe,
+  Dna,
+  Building2
 } from "lucide-react";
 import toolsData from "../specialist_tools.json";
 
@@ -27,7 +29,9 @@ interface Tool {
 const CATEGORY_ICONS: Record<string, any> = {
   "Data Titan (Enterprise)": Database,
   "Physics & Bridge Master": Wind,
-  "Circuit & Productivity": Cpu
+  "Circuit & Productivity": Cpu,
+  "Bio-Engineering & CRISPR": Dna,
+  "Structural & Geotechnical AI": Building2
 };
 
 export function SpecialistHub() {

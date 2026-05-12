@@ -110,5 +110,174 @@
         "What is the balance between 'human intuition' and 'AI calculation' in teaching?"
       ]
     }
+  },
+  {
+    "id": "KQm-gfobUm8",
+    "title": "Biomedical Engineering Intro",
+    "description": "Exploration of the intersection between biology and engineering principles.",
+    "insights": {
+      "summary": ["Design and development of physiological sensors.", "Biomechanical analysis of human movement.", "Synthetic tissue engineering foundations."],
+      "deep_dive": ["What are the primary ethical considerations in biomedical device design?"]
+    }
+  },
+  {
+    "id": "sBvHrsogVUk",
+    "title": "Bio-Eng Career Path",
+    "description": "Professional outlook for biomedical engineers in clinical and research settings.",
+    "insights": {
+      "summary": ["Role of engineers in medical imaging (MRI, CT).", "Hospital-integrated engineering workflows.", "Research avenues in molecular bio-engineering."],
+      "deep_dive": ["How does the clinical environment shift the design requirements for bio-engineers?"]
+    }
+  },
+  {
+    "id": "SSzSOeGP87I",
+    "title": "AI for Biology",
+    "description": "How machine learning is accelerating protein folding and drug discovery.",
+    "insights": {
+      "summary": ["AlphaFold impact on molecular research.", "Predictive modeling for enzyme behavior.", "Accelerated screening for potential therapeutics."],
+      "deep_dive": ["Why is structural prediction the 'holy grail' of computational biology?"]
+    }
+  },
+  {
+    "id": "lIYvWcKyxCg",
+    "title": "Deep Tech in Biology",
+    "description": "Advanced synthetic biology and the future of bio-manufacturing.",
+    "insights": {
+      "summary": ["Engineering microbes for carbon capture.", "The rise of the bio-economy.", "Scaling laboratory successes to industrial production."],
+      "deep_dive": ["Can biological systems realistically replace traditional chemical manufacturing?"]
+    }
+  },
+  {
+    "id": "CgpZ2PUcGt0",
+    "title": "CRISPR Genome Engineering",
+    "description": "Technical mechanics of the CRISPR-Cas9 genome editing system.",
+    "insights": {
+      "summary": ["Mechanism of R-loop formation.", "Double-strand break repair pathways (NHEJ/HDR).", "Off-target analytics and mitigation."],
+      "deep_dive": ["What are the physical limits of Cas9 search efficiency in a crowded nucleus?"]
+    }
+  },
+  {
+    "id": "2mP9Eos-A6s",
+    "title": "Jennifer Doudna: CRISPR Pioneer",
+    "description": "The discovery and application of CRISPR-Cas9 by one of its primary pioneers.",
+    "insights": {
+      "summary": ["Historical context of bacterial immunity systems.", "The transition from natural system to engineering tool.", "Future ethical landscapes of somatic vs germline editing."],
+      "deep_dive": ["How did the study of a niche bacterial defense system lead to a global biotech revolution?"]
+    }
+  },
+  {
+    "id": "x9MOtb03jvI",
+    "title": "AI Writing for Civil Engineers",
+    "description": "Essential hacks for automating technical reports and standards documentation.",
+    "insights": {
+      "summary": ["Automating geotechnical report summaries.", "Parsing complex building codes with AI agents.", "Improving delivery speed of structural project wikis."],
+      "deep_dive": ["How can AI reduce human error in interpreting AASHTO or ACI standards?"]
+    }
+  },
+  {
+    "id": "5xkfhH2R3eo",
+    "title": "Civils.ai Engineering AI Tutorial",
+    "description": "How to use Civils.ai for deep information management in construction.",
+    "insights": {
+      "summary": ["Extracting settlement data from PDF drawings.", "Generating 2D ground models from raw borehole CSVs.", "Reducing cost overruns through centralized AI information hubs."],
+      "deep_dive": ["What are the specific advantages of 2D section tools for geotechnical case studies?"]
+    }
+  },
+  {
+    "id": "z3v6iGaJNts",
+    "title": "AI for Structural Engineering",
+    "description": "Advanced structural health monitoring and load-bearing optimization.",
+    "insights": {
+      "summary": ["IoT drone surveys for bridge integrity.", "AI-driven material optimization for sustainability.", "Predicting concrete fatigue using neural networks."],
+      "deep_dive": ["How does real-time sensor data feed into FEA models via AI bridges?"]
+    }
+  },
+  {
+    "id": "EZZOMXjERAI",
+    "title": "AI in Geotechnical Engineering",
+    "description": "Modeling soil-structure interactions using modern machine learning.",
+    "insights": {
+      "summary": ["Subsurface soil strata prediction models.", "Automated borehole log digitization.", "Slope stability analysis with predictive AI."],
+      "deep_dive": ["Why is borehole data the primary input for site Assistant agents?"]
+    }
+  },
+  {
+    "id": "dS6jn0gMSZ0",
+    "title": "Cell Signaling & Transductions",
+    "description": "Molecular communication pathways and signal relay systems.",
+    "insights": {
+      "summary": ["Ligand-receptor kinetics and binding affinity.", "Signal amplification through kinase cascades.", "Autocrine, paracrine, and endocrine coordination."],
+      "deep_dive": ["How does a single ligand binding event trigger thousands of downstream biochemical reactions?"]
+    }
+  },
+  {
+    "id": "Tf2f8z7n2vA",
+    "title": "Laplace Transform in Circuit Analysis",
+    "description": "Deep dive into s-domain modeling and transfer functions for complex circuits.",
+    "insights": {
+      "summary": [
+        "Transforming time-domain differential equations into s-domain algebraic loops.",
+        "Impedance modeling for resistors, capacitors, and inductors in Laplace form.",
+        "Final Value Theorem application for steady-state circuit response."
+      ],
+      "deep_dive": [
+        "Why does the s-domain allow us to treat capacitors and inductors as simple impedances?",
+        "How do initial conditions manifest as independent sources in the s-domain?"
+      ]
+    }
+  },
+  {
+    "id": "XhS6_K_9I4A",
+    "title": "Structural Health Monitoring",
+    "description": "Sensors and IoT in massive civil engineering infrastructures.",
+    "insights": {
+      "summary": ["Detecting fatigue in structural steel and concrete.", "Real-time strain gauge data analysis.", "Modal frequency analysis for integrity checks."],
+      "deep_dive": ["How can frequency domain shifts predict internal damage before it's visible?"]
+    }
+  },
+  {
+    "id": "6um4oZVyzc0",
+    "title": "Operational Amplifiers (Op-Amps)",
+    "description": "Fundamental principles of Op-Amp operation and negative feedback systems.",
+    "insights": {
+      "summary": ["Ideal Op-Amp golden rules.", "Negative feedback and summing amplifier configurations.", "Practical applications in analog computing."],
+      "deep_dive": ["How does the virtual ground concept simplify node analysis in complex circuits?"]
+    }
+  },
+  {
+    "id": "V-IwuBEa0PE",
+    "title": "Wiring & Controls Automation",
+    "description": "Practical introduction to industrial electrical wiring and control schematics.",
+    "insights": {
+      "summary": ["Industrial control logic and safety interlocking.", "Schematic reading for complex automation systems.", "Wiring best practices for signal integrity."],
+      "deep_dive": ["Why is isolation critical when bridging high-power controls with sensitive logic circuits?"]
+    }
+  },
+  {
+    "id": "C9W6qTueNBI",
+    "title": "Circuits & Electronics",
+    "description": "Core concepts in electrical engineering and electronic device physics.",
+    "insights": {
+      "summary": ["Analysis of linear and non-linear circuit elements.", "Frequency response of basic electronic filters.", "Semiconductor physics and transistor application."],
+      "deep_dive": ["How do parasitics and non-idealities affect high-frequency circuit performance?"]
+    }
+  },
+  {
+    "id": "ZuFlJ1IZyPs",
+    "title": "Electronics Lab Intro",
+    "description": "Structured laboratory procedures for signal measurements and hardware verification.",
+    "insights": {
+      "summary": ["Using oscilloscopes and multimeters for signal tracing.", "Debugging breadboarded circuit prototypes.", "Standard measurement protocols for EE labs."],
+      "deep_dive": ["What are the most common points of failure in analog signal conditioning breadboards?"]
+    }
+  },
+  {
+    "id": "I6arUTJ045w",
+    "title": "Practical Electronics & Circuits",
+    "description": "Applied electronics for real-world hardware development.",
+    "insights": {
+      "summary": ["Component selection and datasheet interpretation.", "Voltage regulation and power supply design.", "Integrated circuit (IC) integration strategies."],
+      "deep_dive": ["How does thermal management impact the longevity of power electronic circuits?"]
+    }
   }
 ]

@@ -28,9 +28,24 @@
         "updatedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["labId", "userId", "completed", "score", "lastAttemptAt", "updatedAt"]
+    },
+    "CuratedResource": {
+      "title": "Curated Bio-Eng Topic",
+      "description": "Expert-selected technical resources for bio-engineering foundations.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "url": { "type": "string" },
+        "category": { "type": "string", "enum": ["Foundations", "Deep Tech", "Advanced Mechanics", "CRISPR"] },
+        "tags": { "type": "array" }
+      }
     }
   },
   "firestore": {
+    "/bio_engineering/{resourceId}": {
+      "schema": "CuratedResource",
+      "description": "Global collection of curated bio-engineering links."
+    },
     "/users/{userId}": {
       "schema": "User",
       "description": "User profile document."
