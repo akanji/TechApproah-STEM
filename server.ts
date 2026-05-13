@@ -32,7 +32,7 @@ async function startServer() {
   };
 
   // API Routes
-  app.post("/api/create-checkout-session", async (req, res) => {
+  app.post("/api/create-subscription", async (req, res) => {
     const { priceId, customerEmail, userEmail } = req.body;
     const finalEmail = customerEmail || userEmail;
     
@@ -59,7 +59,7 @@ async function startServer() {
         cancel_url: `${origin}/pricing`,
       });
 
-      res.json({ id: session.id });
+      res.json(session);
     } catch (error: any) {
       console.error("Stripe Session Error:", error);
       res.status(500).json({ error: error.message });

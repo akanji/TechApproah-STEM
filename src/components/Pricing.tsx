@@ -1,11 +1,6 @@
 import React, { useState } from "react";
-import { loadStripe } from "@stripe/stripe-js";
 import { CheckCircle2, Zap, Shield, Sparkles, ArrowRight } from "lucide-react";
 import { useUser } from "./UserContext";
-
-const VITE_STRIPE_PUBLISHABLE_KEY = (import.meta as any).env.VITE_STRIPE_PUBLISHABLE_KEY;
-
-const stripePromise = VITE_STRIPE_PUBLISHABLE_KEY ? loadStripe(VITE_STRIPE_PUBLISHABLE_KEY) : null;
 
 export function Pricing() {
   const { user } = useUser();
@@ -23,7 +18,7 @@ export function Pricing() {
     }
 
     try {
-      const response = await fetch("/api/create-checkout-session", {
+      const response = await fetch("/api/create-subscription", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -40,19 +35,10 @@ export function Pricing() {
         throw new Error(session.error);
       }
 
-      if (!stripePromise) {
-        throw new Error("Stripe publishable key is missing. Please add VITE_STRIPE_PUBLISHABLE_KEY to your environment variables.");
-      }
-
-      const stripe = await stripePromise;
-      if (!stripe) throw new Error("Stripe failed to load");
-
-      const { error: stripeError } = await (stripe as any).redirectToCheckout({
-        sessionId: session.id,
-      });
-
-      if (stripeError) {
-        throw new Error(stripeError.message);
+      if (session.url) {
+        window.location.href = session.url;
+      } else {
+        throw new Error("Subscription Error: No redirect URL found");
       }
     } catch (err: any) {
       console.error("Subscription Error:", err);
