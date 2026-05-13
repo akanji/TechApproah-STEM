@@ -22,7 +22,10 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  Cell
+  Cell,
+  LineChart,
+  Line,
+  ReferenceLine
 } from "recharts";
 import { db, auth, OperationType, handleFirestoreError } from "../lib/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
@@ -34,7 +37,14 @@ interface LoadData {
   color: string;
 }
 
+const BRIDGE_MATERIALS = [
+  { id: "concrete", name: "Reinforced Concrete", capacity: 1800, color: "text-zinc-400" },
+  { id: "steel", name: "Structural Steel", capacity: 2800, color: "text-blue-400" },
+  { id: "carbon", name: "High-Modulus Carbon", capacity: 4500, color: "text-emerald-400" }
+];
+
 export function BridgeDesignLab() {
+  const [selectedMaterial, setSelectedMaterial] = useState(BRIDGE_MATERIALS[0]);
   const [deadLoad, setDeadLoad] = useState(500); // kN
   const [superDeadLoad, setSuperDeadLoad] = useState(150); // kN
   const [hydrostaticLoad, setHydrostaticLoad] = useState(50); // kN
@@ -45,6 +55,17 @@ export function BridgeDesignLab() {
   const [activeTab, setActiveTab] = useState<"simulator" | "fea">("simulator");
   const [simulationActive, setSimulationActive] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [history, setHistory] = useState<{ time: number; load: number }[]>([]);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Ultimate Design Value U = γD * D + γSD * SD
+  const ultimateLoad = (gammaD * deadLoad) + (gammaSD * superDeadLoad) + hydrostaticLoad;
+  
+  // Total Static Load for Equilibrium visualization
+  const totalStaticLoad = deadLoad + superDeadLoad + hydrostaticLoad;
+
+  // Failure Condition based on selected material
+  const isFailed = ultimateLoad > selectedMaterial.capacity;
 
   // Firebase: Load saved config
   useEffect(() => {
@@ -60,6 +81,8 @@ export function BridgeDesignLab() {
           setHydrostaticLoad(data.hydrostaticLoad ?? 50);
           setGammaD(data.gammaD ?? 1.25);
           setGammaSD(data.gammaSD ?? 1.50);
+          const mat = BRIDGE_MATERIALS.find(m => m.id === data.materialId);
+          if (mat) setSelectedMaterial(mat);
         }
       } catch (error) {
         handleFirestoreError(error, OperationType.GET, "labConfigs/bridge");
@@ -80,6 +103,7 @@ export function BridgeDesignLab() {
         hydrostaticLoad,
         gammaD,
         gammaSD,
+        materialId: selectedMaterial.id,
         updatedAt: serverTimestamp()
       }, { merge: true });
     } catch (error) {
@@ -89,11 +113,30 @@ export function BridgeDesignLab() {
     }
   };
 
-  // Ultimate Design Value U = γD * D + γSD * SD
-  const ultimateLoad = (gammaD * deadLoad) + (gammaSD * superDeadLoad) + hydrostaticLoad;
-  
-  // Total Static Load for Equilibrium visualization
-  const totalStaticLoad = deadLoad + superDeadLoad + hydrostaticLoad;
+  useEffect(() => {
+    if (simulationActive && !isFailed) {
+      timerRef.current = setInterval(() => {
+        setHistory(prev => {
+          const next = [...prev, { time: prev.length, load: ultimateLoad + (Math.random() - 0.5) * 10 }];
+          return next.slice(-20); // Keep last 20 points
+        });
+      }, 500);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [simulationActive, ultimateLoad, isFailed]);
+
+  const resetSimulator = () => {
+    setDeadLoad(500);
+    setSuperDeadLoad(150);
+    setHydrostaticLoad(50);
+    setGammaD(1.25);
+    setGammaSD(1.50);
+    setSelectedMaterial(BRIDGE_MATERIALS[0]);
+    setHistory([]);
+    setSimulationActive(false);
+  };
 
   const loadData: LoadData[] = [
     { name: "Dead (D)", value: deadLoad, factor: gammaD, color: "#3b82f6" },
@@ -145,10 +188,10 @@ export function BridgeDesignLab() {
                   scaleY: 1 + (ultimateLoad / 5000)
                 }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="relative w-full h-4 bg-[#30363d] rounded-sm border border-[#484f58] z-20 flex justify-around"
+                className={`relative w-full h-4 ${isFailed ? "bg-red-900 border-red-500" : "bg-[#30363d] border-[#484f58]"} rounded-sm border z-20 flex justify-around`}
               >
                 {/* Visual Load Indicators */}
-                {[...Array(5)].map((_, i) => (
+                {!isFailed && [...Array(5)].map((_, i) => (
                   <motion.div 
                     key={i}
                     animate={{ 
@@ -160,6 +203,11 @@ export function BridgeDesignLab() {
                     style={{ marginTop: -15 }}
                   />
                 ))}
+                {isFailed && (
+                  <div className="absolute -top-10 inset-0 flex items-center justify-center">
+                    <Zap size={32} className="text-yellow-500 animate-bounce" />
+                  </div>
+                )}
               </motion.div>
 
               {/* Piers */}
@@ -204,7 +252,9 @@ export function BridgeDesignLab() {
               </div>
               <div className="bg-black/40 border border-[#30363d] p-4 rounded-xl">
                 <div className="text-[9px] uppercase font-bold text-[#8b949e] mb-1">Status</div>
-                <div className="text-[10px] font-bold text-green-500 uppercase tracking-tighter">Stable State</div>
+                <div className={`text-[10px] font-bold ${isFailed ? "text-red-500" : "text-green-500"} uppercase tracking-tighter`}>
+                  {isFailed ? "STRUCTURE COLLAPSED" : "Stable State"}
+                </div>
               </div>
             </div>
           </div>
@@ -277,6 +327,25 @@ export function BridgeDesignLab() {
                 >
                   <div className="space-y-4">
                     <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
+                      <span className="text-[#8b949e]">Structural Material</span>
+                      <span className={selectedMaterial.color}>{selectedMaterial.capacity} kN Yield</span>
+                    </div>
+                    <select 
+                      value={selectedMaterial.id}
+                      onChange={(e) => {
+                        const mat = BRIDGE_MATERIALS.find(m => m.id === e.target.value);
+                        if (mat) setSelectedMaterial(mat);
+                      }}
+                      className="w-full bg-[#161b22] border border-[#30363d] rounded-xl p-3 text-xs text-white"
+                    >
+                      {BRIDGE_MATERIALS.map(m => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      )  )}
+                    </select>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
                       <span className="text-blue-400">Dead Load (D)</span>
                       <span className="text-[#8b949e] font-mono">{deadLoad} kN</span>
                     </div>
@@ -314,10 +383,17 @@ export function BridgeDesignLab() {
                   <div className="flex gap-2">
                     <button 
                       onClick={() => setSimulationActive(!simulationActive)}
-                      className={`flex-1 py-4 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${simulationActive ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-blue-600 text-white"}`}
+                      disabled={isFailed}
+                      className={`flex-1 py-4 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${simulationActive ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-blue-600 text-white"} disabled:opacity-50`}
                     >
                       <Activity size={16} />
                       {simulationActive ? "Stop Analysis" : "Initialize FEA Solver"}
+                    </button>
+                    <button 
+                      onClick={resetSimulator}
+                      className="px-4 py-4 rounded-xl font-bold text-[10px] uppercase tracking-widest bg-[#161b22] text-[#8b949e] border border-[#30363d] hover:text-white transition-all"
+                    >
+                      Reset
                     </button>
                     <button 
                       onClick={saveConfig}
@@ -384,44 +460,47 @@ export function BridgeDesignLab() {
           </div>
         </div>
 
-        {/* Analytics Distribution */}
+        {/* Analytics Distribution & History */}
         <div className="bg-[#0b0e14] border border-[#30363d] rounded-2xl p-8 flex flex-col">
           <div className="flex items-center justify-between mb-8">
-            <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#8b949e]">Load Contribution Spectrum</h4>
-            <div className="text-[9px] font-mono text-[#484f58]">TOTAL: {totalStaticLoad} kN</div>
+            <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#8b949e]">Load Contribution & Force History</h4>
+            <div className="text-[9px] font-mono text-[#484f58]">CAPACITY: {selectedMaterial.capacity} kN</div>
           </div>
           
-          <div className="flex-1 min-h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={designData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#161b22" />
-                <XAxis 
-                  dataKey="name" 
-                  stroke="#484f58" 
-                  fontSize={10} 
-                  tick={{ fill: "#484f58" }} 
-                  axisLine={false} 
-                  tickLine={false}
-                />
-                <YAxis 
-                  stroke="#484f58" 
-                  fontSize={10} 
-                  tick={{ fill: "#484f58" }} 
-                  axisLine={false} 
-                  tickLine={false} 
-                  label={{ value: 'Design kN', angle: -90, position: 'insideLeft', fill: '#484f58', fontSize: 10 }}
-                />
-                <Tooltip 
-                  cursor={{ fill: '#161b22' }}
-                  contentStyle={{ backgroundColor: '#0b0e14', border: '1px solid #30363d', borderRadius: '12px', fontSize: '10px' }}
-                />
-                <Bar dataKey="designValue" radius={[4, 4, 0, 0]} barSize={40}>
-                  {designData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="flex-1 space-y-8">
+            <div className="h-[180px]">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-[9px] font-bold text-[#484f58] uppercase">Component Load Share</span>
+                <span className={`${selectedMaterial.color} text-[10px] font-mono`}>{selectedMaterial.name}</span>
+              </div>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={designData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#161b22" />
+                  <XAxis dataKey="name" stroke="#484f58" fontSize={9} axisLine={false} tickLine={false} />
+                  <YAxis stroke="#484f58" fontSize={9} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ backgroundColor: '#0b0e14', border: '1px solid #30363d', borderRadius: '12px', fontSize: '9px' }} />
+                  <Bar dataKey="designValue" radius={[4, 4, 0, 0]} barSize={30}>
+                    {designData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="h-[180px]">
+              <div className="text-[9px] font-bold text-[#484f58] uppercase mb-4 tracking-widest">Real-time Stress History</div>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={history}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#161b22" />
+                  <XAxis hide dataKey="time" />
+                  <YAxis stroke="#484f58" fontSize={9} axisLine={false} tickLine={false} domain={[0, Math.max(selectedMaterial.capacity + 500, ultimateLoad + 100)]} />
+                  <Tooltip labelStyle={{ display: 'none' }} contentStyle={{ backgroundColor: '#0b0e14', border: '1px solid #30363d', borderRadius: '12px', fontSize: '9px' }} />
+                  <ReferenceLine y={selectedMaterial.capacity} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'right', value: 'Failure', fill: '#ef4444', fontSize: 8 }} />
+                  <Line type="monotone" dataKey="load" stroke="#3b82f6" strokeWidth={2} dot={false} isAnimationActive={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">

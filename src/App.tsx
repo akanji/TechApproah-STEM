@@ -29,8 +29,7 @@ export default function App() {
 }
 
 function AppContent() {
-  const [page, setPage] = useState(() => localStorage.getItem("eng_page") || "home");
-  const { user, profile, progress, login, logout, updateXP } = useUser();
+  const { user, profile, progress, login, logout, updateXP, page, setPage } = useUser();
   const { playSound } = useSoundEffects();
   const [activeSubject, setActiveSubject] = useState<string | null>(() => localStorage.getItem("eng_subject") || null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,10 +68,6 @@ function AppContent() {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem("eng_page", page);
-  }, [page]);
 
   useEffect(() => {
     if (activeSubject) localStorage.setItem("eng_subject", activeSubject);

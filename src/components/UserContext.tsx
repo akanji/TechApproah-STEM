@@ -40,6 +40,8 @@ interface UserContextType {
   profile: UserProfile | null;
   progress: Record<string, LabProgressRecord>;
   loading: boolean;
+  page: string;
+  setPage: (page: string) => void;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   updateXP: (amount: number) => Promise<void>;
@@ -53,6 +55,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [progress, setProgress] = useState<Record<string, LabProgressRecord>>({});
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(() => localStorage.getItem("eng_page") || "home");
+
+  useEffect(() => {
+    localStorage.setItem("eng_page", page);
+  }, [page]);
 
   useEffect(() => {
     let unsubProfile: (() => void) | undefined;
@@ -155,7 +162,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <UserContext.Provider value={{ user, profile, progress, loading, login, logout, updateXP, updateProfile }}>
+    <UserContext.Provider value={{ user, profile, progress, loading, page, setPage, login, logout, updateXP, updateProfile }}>
       {children}
     </UserContext.Provider>
   );

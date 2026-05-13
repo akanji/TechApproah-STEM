@@ -11,7 +11,8 @@ import {
   Microscope, 
   Wind, 
   Database,
-  Save
+  Save,
+  Sparkles
 } from 'lucide-react';
 import { useUser } from './UserContext';
 import { useSoundEffects } from '../hooks/useSoundEffects';
@@ -24,11 +25,16 @@ const SPECIALIZATIONS = [
 ];
 
 export function UserProfile() {
-  const { profile, updateProfile, logout } = useUser();
+  const { profile, updateProfile, logout, setPage } = useUser();
   const { playSound } = useSoundEffects();
   const [displayName, setDisplayName] = useState(profile?.displayName || '');
   const [specialization, setSpecialization] = useState(profile?.specialization || '');
   const [isSaving, setIsSaving] = useState(false);
+
+  const handleUpgrade = () => {
+    playSound('click');
+    setPage('pricing');
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -64,6 +70,47 @@ export function UserProfile() {
           <p className="text-[#8b949e] text-xs font-mono uppercase tracking-widest">Level {level} Elite Scientist</p>
         </div>
       </header>
+
+      <div className="bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-blue-500/20 rounded-[32px] p-8 space-y-6 relative overflow-hidden shadow-2xl">
+        <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+          <Zap size={140} fill="currentColor" className="text-blue-400" />
+        </div>
+        
+        <div className="relative z-10 space-y-4">
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest w-fit">
+            <Sparkles size={12} /> Membership
+          </div>
+          <h3 className="text-2xl font-bold text-white tracking-tight uppercase">Upgrade Your Research</h3>
+          <p className="text-[#8b949e] text-xs leading-relaxed max-w-sm">
+            Unlock advanced virtual labs, exclusive engineering specialist tools, and unlimited AI sessions with Gemini 3.1.
+          </p>
+
+          <div className="grid grid-cols-1 gap-3 pt-2">
+            <button 
+              onClick={handleUpgrade}
+              className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 uppercase tracking-widest text-[10px]"
+            >
+              Start 7-Day Free Trial
+            </button>
+            <div className="grid grid-cols-2 gap-3">
+              <button 
+                onClick={handleUpgrade}
+                className="py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition-all flex flex-col items-center justify-center gap-0.5 uppercase tracking-tighter text-[9px]"
+              >
+                <span>Pro Subscription</span>
+                <span className="opacity-80">$19.99 / Monthly</span>
+              </button>
+              <button 
+                onClick={handleUpgrade}
+                className="py-3 bg-[#161b22] hover:bg-[#1f2937] text-white font-bold rounded-2xl border border-blue-500/30 transition-all shadow-blue-900/20 flex flex-col items-center justify-center gap-0.5 uppercase tracking-tighter text-[9px]"
+              >
+                <span>Premium Access</span>
+                <span className="text-blue-400">$199.99 / Yearly</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-[#161b22] border border-[#30363d] rounded-3xl p-6 space-y-6">

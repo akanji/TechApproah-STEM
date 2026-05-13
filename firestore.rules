@@ -101,9 +101,9 @@ service cloud.firestore {
             && data.cuttingSpeed is number && data.feedRate is number;
             
           let isBridge = labType == 'bridge'
-            && data.keys().hasAll(['deadLoad', 'superDeadLoad', 'hydrostaticLoad', 'gammaD', 'gammaSD'])
+            && data.keys().hasAll(['deadLoad', 'superDeadLoad', 'hydrostaticLoad', 'gammaD', 'gammaSD', 'materialId'])
             && data.deadLoad is number && data.superDeadLoad is number && data.hydrostaticLoad is number
-            && data.gammaD is number && data.gammaSD is number;
+            && data.gammaD is number && data.gammaSD is number && data.materialId is string;
 
           return common && (isMech || isBridge) && data.keys().size() <= 12;
         }

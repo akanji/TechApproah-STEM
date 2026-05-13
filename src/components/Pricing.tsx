@@ -30,7 +30,7 @@ export function Pricing() {
         },
         body: JSON.stringify({
           priceId,
-          userEmail: user.email,
+          customerEmail: user.email,
         }),
       });
 
@@ -77,34 +77,71 @@ export function Pricing() {
           <Zap size={120} fill="currentColor" className="text-blue-400" />
         </div>
 
-        <div className="space-y-2 relative z-10">
-          <div className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Pro Subscription</div>
-          <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-bold text-white">$29</span>
-            <span className="text-[#8b949e] text-lg">/month</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+          <div className="space-y-4 p-6 rounded-2xl bg-white/5 border border-white/5">
+            <div className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Pro Subscription</div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-4xl font-bold text-white">$19.99</span>
+              <span className="text-[#8b949e] text-lg">/mo</span>
+            </div>
+            <p className="text-[#8b949e] text-[10px] leading-relaxed">Perfect for individual researchers and engineering students.</p>
+            <button
+              onClick={() => handleSubscribe("price_1TWUtuBMbxh6jv0Ca30P5IY1")}
+              disabled={loading}
+              className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all uppercase tracking-widest text-[10px] mt-2"
+            >
+              Start Free Trial
+            </button>
           </div>
-          <p className="text-emerald-400 text-xs font-medium bg-emerald-500/10 inline-block px-2 py-0.5 rounded border border-emerald-500/20 mt-2">
-            Includes 7-day Free Trial
-          </p>
+
+          <div className="space-y-4 p-6 rounded-2xl bg-blue-500/10 border border-blue-500/20 relative overflow-hidden">
+            <div className="absolute top-2 right-2 px-2 py-0.5 bg-blue-500 text-white text-[8px] font-bold rounded uppercase tracking-tighter shadow-lg">Save 20%</div>
+            <div className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Premium Access</div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-4xl font-bold text-white">$199.99</span>
+              <span className="text-[#8b949e] text-lg">/yr</span>
+            </div>
+            <p className="text-[#8b949e] text-[10px] leading-relaxed">Full annual access with priority specialized lab updates.</p>
+            <button
+              onClick={() => handleSubscribe("price_1TWUtuBMbxh6jv0CcbXIuQZF")}
+              disabled={loading}
+              className="w-full py-3 bg-white text-[#0d162d] hover:bg-blue-50 text-[#0d162d] font-black rounded-xl transition-all uppercase tracking-widest text-[10px] mt-2"
+            >
+              Start Free Trial
+            </button>
+          </div>
+        </div>
+
+        <div className="relative z-10 p-1 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-500">
+          <button
+            onClick={() => handleSubscribe("price_1TWUtuBMbxh6jv0Ca30P5IY1")}
+            disabled={loading}
+            className="w-full py-5 bg-[#0d162d] hover:bg-[#161b22] text-white font-bold rounded-[14px] transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span className="bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent uppercase tracking-[0.2em] text-sm font-black">
+              Start 7-Day Free Trial
+            </span>
+            <ArrowRight size={18} className="text-blue-400 group-hover:translate-x-1 transition-transform" />
+          </button>
         </div>
 
         <div className="space-y-4 relative z-10">
-          <h4 className="text-xs font-bold text-white uppercase tracking-wider">What's included:</h4>
-          <ul className="space-y-3">
+          <h4 className="text-[10px] font-bold text-[#484f58] uppercase tracking-[0.2em]">Unlimited Capabilities:</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
             {[
-              "All 50+ Virtual Engineering Labs",
-              "Unlimited AI Thinking Chat sessions",
-              "Specialist AI Hub Access (Titan, SimScale, Flux)",
-              "Priority support from AI Experts",
-              "Exportable lab reports & certificates",
-              "Offline study capability"
+              "50+ Virtual Engineering Labs",
+              "Unlimited AI Thinking Chat",
+              "Specialist AI Hub Access",
+              "Priority Expert Support",
+              "Exportable Lab Reports",
+              "Offline Study Mode"
             ].map((feature, i) => (
-              <li key={i} className="flex items-center gap-3 text-sm text-[#8b949e]">
-                <CheckCircle2 size={18} className="text-emerald-500 flex-shrink-0" />
+              <div key={i} className="flex items-center gap-2 text-[11px] text-[#8b949e]">
+                <CheckCircle2 size={14} className="text-emerald-500 flex-shrink-0" />
                 {feature}
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
 
         {error && (
@@ -112,15 +149,6 @@ export function Pricing() {
             {error}
           </div>
         )}
-
-        <button
-          onClick={() => handleSubscribe("price_H5ggv9tG4l2a1z")} // Placeholder Price ID
-          disabled={loading}
-          className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-xs"
-        >
-          {loading ? "Preparing Checkout..." : "Start 7-Day Free Trial"}
-          {!loading && <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />}
-        </button>
 
         <div className="flex items-center justify-center gap-2 text-[10px] text-[#484f58] uppercase tracking-widest">
           <Shield size={12} /> Secure Checkout powered by Stripe

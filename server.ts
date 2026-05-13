@@ -33,7 +33,8 @@ async function startServer() {
 
   // API Routes
   app.post("/api/create-checkout-session", async (req, res) => {
-    const { priceId, userEmail } = req.body;
+    const { priceId, customerEmail, userEmail } = req.body;
+    const finalEmail = customerEmail || userEmail;
     
     const stripeInstance = getStripe();
     if (!stripeInstance) {
@@ -41,8 +42,10 @@ async function startServer() {
     }
 
     try {
+      const origin = req.headers.origin || process.env.APP_URL || `http://localhost:${PORT}`;
+      
       const session = await stripeInstance.checkout.sessions.create({
-        customer_email: userEmail,
+        customer_email: finalEmail,
         payment_method_types: ["card"],
         line_items: [{
           price: priceId, 
@@ -52,9 +55,8 @@ async function startServer() {
         subscription_data: {
           trial_period_days: 7,
         },
-        // Using the provided success/cancel URLs or reasonable defaults
-        success_url: `${req.headers.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${req.headers.origin}/pricing`,
+        success_url: `${origin}/success`,
+        cancel_url: `${origin}/pricing`,
       });
 
       res.json({ id: session.id });
