@@ -39,6 +39,23 @@
         "category": { "type": "string", "enum": ["Foundations", "Deep Tech", "Advanced Mechanics", "CRISPR"] },
         "tags": { "type": "array" }
       }
+    },
+    "LabConfig": {
+      "title": "Lab Configuration",
+      "description": "Stores user-specific settings for different lab environments.",
+      "type": "object",
+      "properties": {
+        "labType": { "type": "string", "description": "Type of lab (e.g., mechanical, physics, bridge)." },
+        "materialId": { "type": "string" },
+        "cuttingSpeed": { "type": "number" },
+        "feedRate": { "type": "number" },
+        "deadLoad": { "type": "number" },
+        "superDeadLoad": { "type": "number" },
+        "hydrostaticLoad": { "type": "number" },
+        "gammaD": { "type": "number" },
+        "gammaSD": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "firestore": {
@@ -53,6 +70,10 @@
     "/users/{userId}/progress/{labId}": {
       "schema": "LabProgress",
       "description": "Progress records for specific labs associated with a user."
+    },
+    "/users/{userId}/labConfigs/{labType}": {
+      "schema": "LabConfig",
+      "description": "Customized configurations for each lab type per user."
     }
   }
 }

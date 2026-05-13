@@ -89,6 +89,32 @@ service cloud.firestore {
           && incoming().labId == existing().labId
           && incoming().diff(existing()).affectedKeys().hasOnly(['completed', 'score', 'lastAttemptAt', 'updatedAt']);
       }
+
+      // --- Lab Configs (Subcollection) ---
+      match /labConfigs/{labType} {
+        function isValidLabConfig(data) {
+          let common = data.keys().hasAll(['updatedAt']) && data.updatedAt is timestamp;
+          
+          let isMech = labType == 'mechanical' 
+            && data.keys().hasAll(['materialId', 'cuttingSpeed', 'feedRate'])
+            && data.materialId is string && data.materialId.size() <= 64
+            && data.cuttingSpeed is number && data.feedRate is number;
+            
+          let isBridge = labType == 'bridge'
+            && data.keys().hasAll(['deadLoad', 'superDeadLoad', 'hydrostaticLoad', 'gammaD', 'gammaSD'])
+            && data.deadLoad is number && data.superDeadLoad is number && data.hydrostaticLoad is number
+            && data.gammaD is number && data.gammaSD is number;
+
+          return common && (isMech || isBridge) && data.keys().size() <= 12;
+        }
+
+        allow get: if isOwner(userId);
+        
+        allow create, update: if isOwner(userId)
+          && isValidId(labType)
+          && isValidLabConfig(incoming())
+          && incoming().updatedAt == request.time;
+      }
     }
   }
 }

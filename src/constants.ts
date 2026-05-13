@@ -29,6 +29,13 @@ export const SUBJECTS = [
     desc: "Cellular Mechanics & CRISPR",
     topics: ["Genetics", "Proteins", "Lab PCR"]
   },
+  { 
+    id: "mechanical", 
+    name: "Mechanical Eng.", 
+    icon: "⚙️", 
+    desc: "Production & Machine Design",
+    topics: ["Machining", "CAD/CAM", "Thermodynamics", "Robotics"]
+  },
 ];
 
 export const MODULES: Record<string, any[]> = {
@@ -57,7 +64,57 @@ export const MODULES: Record<string, any[]> = {
         ]
       }
     },
-    { id: 2, title: "Kinetic Energy Lab", duration: "30 min", xp: 300, active: false }
+    { 
+      id: 2, 
+      title: "Kinetic Energy Lab", 
+      duration: "30 min", 
+      xp: 300, 
+      active: true, 
+      labType: "physics",
+      content: {
+        lab_id: "phys_002",
+        title: "Kinetic Energy Analyzer",
+        ai_notes: {
+          definition: "Kinetic Energy (KE) is the energy an object possesses due to its motion, derived as KE = ½mv².",
+          formulas: ["KE = ½mv²", "W = ΔKE (Work-Energy Theorem)"],
+          units: "Joules (J)",
+          technical_breakdown: [
+            "Mass proportionality: Double mass = Double KE",
+            "Velocity proportionality: Double velocity = Quadruple KE",
+            "Work-Energy Theorem: Total work equals change in KE"
+          ]
+        },
+        resources: [
+          {type: "video", url: "https://youtu.be/jOeUlYaikJ4", desc: "Kinetic Energy and Velocity Modeling"},
+          {type: "video", url: "https://youtu.be/DfzBYhO8aoY", desc: "Potential and Kinetic Energy LAB"}
+        ]
+      }
+    },
+    { 
+      id: 3, 
+      title: "Energy Ramp Lab", 
+      duration: "25 min", 
+      xp: 450, 
+      active: true, 
+      labType: "physics",
+      content: {
+        lab_id: "phys_003",
+        title: "PE to KE Conversion",
+        ai_notes: {
+          definition: "Analysis of gravitational potential energy conversion into translational kinetic energy.",
+          formulas: ["PE = mgh", "v = √(2gh)"],
+          technical_breakdown: [
+            "Energy Conservation Principle",
+            "Height-Velocity Correlation: v = √(2gh)",
+            "Mass Independence of Velocity in Vacuum"
+          ]
+        },
+        resources: [
+          {type: "video", url: "https://youtu.be/DfzBYhO8aoY", desc: "Potential and Kinetic Energy LAB"}
+        ]
+      }
+    }
+
   ],
   ee: [
     { 
@@ -182,6 +239,43 @@ export const MODULES: Record<string, any[]> = {
           {type: "link", url: "https://civils.ai/", desc: "Civils.ai Dashboard"}
         ]
       }
+    },
+    {
+      id: 2,
+      title: "Static Loads & Bridge Design",
+      duration: "35 min",
+      xp: 550,
+      active: true,
+      labType: "structural",
+      content: {
+        lab_id: "bridge_001",
+        title: "Loads & LSD Optimization",
+        ai_notes: {
+          definition: "Analysis of constant forces (static loads) that a bridge must support throughout its lifespan, adhering to AASHTO LRFD Equilibrium codes.",
+          formulas: [
+            "ΣF = 0, ΣM = 0",
+            "U = γ_D * D + γ_SD * SD"
+          ],
+          technical_breakdown: [
+            "Dead Loads (D): Structural weight (steel, concrete)",
+            "Superimposed Dead (SD): Add-ons (asphalt, railings)",
+            "Hydrostatic Pressures (H): Water/Soil lateral forces",
+            "Limit State Design (LSD): Using load factors (γ) for safety"
+          ],
+          audio_overview: "Host: Bridge design isn't just about the aesthetics. Guest: No, it's about balance. Every bridge is a massive math problem where the sum of forces must be zero. Host: And the loads? Guest: We distinguish between Dead Loads—the bridge itself—and Superimposed Dead Loads like the asphalt on top. AI tools like SimScale are now running mesh configuration and stress distribution workflows in seconds, something that used to take days of manual analysis.",
+          study_guide: "# Static Loads & Bridge Design Guide\n\n## 1. Load Classification\n- **Dead Loads (D)**: Permanent structural weight.\n- **Superimposed Dead Loads (SD)**: Constant forces added post-finish (railings, asphalt).\n- **Hydrostatic Pressures (H)**: Lateral forces from soil or water.\n\n## 2. Governing Laws\nNewton's laws of equilibrium demand that $\\sum F = 0$ and $\\sum M = 0$. If these are not met, structural failure is inevitable.\n\n## 3. Limit State Design (LSD)\nDesigners add safety buffers using Load Factors ($\\gamma$): $U = \\gamma_D \\cdot D + \\gamma_{SD} \\cdot SD$. For factory concrete, $\\gamma_D$ is typically 1.25.",
+          quiz: [
+            {q: "What does LSD stand for in structural design?", a: "Limit State Design"},
+            {q: "The sum of all forces and moments must equal what for equilibrium?", a: "Zero"},
+            {q: "True or False: γ_SD is typically 1.50 for wearing surfaces.", a: "True"}
+          ]
+        },
+        resources: [
+          {type: "video", url: "https://youtu.be/SbCVRr5eANA", desc: "Bridge Engineering Basics"},
+          {type: "video", url: "https://youtu.be/IqCIX76eBks", desc: "Static Load Analysis on Bridge"},
+          {type: "video", url: "https://youtu.be/so_R_KDRzC0", desc: "Bridge Design: Staad Pro Optimization"}
+        ]
+      }
     }
   ],
   bio: [
@@ -254,6 +348,47 @@ export const MODULES: Record<string, any[]> = {
           {type: "video", url: "https://youtu.be/CgpZ2PUcGt0", desc: "Genome Engineering CRISPR"},
           {type: "video", url: "https://youtu.be/lIYvWcKyxCg", desc: "Deep Tech in Biology"},
           {type: "video", url: "https://youtu.be/2mP9Eos-A6s", desc: "iBiology: CRISPR Mechanics (Jennifer Doudna)"}
+        ]
+      }
+    }
+  ],
+  mechanical: [
+    {
+      id: 1,
+      title: "Manufacturing & Production",
+      duration: "50 min",
+      xp: 700,
+      active: true,
+      labType: "mechanical",
+      content: {
+        lab_id: "mech_001",
+        title: "Intelligent Production Systems",
+        ai_notes: {
+          definition: "⚙️ This module focuses on the transition from design to physical production, utilizing AI to simulate stress, heat, and manufacturing workflows.",
+          technical_breakdown: [
+            "CNC Machining: G-Code and M-Code automation",
+            "Tool Stack: SimScale (AI design), Ansys (Stress analysis)",
+            "Industry 4.0: Integration of IoT and Edge Computing",
+            "Generative Design: Siemens NX AI optimization"
+          ],
+          audio_overview: "Host: Mechanical Engineering is changing. We are moving from manual drafting to AI-powered documentation. Guest: Exactly. Tools like NotebookLM and Otter.ai are digesting syllabi and live lectures in real-time. Host: And production? Guest: CNC machining and lean manufacturing are being revolutionized by Mindgrasp AI, which summarizes expert lessons from YouTube. We are seeing a shift where Industry 4.0 meets Generative Design.",
+          study_guide: "# Technical Production Study Guide\n\n## 1. AI-Powered Documentation\n- **NotebookLM**: Upload PDFs for structured summaries of Integrated Manufacturing.\n- **Otter.ai**: Capture live lecture principles into searchable text.\n- **Turbo AI**: Transform technical videos into editable notes.\n\n## 2. Manufacturing Strategy\nFocus on 'Industry 4.0', 'Additive Manufacturing', and 'Robotics'. CNC machining processes use tool wear monitoring and G-code automation.\n\n## 3. Tool Stack Summary\n| Task | Tool | Benefit |\n|---|---|---|\n| Notes | NoteGPT | Summarization |\n| Simulated Labs | SimScale | AI-guided validation |\n| Study Aids | MechiAI | Interview prep |",
+          video_prompts: [
+            "A 3D explainer of a CNC spindle operating at high RPM, showing material removal and chip formation in macroscopic detail.",
+            "Visualizing the heat gradient across a titanium component during high-feed milling using thermal mapping.",
+            "An animation showing generative design algorithms iteratively optimizing a machine bracket for structural integrity."
+          ],
+          quiz: [
+            {q: "What AI tool is best for converting technical lecture audio to searchable notes?", a: "Otter.ai"},
+            {q: "Which tool would you use for AI-guided stress/strain and thermal design validation?", a: "SimScale or Ansys AI"},
+            {q: "What is the primary benefit of Siemens NX AI in mechanical engineering?", a: "Generative design and automated optimization for production."}
+          ]
+        },
+        resources: [
+          {type: "video", url: "https://youtu.be/Lu76Ua2AR4w", desc: "Mechanical Engineering - Made Easy"},
+          {type: "video", url: "https://youtu.be/dhyAjUuDEGs", desc: "Production Engineering Essentials"},
+          {type: "video", url: "https://youtu.be/kDJ3QzTCgXM", desc: "CNC Machining Process"},
+          {type: "video", url: "https://youtu.be/-53F9sxYKi4", desc: "Intro to Thermodynamics"}
         ]
       }
     }
