@@ -66,6 +66,7 @@ export function LabEngine({ type, labId = "unknown", onComplete }: LabProps) {
         {type === "physics" && (
           labId === "phys_002" ? <KineticEnergyLab /> : 
           labId === "phys_003" ? <RampLab /> : 
+          labId === "phys_004" ? <PhysicsLab /> : 
           <PhysicsLab />
         )}
         {type === "ee" && <EELab labId={labId} />}

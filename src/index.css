@@ -1,1 +1,55 @@
 @import "tailwindcss";
+
+@theme {
+  --color-brand-blue: #0066ff;
+  --color-brand-bg: #0d1117;
+  --color-brand-surface: #161b22;
+  --color-brand-border: #30363d;
+  
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer components {
+  .btn {
+    @apply px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2;
+  }
+  
+  .btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-900/20;
+  }
+  
+  .btn-secondary {
+    @apply bg-[#21262d] border border-[#30363d] text-[#c9d1d9] hover:bg-[#30363d] hover:border-[#8b949e]/30;
+  }
+  
+  .btn-glass {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 text-white hover:bg-white/10;
+  }
+  
+  .card-tech {
+    @apply bg-[#161b22] border border-[#30363d] rounded-2xl p-6 transition-all hover:border-blue-500/20 shadow-sm;
+  }
+  
+  .label-mono {
+    @apply font-mono text-[10px] font-bold uppercase tracking-widest opacity-60;
+  }
+}
+
+/* Custom scrollbar for better tech look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}

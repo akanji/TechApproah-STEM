@@ -8,6 +8,7 @@ export function VoicePartner({ onClose }: { onClose: () => void }) {
   const [isActive, setIsActive] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [status, setStatus] = useState<"idle" | "connecting" | "active" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const sessionPromiseRef = useRef<Promise<any> | null>(null);
   const sessionRef = useRef<any>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -16,8 +17,24 @@ export function VoicePartner({ onClose }: { onClose: () => void }) {
 
   const startSession = async () => {
     try {
+      setErrorMessage(null);
       setStatus("connecting");
       
+      // Setup Microphone FIRST to ensure we have permission before connecting
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (err: any) {
+        console.error("Microphone Access Error:", err);
+        if (err.name === "NotAllowedError" || err.name === "PermissionDismissedError") {
+          setErrorMessage("Microphone permission was denied. Please allow access in browser settings.");
+        } else {
+          setErrorMessage("Could not access microphone. Please check your connection.");
+        }
+        setStatus("error");
+        return;
+      }
+
       const sessionPromise = ai.live.connect({
         model: MODELS.live,
         callbacks: {
@@ -31,8 +48,9 @@ export function VoicePartner({ onClose }: { onClose: () => void }) {
               playPCM(base64Audio);
             }
           },
-          onerror: (err) => {
+          onerror: (err: any) => {
             console.error("Live API Error:", err);
+            setErrorMessage("Gemini Live service is currently unavailable.");
             setStatus("error");
           },
           onclose: () => {
@@ -53,8 +71,6 @@ export function VoicePartner({ onClose }: { onClose: () => void }) {
       const session = await sessionPromise;
       sessionRef.current = session;
 
-      // Setup Microphone
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioContextRef.current = new AudioContext({ sampleRate: 16000 });
       sourceRef.current = audioContextRef.current.createMediaStreamSource(stream);
       // Deprecated but simple for this env, better to use AudioWorklet in production
@@ -135,11 +151,11 @@ export function VoicePartner({ onClose }: { onClose: () => void }) {
           </div>
 
           <h2 className="text-2xl font-bold text-white mb-2">Voice Study Partner</h2>
-          <p className="text-[#8b949e] text-sm mb-8 px-4">
+          <p className={`text-sm mb-8 px-4 ${status === "error" ? "text-red-400 font-medium" : "text-[#8b949e]"}`}>
             {status === "idle" && "Ready to talk? Start a real-time voice session about your studies."}
             {status === "connecting" && "Connecting to Gemini Live..."}
             {status === "active" && "Gemini is listening. Ask anything!"}
-            {status === "error" && "Connection failed. Please try again."}
+            {status === "error" && (errorMessage || "Connection failed. Please try again.")}
           </p>
 
           <div className="flex gap-4 mb-8">

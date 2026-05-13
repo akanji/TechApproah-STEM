@@ -41,15 +41,16 @@ export function GlobalSearch({ onClose, onNavigate }: { onClose: () => void, onN
     // Modules
     Object.entries(MODULES).forEach(([subjectId, modules]) => {
       modules.forEach(m => {
-        if (m.title.toLowerCase().includes(q) || (m.content?.title?.toLowerCase().includes(q))) {
+        const fullText = `${m.title} ${m.content?.title || ''} ${m.content?.ai_notes?.definition || ''} ${m.content?.ai_notes?.technical_breakdown?.join(' ') || ''}`.toLowerCase();
+        if (fullText.includes(q)) {
           searchResults.push({
-            id: `mod-${m.id}`,
+            id: `mod-${m.id}-${subjectId}`,
             title: m.title,
             type: 'module',
             category: subjectId.toUpperCase(),
-            description: m.content?.ai_notes?.definition || 'Learning Module',
+            description: m.content?.ai_notes?.definition || 'Course Module',
             action: () => {
-              onNavigate('projects'); // Or navigate directly to module if possible
+              onNavigate('subjects', { subject: subjectId, module: m.id });
               onClose();
             }
           });

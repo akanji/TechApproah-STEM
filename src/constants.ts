@@ -40,8 +40,60 @@ export const SUBJECTS = [
 
 export const MODULES: Record<string, any[]> = {
   physics: [
+    {
+      id: 1,
+      title: "Course Overview & Foundations",
+      duration: "15 min",
+      xp: 200,
+      active: true,
+      content: {
+        lab_id: "phys_000",
+        title: "Applied Physics: Mechanics, Waves, & Dynamics",
+        ai_notes: {
+          definition: "This section explores the bridge between fundamental physical laws and practical engineering, emphasizing real-world technology applications of movement, energy, and system response.",
+          technical_breakdown: [
+            "Mechanics & Dynamics",
+            "Wave Propagation",
+            "Thermodynamic Systems"
+          ],
+          study_guide: `# Applied Physics: Mechanics, Waves, & Dynamics
+
+## 1. Core Learning Modules
+- **Fundamental Mechanics**: A deep dive into classical mechanics, including Newton’s laws, rotational dynamics, and the conservation of energy and momentum.
+- **Wave Mechanics & Optics**: Exploring wave propagation, interference, and diffraction. Practical applications in Laser Technology, Fiber Optics, and Optical Imaging.
+- **Dynamics & Thermodynamics**: Analyzing systems in motion and thermal properties, essential for heat engines and energy transfer.
+- **Materials Science & Crystallography**: Solid-state physics, crystal structures, and magnetic properties in modern engineering.
+
+## 2. Specialized Applications
+| Specialization | Focus Areas |
+|---|---|
+| **Nanotechnology** | Nanoscale mechanics and molecular electronics. |
+| **Medical Physics** | Radiotherapy, diagnostic imaging, and bioengineering. |
+| **Sustainable Energy** | Renewable energy harvesting and advanced storage. |
+| **Computational Physics** | Numerical simulations and data analysis. |
+
+## 3. Laboratory & Simulation
+- **Experimental Physics**: Lab work focusing on modern optics, spectroscopy, and nuclear physics.
+- **Methods & Simulation**: Utilizing computational tools for numerical simulations and industrial problem-solving.
+
+## 4. Recommended Resources & Literature
+- *Fundamentals of Physics* — Halliday, Resnick, and Walker.
+- *University Physics* — Young and Freedman.
+- *Schaum’s Outline of Applied Physics* — For practical problem-solving.
+
+**Note**: Students are expected to integrate computational methods into their final projects to simulate real-world dynamic systems.`,
+          quiz: [
+            { q: "What is the focus of the 'Specialized Applications' section?", a: "Nanotechnology, Medical Physics, Sustainable Energy, and Computational Physics." },
+            { q: "Which textbook is recommended for practical problem-solving?", a: "Schaum’s Outline of Applied Physics." }
+          ]
+        },
+        resources: [
+          { type: "link", url: "https://openstax.org/details/books/university-physics-volume-1", desc: "University Physics - Vol 1" }
+        ]
+      }
+    },
     { 
-      id: 1, 
+      id: 2, 
       title: "Projectile Dynamics", 
       duration: "45 min", 
       xp: 500, 
@@ -65,7 +117,7 @@ export const MODULES: Record<string, any[]> = {
       }
     },
     { 
-      id: 2, 
+      id: 3, 
       title: "Kinetic Energy Lab", 
       duration: "30 min", 
       xp: 300, 
@@ -91,7 +143,7 @@ export const MODULES: Record<string, any[]> = {
       }
     },
     { 
-      id: 3, 
+      id: 4, 
       title: "Energy Ramp Lab", 
       duration: "25 min", 
       xp: 450, 
@@ -113,12 +165,97 @@ export const MODULES: Record<string, any[]> = {
           {type: "video", url: "https://youtu.be/DfzBYhO8aoY", desc: "Potential and Kinetic Energy LAB"}
         ]
       }
+    },
+    { 
+      id: 5, 
+      title: "Newton's Second Law (F=ma)", 
+      duration: "40 min", 
+      xp: 600, 
+      active: true, 
+      labType: "physics",
+      content: {
+        lab_id: "phys_004",
+        title: "Newtonian Dynamics Analyzer",
+        ai_notes: {
+          definition: "Deep dive into the relationship between Force, Mass, and Acceleration with integrated friction analysis.",
+          formulas: ["F = ma", "F_net = F_app - F_f", "F_f = μ • m • g"],
+          technical_breakdown: [
+            "Friction dynamics",
+            "Force-Velocity correlation",
+            "Unit conversion (SI vs Imperial)"
+          ],
+          quiz: [
+            { q: "What happens to acceleration if mass is doubled (constant force)?", a: "It is halved." },
+            { q: "What is the net force if applied force equals friction?", a: "Zero." }
+          ]
+        },
+        resources: [
+          { type: "video", url: "https://www.youtube.com/watch?v=Zv9lJtf9_8U", desc: "Newton's Second Law Explanation" }
+        ]
+      }
     }
-
   ],
   ee: [
+    {
+      id: 1,
+      title: "Course Overview & Foundations",
+      duration: "20 min",
+      xp: 250,
+      active: true,
+      content: {
+        lab_id: "ee_000",
+        title: "Electrical Engineering: Circuits & Signal Processing",
+        ai_notes: {
+          definition: "A comprehensive deep-dive into the technical heart of Electrical Engineering, bridging fundamental physical laws with modern signal processing, power generation, and automation.",
+          technical_breakdown: [
+            "Faraday's Law of Induction",
+            "Circuit Theory & Hardware",
+            "Digital Signal Processing (DSP)"
+          ],
+          study_guide: `# Electrical Engineering: Circuits & Signal Processing
+
+## 1. Circuit Theory & Electronics
+- **Circuit Analysis**: Mastery of DC/AC circuits using Ohm’s Law, Kirchhoff’s Laws, and transient analysis.
+- **Semiconductor Electronics**: Device characteristics of diodes, transistors (BJTs/MOSFETs), and Op-Amp design.
+- **Electromagnetics**: Maxwell’s equations, field theory, wave propagation, and transmission lines.
+
+## 2. Digital Systems & Signal Processing
+- **Signals & Systems**: Fourier analysis, Z-transforms, and frequency response for continuous and discrete signals.
+- **Digital Logic Design**: Binary systems, Boolean algebra, and microprocessor architectures.
+- **Computational Engineering**: MATLAB, Python, and C++ for engineering simulations.
+
+## 3. Specialized Learning Paths
+| Specialization | Key Focus Areas |
+|---|---|
+| **Power & Energy** | Renewable systems, power electronics, and grid protection. |
+| **Communications** | Wireless systems, antenna theory, and fiber optics. |
+| **Control Systems** | Robotics, industrial automation, and feedback loops. |
+| **Biomedical** | Medical equipment design and bio-signal processing. |
+
+## 4. Technical Foundations
+- **Advanced Mathematics**: Calculus I-III, Linear Algebra, and Differential Equations.
+- **Engineering Physics**: Core principles of electricity, magnetism, and thermodynamics.
+
+## 5. Verified Resources
+- **MIT OpenCourseWare**: Introduction to EECS I.
+- **Engineers Canada**: Standardized Electrical Engineering Syllabus.
+- **Khan Academy**: Circuit elements and signal analysis modules.
+- **LinkedIn Learning**: PLC programming and motor controls.
+
+**Note**: This course emphasizes both theoretical derivation and practical application for research and industrial roles.`,
+          quiz: [
+            { q: "Which law serves as the bridge between fundamental physics and EE in this course?", a: "Faraday’s Law of Induction." },
+            { q: "What are the key computational tools mentioned for system simulations?", a: "MATLAB, Python, and C++." }
+          ]
+        },
+        resources: [
+          { type: "link", url: "https://ocw.mit.edu/courses/6-01sc-introduction-to-electrical-engineering-and-computer-science-i-spring-2011/", desc: "MIT OpenCourseWare - Intro to EECS I" },
+          { type: "link", url: "https://engineerscanada.ca/regulatory-excellence/examination-syllabi/electrical-engineering-syllabus", desc: "Engineers Canada - EE Syllabus" }
+        ]
+      }
+    },
     { 
-      id: 1, 
+      id: 2, 
       title: "Logic Gate Simulator", 
       duration: "20 min", 
       xp: 200, 
@@ -142,7 +279,7 @@ export const MODULES: Record<string, any[]> = {
       }
     },
     { 
-      id: 2, 
+      id: 3, 
       title: "Circuits & Signal Processing", 
       duration: "50 min", 
       xp: 750, 
@@ -192,8 +329,54 @@ export const MODULES: Record<string, any[]> = {
     }
   ],
   structural: [
+    {
+      id: 1,
+      title: "Course Overview & Foundations",
+      duration: "20 min",
+      xp: 250,
+      active: true,
+      content: {
+        lab_id: "civil_000",
+        title: "Civil Engineering: Foundations & Specializations",
+        ai_notes: {
+          definition: "Civil Engineering programs provide foundational knowledge in mathematics, physics, and chemistry, specialized in structural, geotechnical, environmental, and transportation engineering.",
+          technical_breakdown: [
+            "Structural & Geotechnical Engineering",
+            "Transportation & Infrastructure",
+            "Water Resources & Construction Management"
+          ],
+          study_guide: `# Civil Engineering Curriculum Overview
+
+## 1. Core Learning Pillars
+- **Structural Engineering**: Study of steel, concrete, and timber design; structural analysis and dynamics.
+- **Geotechnical Engineering**: Soil mechanics, rock engineering, foundation design, and engineering geology.
+- **Transportation Engineering**: Planning, design, and operations of roads, highways, and traffic systems.
+- **Water Resources/Environmental**: Hydrology, hydraulic structures, municipal services, potable water, and wastewater treatment.
+- **Construction Engineering**: Project scheduling, estimating, site investigation, and material testing.
+
+## 2. Technical Foundations
+- **Foundational Science**: Mathematics (Calculus, Linear Algebra, Stats), Physics, and Chemistry.
+- **Digital Modeling**: AutoCAD Civil 3D, Revit, and Structural Analysis software.
+- **Project Management**: Site assessment and construction scheduling.
+
+## 3. Recommended Resources
+- **LinkedIn Learning**: Courses on AutoCAD Civil 3D, Revit, and structural analysis.
+- **Coursera**: Introductory courses on site assessment and management.
+
+**Note**: This course emphasizes foundational knowledge followed by specialized technical studies and real-world project management.`,
+          quiz: [
+            { q: "What is the primary focus of Geotechnical Engineering?", a: "Soil mechanics, foundation design, and engineering geology." },
+            { q: "Which software is commonly used for 3D digital modeling in Civil?", a: "AutoCAD Civil 3D and Revit." }
+          ]
+        },
+        resources: [
+          { type: "link", url: "https://www.linkedin.com/learning/topics/civil-engineering", desc: "LinkedIn Learning - Civil Engineering" },
+          { type: "link", url: "https://www.coursera.org/search?query=civil%20engineering", desc: "Coursera - Civil Engineering" }
+        ]
+      }
+    },
     { 
-      id: 1, 
+      id: 2, 
       title: "Structural & Geotechnical AI", 
       duration: "45 min", 
       xp: 600, 
@@ -241,7 +424,7 @@ export const MODULES: Record<string, any[]> = {
       }
     },
     {
-      id: 2,
+      id: 3,
       title: "Static Loads & Bridge Design",
       duration: "35 min",
       xp: 550,
@@ -276,11 +459,104 @@ export const MODULES: Record<string, any[]> = {
           {type: "video", url: "https://youtu.be/so_R_KDRzC0", desc: "Bridge Design: Staad Pro Optimization"}
         ]
       }
+    },
+    {
+      id: 4,
+      title: "Infrastructure & Environmental Systems",
+      duration: "40 min",
+      xp: 650,
+      active: true,
+      labType: "structural",
+      content: {
+        lab_id: "civil_002",
+        title: "Transportation & Water Management",
+        ai_notes: {
+          definition: "Exploration of transportation network planning and water resource management, including hydrology and wastewater systems.",
+          technical_breakdown: [
+            "Transportation: Traffic flow and highway geometry",
+            "Hydrology: Rainwater runoff and pipe flow",
+            "Environmental: Municipal water treatment cycles",
+            "Construction: Scheduling and site testing"
+          ],
+          study_guide: `# Transportation, Water & Construction
+
+## 1. Transportation Engineering
+Focus on the planning, design, and operations of roads and high-capacity traffic systems. Key tools include AutoCAD Civil 3D for highway design.
+
+## 2. Water Resources & Environmental
+- **Hydrology**: Study of water movement and hydraulic structures.
+- **Wastewater**: Treatment processes for municipal potable water and sewage.
+
+## 3. Construction Engineering
+Critical processes include project scheduling, estimating, site investigation, and material testing to ensure safety and compliance.`,
+          quiz: [
+            { q: "What does Hydrology study in Civil Engineering?", a: "The movement and distribution of water and hydraulic structures." },
+            { q: "What is a key focus of Construction Engineering?", a: "Project scheduling, estimating, and material testing." }
+          ]
+        },
+        resources: [
+          { type: "link", url: "https://ocw.mit.edu/courses/1-001-introduction-to-civil-and-environmental-engineering-design-i-fall-2005/", desc: "MIT OCW - Intro to Civil & Environmental Design" }
+        ]
+      }
     }
   ],
   bio: [
     {
       id: 1,
+      title: "Course Overview & Foundations",
+      duration: "25 min",
+      xp: 300,
+      active: true,
+      content: {
+        lab_id: "bio_000",
+        title: "Bio-Engineering: Cellular Mechanics & CRISPR",
+        ai_notes: {
+          definition: "Exploration of the intersection between molecular biology and mechanical engineering, focusing on physical forces governing cell behavior and genetic tools for reprogramming biological systems.",
+          technical_breakdown: [
+            "CRISPR-Cas9 & Gene Editing",
+            "Cellular Biomechanics",
+            "Synthetic Biology & Tissue Engineering"
+          ],
+          study_guide: `# Bio-Engineering Curriculum Overview
+
+## 1. Molecular & Genetic Engineering
+- **CRISPR-Cas9 & Gene Editing**: Site-specific genomic modification, synthetic biology, and molecular modeling.
+- **Cell Culture**: Engineering cell lines for regenerative medicine.
+- **Synthetic Biology**: Designing new biological parts and systems.
+
+## 2. Biomechanics & Bioinstrumentation
+- **Cellular Mechanics**: How cells sense and respond to mechanical loads and cytoskeleton physical properties.
+- **Bioimaging & Biosensors**: Advanced imaging (MRI) and real-time biological signal monitoring.
+- **Bio-instrumentation**: Medical devices interfacing with biological systems.
+
+## 3. Biomaterials & Tissue Engineering
+- **Biocompatibility**: Interaction between materials and human tissues (cytotoxicity, immune response).
+- **Regenerative Medicine**: Using scaffolds and engineered cells to repair tissues.
+- **Solid-State Properties**: Materials science behind implants and prosthetics.
+
+## 4. Bio-computing & Informatics
+- **Computational Biology**: Modeling complex biological systems and predicting stimuli responses.
+- **Bioinformatics**: Analyzing large genetic/protein datasets for therapeutic targets.
+
+## 5. Foundations & Ethics
+| Category | Topics Covered |
+|---|---|
+| **Fundamental Sciences** | Organic Chemistry, Physics, and Advanced Mathematics (Calculus, Stats). |
+| **Regulatory Affairs** | FDA approval processes, biosafety protocols, and medical standards. |
+| **Bioethics** | Moral implications of genetic engineering and human enhancement. |`,
+          quiz: [
+            { q: "What is the focus of cellular mechanics?", a: "How cells sense and respond to mechanical loads and physical properties of the cytoskeleton." },
+            { q: "Which repair pathway is used for gene insertions with CRISPR?", a: "HDR (Homology-Directed Repair)." }
+          ]
+        },
+        resources: [
+          { type: "link", url: "https://www.nature.com/subjects/bioengineering", desc: "Nature - Bioengineering Research" },
+          { type: "link", url: "https://syntheticbiology.org/", desc: "Synthetic Biology Community" }
+        ]
+      }
+    },
+    {
+      id: 2,
       title: "Cell Signaling & Transductions",
       duration: "45 min",
       xp: 600,
@@ -316,7 +592,7 @@ export const MODULES: Record<string, any[]> = {
       }
     },
     {
-      id: 2,
+      id: 3,
       title: "CRISPR-Cas9 Robotics",
       duration: "60 min",
       xp: 800,
@@ -355,6 +631,64 @@ export const MODULES: Record<string, any[]> = {
   mechanical: [
     {
       id: 1,
+      title: "Course Overview & Foundations",
+      duration: "25 min",
+      xp: 300,
+      active: true,
+      content: {
+        lab_id: "mech_000",
+        title: "Mechanical Engineering: Production & Machine Design",
+        ai_notes: {
+          definition: "This course integrates classical mechanical principles with modern industrial systems, preparing students for advanced manufacturing and automated design.",
+          technical_breakdown: [
+            "Mechanical Core & Design Foundations",
+            "Production & Manufacturing Systems",
+            "Modern Tech & Industry 4.0"
+          ],
+          study_guide: `# Mechanical Engineering: Production & Machine Design
+
+## 1. Mechanical Core & Design Foundations
+- **Engineering Mechanics & Kinematics**: Study of forces, moments, and motion of machine elements.
+- **Machine Design**: Principles of gears, bearings, shafts, and fasteners.
+- **Materials Science**: Selection of metals, polymers, and composites.
+- **Thermal & Fluid Systems**: Thermodynamics, Heat Transfer, and Fluid Mechanics.
+
+## 2. Production & Manufacturing Systems
+- **Manufacturing Processes**: Machining, casting, and joining techniques.
+- **Tool & Die Design**: Hardware for mass production and precision.
+- **Production Planning & Control (PPC)**: Resource optimization and scheduling.
+- **Quality Control**: Statistical methods and human-machine interaction.
+
+## 3. Modern Technologies & Industry 4.0
+| Technology | Focus Area |
+|---|---|
+| **CAM & Digital Twin** | Virtual modeling of production lines. |
+| **Additive Manufacturing** | Industrial 3D printing and rapid prototyping. |
+| **Mechatronics & Robotics** | Synergy of mechanics, electronics, and control. |
+| **Industry 4.0** | IoT, smart sensors, and data-driven systems. |
+
+## 4. Specialized Learning Paths
+- **DUT/BSc**: Core technical subjects and production technology.
+- **M.E./Master’s**: Hydraulic/pneumatic systems and advanced management.
+- **Thermal Specialization**: I.C. engines and energy transfer.
+
+## 5. Professional Standards & Resources
+- **MSBTE K-Scheme**: Specialized diploma curricula.
+- **UCEOU Framework**: Advanced research-focused manufacturing.
+- **Ideal Gases & Steam**: Foundational thermal engineering lectures.`,
+          quiz: [
+            { q: "What is the focus of PPC in manufacturing?", a: "Optimization of resources, scheduling, and workflow to maximize output." },
+            { q: "Which technology involves virtual modeling of production lines?", a: "CAM & Digital Twin." }
+          ]
+        },
+        resources: [
+          { type: "link", url: "https://www.scribd.com/document/961028708/DUT-GMP", desc: "DUT GMP Syllabus" },
+          { type: "video", url: "https://www.youtube.com/watch?v=YOPaUBIfGw4", desc: "Thermal Engineering Fundamentals" }
+        ]
+      }
+    },
+    {
+      id: 2,
       title: "Manufacturing & Production",
       duration: "50 min",
       xp: 700,

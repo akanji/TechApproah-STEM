@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Home, BookOpen, Microscope, BarChart3, MessageSquare, 
   Sparkles, Brain, Mic, Video, Settings, Play, ChevronRight,
-  Flame, Zap, Trophy, Headphones, Search, Link as LinkIcon, FileText, Info, CheckCircle2
+  Flame, Zap, Trophy, Headphones, Search, Link as LinkIcon, FileText, Info, CheckCircle2,
+  Calculator
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { ThinkingChat } from "./components/ThinkingChat";
@@ -17,6 +18,7 @@ import { Pricing } from "./components/Pricing";
 import { Success } from "./components/Success";
 import { GlobalSearch } from "./components/GlobalSearch";
 import { UserProfile } from "./components/UserProfile";
+import { UnitConverter } from "./components/UnitConverter";
 import { useSoundEffects } from "./hooks/useSoundEffects";
 import { SUBJECTS, MODULES, BADGES, NAV_ITEMS, RESOURCES } from "./constants";
 
@@ -38,14 +40,20 @@ function AppContent() {
   const [showThinkingChat, setShowThinkingChat] = useState(false);
   const [showVoicePartner, setShowVoicePartner] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [showUnitConverter, setShowUnitConverter] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [xp, setXp] = useState(1840);
   const [streak, setStreak] = useState(12);
 
   const handleNavigate = (newPage: string, params?: any) => {
     playSound('transition');
-    setPage(newPage);
-    if (params?.subject) setActiveSubject(params.subject);
-    if (params?.module) setActiveModule(params.module);
+    setIsLoading(true);
+    setTimeout(() => {
+      setPage(newPage);
+      if (params?.subject) setActiveSubject(params.subject);
+      if (params?.module) setActiveModule(params.module);
+      setIsLoading(false);
+    }, 400);
   };
 
   useEffect(() => {
@@ -144,13 +152,13 @@ function AppContent() {
           <div className="flex gap-2">
             <button 
               onClick={() => setPage("subjects")}
-              className="px-6 py-2.5 bg-blue-600 text-white text-xs font-bold rounded-full hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/40"
+              className="btn btn-primary"
             >
               Resume Track
             </button>
             <button 
               onClick={() => setShowVoicePartner(true)}
-              className="px-6 py-2.5 bg-white/5 border border-white/10 text-white text-xs font-bold rounded-full hover:bg-white/10 transition-all flex items-center gap-2"
+              className="btn btn-glass"
             >
               <Mic size={14} />
               AI Voice Partner
@@ -180,10 +188,10 @@ function AppContent() {
       </div>
 
       {/* Active Module */}
-      <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 relative group overflow-hidden">
+      <div className="card-tech relative group overflow-hidden">
         <div className="flex justify-between items-start mb-4">
           <div>
-            <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Current Goal · Physics</p>
+            <p className="label-mono text-blue-400 mb-1">Current Goal · Physics</p>
             <h3 className="text-white font-bold text-lg">Newton's Second Law</h3>
           </div>
           <div className="px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-[10px] font-bold border border-blue-500/20 uppercase">
@@ -195,7 +203,7 @@ function AppContent() {
         </div>
         <button 
           onClick={() => { setActiveSubject("physics"); setActiveModule(3); setPage("subjects"); }}
-          className="w-full py-3 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+          className="w-full btn btn-secondary"
         >
           Resume Module <ChevronRight size={16} />
         </button>
@@ -290,13 +298,13 @@ function AppContent() {
             <div className="flex bg-[#161b22] border border-[#30363d] rounded-xl p-1">
               <button 
                 onClick={() => setStudyMode("theory")}
-                className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${studyMode === "theory" ? "bg-blue-600 text-white" : "text-[#8b949e] hover:text-[#c9d1d9]"}`}
+                className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${studyMode === "theory" ? "bg-blue-600 text-white shadow-md shadow-blue-900/40" : "text-[#8b949e] hover:text-[#c9d1d9]"}`}
               >
                 Study Mode
               </button>
               <button 
                 onClick={() => setStudyMode("lab")}
-                className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${studyMode === "lab" ? "bg-blue-600 text-white" : "text-[#8b949e] hover:text-[#c9d1d9]"}`}
+                className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${studyMode === "lab" ? "bg-blue-600 text-white shadow-md shadow-blue-900/40" : "text-[#8b949e] hover:text-[#c9d1d9]"}`}
               >
                 Lab Mode
               </button>
@@ -542,6 +550,20 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-[#0d1117] text-[#e6edf3] font-sans selection:bg-blue-500/30">
       <main className="max-w-[480px] mx-auto min-h-screen relative pb-32">
+        {/* Loading Overlay */}
+        <AnimatePresence>
+          {isLoading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[60] bg-[#0d1117]/60 backdrop-blur-sm flex items-center justify-center"
+            >
+              <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Top Header */}
         <header className="sticky top-0 z-40 bg-[#0d1117]/80 backdrop-blur-md border-b border-[#30363d] px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -553,9 +575,15 @@ function AppContent() {
           <div className="flex items-center gap-2">
             <button 
               onClick={() => { setShowSearch(true); playSound('click'); }}
-              className="p-2 rounded-xl bg-[#161b22] border border-[#30363d] text-[#8b949e] hover:text-white transition-all"
+              className="p-2 rounded-xl bg-[#161b22] border border-[#30363d] text-[#8b949e] hover:text-white transition-all hover:border-blue-500/30"
             >
               <Search size={20} />
+            </button>
+            <button 
+              onClick={() => { setShowUnitConverter(true); playSound('click'); }}
+              className="p-2 rounded-xl bg-[#161b22] border border-[#30363d] text-[#8b949e] hover:text-white transition-all hover:border-blue-500/30"
+            >
+              <Calculator size={20} />
             </button>
             {user ? (
               <div className="flex items-center gap-3">
@@ -565,7 +593,7 @@ function AppContent() {
                 </div>
                 <button 
                   onClick={() => handleNavigate('profile')}
-                  className="w-10 h-10 rounded-xl bg-[#161b22] border border-[#30363d] overflow-hidden hover:border-blue-500/50 transition-all transition-colors"
+                  className="w-10 h-10 rounded-xl bg-[#161b22] border border-[#30363d] overflow-hidden hover:border-blue-500/50 transition-all"
                 >
                   <img src={profile?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.uid}`} alt="Profile" className="w-full h-full object-cover opacity-80 hover:opacity-100" />
                 </button>
@@ -573,7 +601,7 @@ function AppContent() {
             ) : (
               <button 
                 onClick={() => { login(); playSound('click'); }}
-                className="px-4 py-2 bg-blue-600 text-white text-[10px] font-bold rounded-xl hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20 uppercase tracking-widest"
+                className="btn btn-primary h-10 py-0"
               >
                 Sign In
               </button>
@@ -623,6 +651,11 @@ function AppContent() {
             <GlobalSearch 
               onClose={() => setShowSearch(false)} 
               onNavigate={handleNavigate}
+            />
+          )}
+          {showUnitConverter && (
+            <UnitConverter 
+              onClose={() => setShowUnitConverter(false)} 
             />
           )}
         </AnimatePresence>
