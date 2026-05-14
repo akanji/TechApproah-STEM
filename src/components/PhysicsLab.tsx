@@ -22,6 +22,8 @@ export function PhysicsLab({ onComplete }: PhysicsLabProps) {
   const [mass, setMass] = useState(5);
   const [force, setForce] = useState(20);
   const [friction, setFriction] = useState(0.1);
+  const [drag, setDrag] = useState(0); // Air Resistance
+  const [gravityType, setGravityType] = useState<"earth" | "moon" | "mars">("earth");
   const [velocity, setVelocity] = useState(0);
   const [position, setPosition] = useState(0);
   const [isSimulating, setIsSimulating] = useState(false);
@@ -30,10 +32,11 @@ export function PhysicsLab({ onComplete }: PhysicsLabProps) {
   const [graphData, setGraphData] = useState<{force: number, velocity: number}[]>([]);
   
   // Constants
-  const g = 9.81;
-  const gravity = unitSystem === "metric" ? g : g * 3.2808;
+  const GRAVITY_MAP = { earth: 9.81, moon: 1.62, mars: 3.71 };
+  const baseG = GRAVITY_MAP[gravityType];
+  const gravity = unitSystem === "metric" ? baseG : baseG * 3.2808;
   
-  const netForce = Math.max(0, force - friction * mass * g);
+  const netForce = Math.max(0, force - friction * mass * baseG - drag * velocity * velocity);
   const accel = netForce / mass;
   
   useEffect(() => {
@@ -46,7 +49,9 @@ export function PhysicsLab({ onComplete }: PhysicsLabProps) {
       const dt = (time - lastTime) / 1000;
       lastTime = time;
 
-      const fNet = Math.max(0, force - friction * mass * g);
+      const fFriction = friction * mass * baseG;
+      const fDrag = drag * velocity * velocity;
+      const fNet = Math.max(0, force - fFriction - fDrag);
       const a = fNet / mass;
       
       const newVelocity = velocity + a * dt;
@@ -68,7 +73,7 @@ export function PhysicsLab({ onComplete }: PhysicsLabProps) {
       frameId = requestAnimationFrame(tick);
     }
     return () => cancelAnimationFrame(frameId);
-  }, [isSimulating, force, mass, friction, velocity]);
+  }, [isSimulating, force, mass, friction, drag, velocity, baseG]);
 
   const reset = () => {
     setVelocity(0);
@@ -129,7 +134,26 @@ export function PhysicsLab({ onComplete }: PhysicsLabProps) {
             <div className="text-[10px] uppercase font-bold text-yellow-400 mb-2">Friction Coeff (μ)</div>
             <div className="text-2xl font-mono text-white mb-2">{friction.toFixed(2)}</div>
             <input type="range" min="0" max="1" step="0.01" value={friction} onChange={(e) => setFriction(Number(e.target.value))} className="w-full accent-yellow-500 bg-[#30363d] h-1.5 rounded-lg appearance-none cursor-pointer" />
-            <div className="text-[9px] text-[#8b949e] mt-1">Simulates standard kinetic friction.</div>
+            <div className="text-[9px] text-[#8b949e] mt-1">Simulates kinetic friction.</div>
+          </div>
+          <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-4">
+            <div className="text-[10px] uppercase font-bold text-emerald-400 mb-2">Air Resistance (Drag)</div>
+            <div className="text-2xl font-mono text-white mb-2">{drag.toFixed(3)}</div>
+            <input type="range" min="0" max="0.1" step="0.005" value={drag} onChange={(e) => setDrag(Number(e.target.value))} className="w-full accent-emerald-500 bg-[#30363d] h-1.5 rounded-lg appearance-none cursor-pointer" />
+          </div>
+          <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-4">
+            <div className="text-[10px] uppercase font-bold text-purple-400 mb-2">Gravity Presets</div>
+            <div className="grid grid-cols-3 gap-2 mt-2">
+              {(['earth', 'moon', 'mars'] as const).map(g => (
+                <button 
+                  key={g}
+                  onClick={() => setGravityType(g)}
+                  className={`py-1.5 text-[8px] font-bold uppercase rounded border transition-all ${gravityType === g ? "bg-purple-500/20 text-purple-400 border-purple-500/30" : "bg-[#0d162d] text-[#484f58] border-[#30363d]"}`}
+                >
+                  {g}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

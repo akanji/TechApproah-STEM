@@ -18,7 +18,13 @@ import {
   RefreshCcw,
   Sparkles,
   Video,
-  X
+  X,
+  Atom,
+  FlaskConical,
+  Activity,
+  History,
+  MessageSquareQuote,
+  Brain
 } from "lucide-react";
 import toolsData from "../specialist_tools.json";
 
@@ -37,7 +43,10 @@ const CATEGORY_ICONS: Record<string, any> = {
   "Physics & Bridge Master": Wind,
   "Circuit & Productivity": Cpu,
   "Bio-Engineering & CRISPR": Dna,
-  "Structural & Geotechnical AI": Building2
+  "Structural & Geotechnical AI": Building2,
+  "Chemical Kinetics AI": FlaskConical,
+  "Aerospace Dynamics": Atom,
+  "Biomedical Diagnostics": Activity
 };
 
 import { VeoPrompter } from "./VeoPrompter";
@@ -47,6 +56,33 @@ export function SpecialistHub() {
   const [showVeoPrompter, setShowVeoPrompter] = useState(false);
   const [toolSummary, setToolSummary] = useState<string | null>(null);
   const [isSummarizing, setIsSummarizing] = useState(false);
+  const [showDeepThought, setShowDeepThought] = useState(false);
+  const [deepThoughtQuery, setDeepThoughtQuery] = useState("");
+  const [deepThoughtResult, setDeepThoughtResult] = useState<string | null>(null);
+  const [isThinking, setIsThinking] = useState(false);
+
+  const handleDeepThought = async () => {
+    if (!deepThoughtQuery.trim()) return;
+    setIsThinking(true);
+    setDeepThoughtResult(null);
+    try {
+      const response = await ai.models.generateContent({
+        model: MODELS.flash,
+        contents: [{
+          role: "user",
+          parts: [{ text: `Act as a Specialist AI Expert. Solve/Explain this complex engineering challenge with unlimited thinking capacity: ${deepThoughtQuery}` }]
+        }],
+        config: {
+          systemInstruction: "You are an elite ensemble of engineering specialists. Provide deep, multi-disciplinary insights.",
+        }
+      });
+      setDeepThoughtResult(response.text || "Calculation complete.");
+    } catch (e) {
+      console.error("Deep thought error:", e);
+    } finally {
+      setIsThinking(false);
+    }
+  };
 
   const handleGenerateSummary = async (tool: Tool) => {
     setIsSummarizing(true);
@@ -73,16 +109,126 @@ export function SpecialistHub() {
 
   return (
     <div className="space-y-8 pb-32">
-      <header className="space-y-2">
-        <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-          <Zap className="text-emerald-400 fill-emerald-400/20" size={24} /> Expert AI Hub
-        </h2>
-        <p className="text-[#8b949e] text-sm max-w-md">
-          Advanced professional-tier AI tools to complement your Virtual Lab experiments.
-        </p>
+      <header className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+              <Zap className="text-emerald-400 fill-emerald-400/20" size={24} /> Expert AI Hub
+            </h2>
+            <p className="text-[#8b949e] text-sm max-w-md">
+              Unlimited access to 50+ professional-tier specialist modules.
+            </p>
+          </div>
+          <button 
+            onClick={() => setShowDeepThought(true)}
+            className="p-3 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-900/20 hover:scale-105 transition-all flex items-center gap-2"
+          >
+            <Brain size={18} />
+            <span className="text-[10px] font-bold uppercase tracking-widest hidden sm:block">Deep Thinking</span>
+          </button>
+        </div>
+
+        {/* Dynamic Thinking Search */}
+        <div className="relative group">
+          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+            <Sparkles className="text-blue-400 opacity-50" size={16} />
+          </div>
+          <input 
+            placeholder="Ask a specialist ANY engineering problem..."
+            className="w-full bg-[#161b22] border border-[#30363d] rounded-2xl py-4 pl-12 pr-4 text-xs text-white outline-none focus:border-blue-500/50 transition-all placeholder:text-[#484f58]"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                setDeepThoughtQuery(e.currentTarget.value);
+                setShowDeepThought(true);
+                handleDeepThought();
+              }
+            }}
+          />
+        </div>
       </header>
 
       <div className="space-y-10">
+        {/* Deep Thought Modal Overlay */}
+        <AnimatePresence>
+          {showDeepThought && (
+            <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-[#0d1117]/95 backdrop-blur-xl">
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="w-full max-w-2xl bg-[#161b22] border border-[#30363d] rounded-[32px] overflow-hidden flex flex-col max-h-[80vh]"
+              >
+                <div className="p-6 border-b border-[#30363d] flex justify-between items-center bg-[#0d1117]/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+                      <Brain size={20} />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-white uppercase tracking-tight">Unlimited Specialist Thinking</h3>
+                      <p className="text-[10px] text-blue-400 uppercase font-bold tracking-widest">Multi-Disciplinary Synthesis Active</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setShowDeepThought(false)} className="p-2 hover:bg-white/5 rounded-xl text-[#484f58] transition-colors"><X size={20}/></button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-8 space-y-6">
+                  {!deepThoughtResult && (
+                    <div className="space-y-4">
+                      <textarea 
+                        value={deepThoughtQuery}
+                        onChange={(e) => setDeepThoughtQuery(e.target.value)}
+                        placeholder="Define your complex project parameters, material constraints, or mathematical derivations..."
+                        className="w-full h-40 bg-[#0d1117] border border-[#30363d] rounded-2xl p-6 text-sm text-white resize-none outline-none focus:border-blue-500/30"
+                      />
+                      <button 
+                        onClick={handleDeepThought}
+                        disabled={isThinking}
+                        className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold uppercase tracking-widest text-[10px] flex items-center justify-center gap-2"
+                      >
+                        {isThinking ? <RefreshCcw size={16} className="animate-spin" /> : <Zap size={16} />}
+                        {isThinking ? "Consulting Ensemble..." : "Initiate Unlimited Thinking"}
+                      </button>
+                    </div>
+                  )}
+
+                  {deepThoughtResult && (
+                    <div className="space-y-6">
+                      <div className="bg-blue-500/5 border border-blue-500/20 rounded-2xl p-6 prose prose-invert prose-sm max-w-none prose-p:leading-relaxed">
+                        <div className="flex items-center gap-2 mb-4 text-blue-400">
+                          <MessageSquareQuote size={18} />
+                          <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Specialist Consensus Report</span>
+                        </div>
+                        <Markdown>{deepThoughtResult}</Markdown>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button 
+                          onClick={() => setDeepThoughtResult(null)}
+                          className="py-3 bg-[#0d1117] border border-[#30363d] text-white rounded-xl text-[10px] font-bold uppercase tracking-widest"
+                        >
+                          Refine Query
+                        </button>
+                        <button 
+                          onClick={() => {
+                            const blob = new Blob([deepThoughtResult], { type: 'text/markdown' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = "specialist_engine_report.md";
+                            a.click();
+                          }}
+                          className="py-3 bg-blue-600 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest"
+                        >
+                          Export Report
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
         {/* Veo Section */}
         <section className="space-y-4">
           <div className="flex items-center gap-2 px-1 text-indigo-400">

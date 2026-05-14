@@ -36,6 +36,89 @@ export const SUBJECTS = [
     desc: "Production & Machine Design",
     topics: ["Machining", "CAD/CAM", "Thermodynamics", "Robotics"]
   },
+  { 
+    id: "chemical", 
+    name: "Chemical Eng.", 
+    icon: "🧪", 
+    desc: "Reaction Kinetics & Thermodynamics",
+    topics: ["Stoichiometry", "Fluid Flow", "Heat Exchange"]
+  },
+  { 
+    id: "aerospace", 
+    name: "Aerospace Eng.", 
+    icon: "🚀", 
+    desc: "Aerodynamics & Propulsion",
+    topics: ["Lift", "Drag", "Rocketry", "Orbital Mechanics"]
+  },
+];
+
+export const LAB_CATALOG = [
+  // Physics (Labs 1-10)
+  { id: "phys_001", name: "Virtual Ballistics Range", category: "physics", type: "physics" },
+  { id: "phys_002", name: "Kinetic Energy Analyzer", category: "physics", type: "physics" },
+  { id: "phys_003", name: "PE to KE Conversion", category: "physics", type: "ramp" },
+  { id: "phys_004", name: "Newtonian Dynamics Analyzer", category: "physics", type: "physics" },
+  { id: "phys_005", name: "Simple Harmonic Motion Lab", category: "physics", type: "physics" },
+  { id: "phys_006", name: "Wave Interference Sandbox", category: "physics", type: "physics" },
+  { id: "phys_007", name: "Electromagnetic Induction Coil", category: "physics", type: "physics" },
+  { id: "phys_008", name: "Optical Refraction Bench", category: "physics", type: "physics" },
+  { id: "phys_009", name: "Centripetal Force Rotor", category: "physics", type: "physics" },
+  { id: "phys_010", name: "Torque & Equilibrium Beam", category: "physics", type: "physics" },
+  
+  // Electrical (Labs 11-20)
+  { id: "ee_001", name: "Digital Logic Explorer", category: "ee", type: "ee" },
+  { id: "ee_002", name: "S-Domain Solver & Op-Amp Design", category: "ee", type: "eecircuit" },
+  { id: "ee_003", name: "Ohm's Law Fundamentals", category: "ee", type: "ee" },
+  { id: "ee_004", name: "Transistor Characteristic Lab", category: "ee", type: "eecircuit" },
+  { id: "ee_005", name: "Filter Network Analysis", category: "ee", type: "eecircuit" },
+  { id: "ee_006", name: "Microcontroller IO Simulator", category: "ee", type: "ee" },
+  { id: "ee_007", name: "Three-Phase Power Analyzer", category: "ee", type: "ee" },
+  { id: "ee_008", name: "Signal Transformation (DFT/FFT)", category: "ee", type: "eecircuit" },
+  { id: "ee_009", name: "Control Loop PID Tuner", category: "ee", type: "eecircuit" },
+  { id: "ee_010", name: "Antenna Gain & Radiation", category: "ee", type: "ee" },
+
+  // Civil/Structural (Labs 21-30)
+  { id: "civil_001", name: "Automated Standards & Site Modeling", category: "structural", type: "structural" },
+  { id: "bridge_001", name: "Loads & LSD Optimization", category: "structural", type: "bridge" },
+  { id: "civil_003", name: "Borehole Ground Modeler", category: "structural", type: "structural" },
+  { id: "civil_004", name: "Truss Strength Analyzer", category: "structural", type: "bridge" },
+  { id: "civil_005", name: "Concrete Slump & Strength Lab", category: "structural", type: "structural" },
+  { id: "civil_006", name: "Earthquake Simulation Table", category: "structural", type: "structural" },
+  { id: "civil_007", name: "Hydraulic Canal Flow", category: "structural", type: "structural" },
+  { id: "civil_008", name: "Steel Section Optimization", category: "structural", type: "structural" },
+  { id: "civil_009", name: "Roadway Geometry Lab", category: "structural", type: "structural" },
+  { id: "civil_010", name: "Pile Foundation Settlement", category: "structural", type: "structural" },
+
+  // Mechanical (Labs 31-40)
+  { id: "mech_001", name: "Intelligent Production Systems", category: "mechanical", type: "mechanical" },
+  { id: "mech_002", name: "Thermodynamic Cycle Simulator", category: "mechanical", type: "mechanical" },
+  { id: "mech_003", name: "CNC G-Code Generator", category: "mechanical", type: "mechanical" },
+  { id: "mech_004", name: "Heat Exchanger Efficiency", category: "mechanical", type: "mechanical" },
+  { id: "mech_005", name: "Gear Train Ratio Calculator", category: "mechanical", type: "mechanical" },
+  { id: "mech_006", name: "Pneumatic Circuit Designer", category: "mechanical", type: "mechanical" },
+  { id: "mech_007", name: "Combustion Engine Dynamics", category: "mechanical", type: "mechanical" },
+  { id: "mech_008", name: "Robot Arm Kinematics", category: "mechanical", type: "mechanical" },
+  { id: "mech_009", name: "Material Hardness Tester", category: "mechanical", type: "mechanical" },
+  { id: "mech_010", name: "Vibration Analysis Bench", category: "mechanical", type: "mechanical" },
+
+  // Bio (Labs 41-50)
+  { id: "bio_001", name: "Cell Signaling and Transductions", category: "bio", type: "bio" },
+  { id: "bio_002", name: "Programmable Genetic Circuits", category: "bio", type: "bio" },
+  { id: "bio_003", name: "PCR Thermal Cycler Lab", category: "bio", type: "bio" },
+  { id: "bio_004", name: "CRISPR Off-Target Auditor", category: "bio", type: "bio" },
+  { id: "bio_005", name: "Protein Folding Sandbox", category: "bio", type: "bio" },
+  { id: "bio_006", name: "Cell Membrane Permeability", category: "bio", type: "bio" },
+  { id: "bio_007", name: "Bacterial Growth Kinetic Lab", category: "bio", type: "bio" },
+  { id: "bio_008", name: "Enzyme Velocity Analyzer", category: "bio", type: "bio" },
+  { id: "bio_009", name: "Metabolic Pathway Balancer", category: "bio", type: "bio" },
+  { id: "bio_010", name: "Bio-Reactor Fluid Dynamics", category: "bio", type: "bio" },
+
+  // Aerospace (Labs 51-55)
+  { id: "aero_001", name: "Wind Tunnel Lift Analyzer", category: "aerospace", type: "physics" },
+  { id: "aero_002", name: "Orbital Injection Simulator", category: "aerospace", type: "physics" },
+  { id: "aero_003", name: "Rocket Engine ISP Bench", category: "aerospace", type: "physics" },
+  { id: "aero_004", name: "Avionics Logic Debugger", category: "aerospace", type: "ee" },
+  { id: "aero_005", name: "Composite Stress Mapping", category: "aerospace", type: "mechanical" },
 ];
 
 export const MODULES: Record<string, any[]> = {

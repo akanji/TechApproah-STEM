@@ -35,12 +35,12 @@ import { db, auth, OperationType, handleFirestoreError } from "../lib/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const MATERIALS = [
-  { id: "steel", name: "Steel (AISI 1045)", yieldStrength: 530, modulus: 200, kFactor: 1.0, color: "text-zinc-300" },
-  { id: "aluminum", name: "Aluminum (6061)", yieldStrength: 275, modulus: 69, kFactor: 0.6, color: "text-blue-300" },
-  { id: "titanium", name: "Titanium (Gr 5)", yieldStrength: 880, modulus: 114, kFactor: 2.2, color: "text-purple-400" },
-  { id: "carbide", name: "Tungsten Carbide", yieldStrength: 5000, modulus: 600, kFactor: 5.0, color: "text-orange-400" },
-  { id: "copper", name: "Copper (Pure)", yieldStrength: 70, modulus: 117, kFactor: 0.5, color: "text-orange-300" },
-  { id: "castiron", name: "Gray Cast Iron", yieldStrength: 240, modulus: 100, kFactor: 0.8, color: "text-zinc-500" }
+  { id: "steel", name: "Steel (AISI 1045)", yieldStrength: 530, modulus: 200, thermalConductivity: 45, kFactor: 1.0, color: "text-zinc-300" },
+  { id: "aluminum", name: "Aluminum (6061)", yieldStrength: 275, modulus: 69, thermalConductivity: 167, kFactor: 0.6, color: "text-blue-300" },
+  { id: "titanium", name: "Titanium (Gr 5)", yieldStrength: 880, modulus: 114, thermalConductivity: 6.7, kFactor: 2.2, color: "text-purple-400" },
+  { id: "carbide", name: "Tungsten Carbide", yieldStrength: 5000, modulus: 600, thermalConductivity: 110, kFactor: 5.0, color: "text-orange-400" },
+  { id: "copper", name: "Copper (Pure)", yieldStrength: 70, modulus: 117, thermalConductivity: 401, kFactor: 0.5, color: "text-orange-300" },
+  { id: "castiron", name: "Gray Cast Iron", yieldStrength: 240, modulus: 100, thermalConductivity: 52, kFactor: 0.8, color: "text-zinc-500" }
 ];
 
 export function MechanicalLab() {
@@ -123,10 +123,11 @@ export function MechanicalLab() {
         setHistory(prev => {
           const nextTime = prev.length > 0 ? prev[prev.length - 1].time + 1 : 0;
           const fluctuation = (Math.random() - 0.5) * 20;
+          const tempVal = (cuttingSpeed * 2.5) / (selectedMaterial.thermalConductivity / 50);
           const newEntry = {
             time: nextTime,
             stress: Math.max(0, currentStress + fluctuation),
-            temp: Math.max(20, (cuttingSpeed * 2.5) + (Math.random() - 0.5) * 50)
+            temp: Math.max(20, tempVal + (Math.random() - 0.5) * 50)
           };
           const newHistory = [...prev, newEntry];
           return newHistory.slice(-20); // Keep last 20 points
@@ -317,7 +318,8 @@ export function MechanicalLab() {
                     <tr className="bg-black/40">
                       <th className="px-6 py-4 text-[10px] font-bold text-[#8b949e] uppercase tracking-widest border-b border-white/5">Grade</th>
                       <th className="px-6 py-4 text-[10px] font-bold text-[#8b949e] uppercase tracking-widest border-b border-white/5">Yield [MPa]</th>
-                      <th className="px-6 py-4 text-[10px] font-bold text-[#8b949e] uppercase tracking-widest border-b border-white/5">Young's Modulus [GPa]</th>
+                      <th className="px-6 py-4 text-[10px] font-bold text-[#8b949e] uppercase tracking-widest border-b border-white/5">Elastic Modulus [GPa]</th>
+                      <th className="px-6 py-4 text-[10px] font-bold text-[#8b949e] uppercase tracking-widest border-b border-white/5">Thermal [W/m·K]</th>
                       <th className="px-6 py-4 text-[10px] font-bold text-[#8b949e] uppercase tracking-widest border-b border-white/5">K-Factor</th>
                       <th className="px-6 py-4 text-[10px] font-bold text-center text-[#8b949e] uppercase tracking-widest border-b border-white/5">Action</th>
                     </tr>
@@ -333,6 +335,7 @@ export function MechanicalLab() {
                         </td>
                         <td className="px-6 py-4 text-xs font-mono text-[#c9d1d9]">{m.yieldStrength}</td>
                         <td className="px-6 py-4 text-xs font-mono text-[#c9d1d9]">{m.modulus}</td>
+                        <td className="px-6 py-4 text-xs font-mono text-[#c9d1d9]">{m.thermalConductivity}</td>
                         <td className="px-6 py-4 text-xs font-mono text-[#c9d1d9]">{m.kFactor.toFixed(1)}</td>
                         <td className="px-6 py-4 text-center">
                           <button 

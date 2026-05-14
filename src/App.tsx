@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Home, BookOpen, Microscope, BarChart3, MessageSquare, 
   Sparkles, Brain, Mic, Video, Settings, Play, ChevronRight,
   Flame, Zap, Trophy, Headphones, Search, Link as LinkIcon, FileText, Info, CheckCircle2,
-  Calculator, Sun, Moon
+  Calculator, Sun, Moon, WifiOff, LifeBuoy, Download
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { ThinkingChat } from "./components/ThinkingChat";
@@ -20,7 +20,7 @@ import { GlobalSearch } from "./components/GlobalSearch";
 import { UserProfile } from "./components/UserProfile";
 import { UnitConverter } from "./components/UnitConverter";
 import { useSoundEffects } from "./hooks/useSoundEffects";
-import { SUBJECTS, MODULES, BADGES, NAV_ITEMS, RESOURCES } from "./constants";
+import { SUBJECTS, MODULES, BADGES, NAV_ITEMS, RESOURCES, LAB_CATALOG } from "./constants";
 
 export default function App() {
   return (
@@ -45,6 +45,7 @@ function AppContent() {
   const [theme, setTheme] = useState<"dark" | "light">(() => 
     (localStorage.getItem("eng_theme") as "dark" | "light") || "dark"
   );
+  const [offlineMode, setOfflineMode] = useState(() => localStorage.getItem("eng_offline") === "true");
   const [loadingMessage, setLoadingMessage] = useState("Initializing systems...");
   const [showThinkingChat, setShowThinkingChat] = useState(false);
   const [showVoicePartner, setShowVoicePartner] = useState(false);
@@ -108,6 +109,52 @@ function AppContent() {
   }, [activeSubject]);
 
 // Data moved to constants.ts
+  useEffect(() => {
+    localStorage.setItem("eng_offline", offlineMode.toString());
+  }, [offlineMode]);
+
+  const handleExportReport = () => {
+    const reportData = {
+      user: profile?.displayName || "Research Engineer",
+      timestamp: new Date().toISOString(),
+      xp: xp,
+      completedLabs: Object.keys(progress)
+    };
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `TechApproach_Lab_Report_${Date.now()}.json`;
+    a.click();
+    playSound('click');
+  };
+
+  const SupportPage = () => (
+    <div className="space-y-6">
+      <div className="bg-[#161b22] border border-[#30363d] rounded-3xl p-8 text-center space-y-4">
+        <div className="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mx-auto">
+          <LifeBuoy size={32} />
+        </div>
+        <h2 className="text-2xl font-bold text-white">Priority Expert Support</h2>
+        <p className="text-sm text-[#8b949e]">Licensed engineers and Specialist AI agents waiting to assist your research.</p>
+        <button className="w-full btn btn-primary py-4">Request Immediate Callback</button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        {[
+          { label: "Hardware Diagnostics", desc: "For real-world sensor integration" },
+          { label: "Theory Verification", desc: "Proof-checking complex derivations" },
+          { label: "System Architecture", desc: "Full-stack engineering guidance" }
+        ].map(s => (
+          <div key={s.label} className="p-5 bg-[#0d1117] border border-[#30363d] rounded-2xl hover:border-blue-500/20 transition-all cursor-pointer">
+            <h4 className="text-white font-bold text-sm mb-1">{s.label}</h4>
+            <p className="text-[10px] text-[#8b949e] uppercase font-bold">{s.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   const activeModuleData = activeSubject ? MODULES[activeSubject]?.find((m: any) => m.id === activeModule) : null;
 
   // Simulation Panel
@@ -267,44 +314,89 @@ function AppContent() {
       return matchesSubject || matchesModules;
     });
 
+    const filteredLabs = LAB_CATALOG.filter(l => 
+      l.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      l.category.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
       <div className="space-y-6">
         {!activeSubject ? (
           <>
+            <div className="bg-blue-600/10 border border-blue-500/20 rounded-2xl p-6 mb-6">
+              <h2 className="text-xl font-bold text-white mb-2">50+ Virtual Engineering Labs</h2>
+              <p className="text-sm text-blue-300/80">Search our exhaustive technical database for virtual hardware and dynamics simulations.</p>
+            </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#484f58]" size={16} />
               <input 
-                placeholder="Search subjects, labs, or topics..." 
+                placeholder="Search 50+ virtual labs, specialists, or topics..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-[#161b22] border border-[#30363d] rounded-xl py-3 pl-10 pr-4 text-sm text-white outline-none focus:border-blue-500/40" 
               />
             </div>
-            <div className="grid grid-cols-1 gap-4">
-              {filteredSubjects.length > 0 ? (
-                filteredSubjects.map(s => (
-                  <div 
-                    key={s.id} 
-                    onClick={() => setActiveSubject(s.id)}
-                    className="bg-[#161b22] border border-[#30363d] rounded-2xl p-5 flex items-center gap-5 cursor-pointer hover:border-blue-500/30 transition-all group"
-                  >
-                    <div className="w-12 h-12 rounded-xl bg-[#0d162d] border border-blue-500/10 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
-                      {s.icon}
+
+            {searchQuery ? (
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Search Results ({filteredLabs.length})</h4>
+                <div className="grid grid-cols-1 gap-3">
+                  {filteredLabs.map(lab => (
+                    <div 
+                      key={lab.id} 
+                      onClick={() => {
+                        setActiveSubject(lab.category);
+                        // We could find the module that contains this lab_id if it exists
+                        // For now we just go to the subject
+                      }}
+                      className="bg-[#161b22] border border-[#30363d] rounded-xl p-4 flex items-center justify-between hover:border-blue-500/30 cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 font-bold text-[10px]">
+                          {lab.category[0].toUpperCase()}
+                        </div>
+                        <div>
+                          <h5 className="text-white text-xs font-bold">{lab.name}</h5>
+                          <p className="text-[10px] text-[#8b949e] uppercase font-bold">{lab.category}</p>
+                        </div>
+                      </div>
+                      <Play size={14} className="text-[#484f58] group-hover:text-blue-400" />
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-white font-bold">{s.name}</h3>
-                      <p className="text-[#8b949e] text-xs mt-1">{s.desc}</p>
-                    </div>
-                    <ChevronRight size={18} className="text-[#484f58] group-hover:text-blue-400 transition-colors" />
-                  </div>
-                ))
-              ) : (
-                <div className="p-12 text-center border border-dashed border-[#30363d] rounded-2xl">
-                  <Search size={32} className="mx-auto mb-3 opacity-20 text-white" />
-                  <p className="text-[#8b949e] text-sm">No labs found matching "{searchQuery}"</p>
+                  ))}
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4">
+                {filteredSubjects.length > 0 ? (
+                  filteredSubjects.map(s => (
+                    <div 
+                      key={s.id} 
+                      onClick={() => setActiveSubject(s.id)}
+                      className="bg-[#161b22] border border-[#30363d] rounded-2xl p-5 flex items-center gap-5 cursor-pointer hover:border-blue-500/30 transition-all group"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-[#0d162d] border border-blue-500/10 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+                        {s.icon}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-white font-bold">{s.name}</h3>
+                          <span className="text-[8px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20 uppercase font-bold">
+                            {LAB_CATALOG.filter(l => l.category === s.id).length} Labs
+                          </span>
+                        </div>
+                        <p className="text-[#8b949e] text-xs mt-1">{s.desc}</p>
+                      </div>
+                      <ChevronRight size={18} className="text-[#484f58] group-hover:text-blue-400 transition-colors" />
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-12 text-center border border-dashed border-[#30363d] rounded-2xl">
+                    <Search size={32} className="mx-auto mb-3 opacity-20 text-white" />
+                    <p className="text-[#8b949e] text-sm">No labs found matching "{searchQuery}"</p>
+                  </div>
+                )}
+              </div>
+            )}
           </>
         ) : activeModule ? (
         <div className="space-y-4">
@@ -628,6 +720,20 @@ function AppContent() {
               <Calculator size={20} />
             </button>
             <button 
+              onClick={() => { setOfflineMode(!offlineMode); playSound('click'); }}
+              className={`p-2 rounded-xl border transition-all ${offlineMode ? "bg-orange-500/10 text-orange-400 border-orange-500/30" : "bg-[#161b22] border-[#30363d] text-[#8b949e] hover:text-white"}`}
+              title="Toggle Offline Mode"
+            >
+              {offlineMode ? <WifiOff size={20} /> : <Sun size={20} className="opacity-20" />}
+            </button>
+            <button 
+              onClick={handleExportReport}
+              className="p-2 rounded-xl bg-[#161b22] border border-[#30363d] text-[#8b949e] hover:text-white transition-all hover:border-blue-500/30"
+              title="Export Lab Report"
+            >
+              <Download size={20} />
+            </button>
+            <button 
               onClick={() => { setTheme(t => t === 'dark' ? 'light' : 'dark'); playSound('click'); }}
               className="p-2 rounded-xl bg-[#161b22] border border-[#30363d] text-[#8b949e] hover:text-white transition-all hover:border-blue-500/30"
             >
@@ -690,6 +796,7 @@ function AppContent() {
               {page === "progress" && <ProgressPage />}
               {page === "analytics" && <ProgressPage />}
               {page === "community" && <CommunityPage />}
+              {page === "support" && <SupportPage />}
             </motion.div>
           </AnimatePresence>
         </div>

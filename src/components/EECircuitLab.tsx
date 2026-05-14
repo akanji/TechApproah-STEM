@@ -14,6 +14,7 @@ type ComplexNumber = { real: number; imag: number };
 function BodePlot({ magnitude, phase, frequency, noiseEnabled }: { magnitude: number[], phase: number[], frequency: number[], noiseEnabled: boolean }) {
   const size = { w: 400, h: 250 };
   const padding = 40;
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   const getPoints = (data: number[], min: number, max: number, h: number) => {
     return data.map((val, i) => {
@@ -27,8 +28,17 @@ function BodePlot({ magnitude, phase, frequency, noiseEnabled }: { magnitude: nu
   const magMin = -60, magMax = 20;
   const phaseMin = -180, phaseMax = 180;
 
+  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const plotWidth = size.w - padding * 2;
+    const relativeX = Math.max(0, Math.min(plotWidth, x * (size.w / rect.width) - padding));
+    const index = Math.round((relativeX / plotWidth) * (magnitude.length - 1));
+    setHoverIndex(index);
+  };
+
   return (
-    <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 space-y-6">
+    <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 space-y-6" role="region" aria-label="Bode Plot Analysis">
       <div className="flex justify-between items-center">
         <h5 className="text-[10px] font-bold text-white uppercase tracking-widest flex items-center gap-2">
           <TrendingUp size={14} className="text-blue-400" /> Bode Frequency Response
@@ -41,20 +51,71 @@ function BodePlot({ magnitude, phase, frequency, noiseEnabled }: { magnitude: nu
       <div className="space-y-4">
         {/* Magnitude Plot */}
         <div className="relative h-32 bg-black/40 rounded-xl border border-white/5">
-          <svg viewBox={`0 0 ${size.w} 125`} className="w-full h-full">
+          <svg 
+            viewBox={`0 0 ${size.w} 125`} 
+            className="w-full h-full cursor-crosshair"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => setHoverIndex(null)}
+            role="img"
+            aria-label="Magnitude vs Frequency plot"
+          >
             <polyline points={getPoints(magnitude, magMin, magMax, 125)} fill="none" stroke="#60a5fa" strokeWidth="2" />
             {/* 0dB Line */}
             <line x1={padding} y1={padding + (1 - (0 - magMin) / (magMax - magMin)) * (125 - padding * 2)} x2={size.w - padding} y2={padding + (1 - (0 - magMin) / (magMax - magMin)) * (125 - padding * 2)} stroke="#484f58" strokeWidth="0.5" strokeDasharray="4 4" />
+            
+            {hoverIndex !== null && (
+              <line 
+                x1={padding + (hoverIndex / (magnitude.length - 1)) * (size.w - padding * 2)} 
+                y1={padding} 
+                x2={padding + (hoverIndex / (magnitude.length - 1)) * (size.w - padding * 2)} 
+                y2={125 - padding} 
+                stroke="white" 
+                strokeWidth="1" 
+                strokeDasharray="2 2" 
+              />
+            )}
           </svg>
           <div className="absolute top-2 left-2 text-[8px] font-bold text-blue-400/60 uppercase">Magnitude (dB)</div>
+          
+          {hoverIndex !== null && (
+            <div className="absolute top-2 right-2 bg-[#0d1117] border border-white/10 p-2 rounded text-[9px] font-mono shadow-xl pointer-events-none">
+              <div className="text-white">Freq: {frequency[hoverIndex].toFixed(1)}Hz</div>
+              <div className="text-blue-400">Mag: {magnitude[hoverIndex].toFixed(1)}dB</div>
+            </div>
+          )}
         </div>
 
         {/* Phase Plot */}
         <div className="relative h-32 bg-black/40 rounded-xl border border-white/5">
-          <svg viewBox={`0 0 ${size.w} 125`} className="w-full h-full">
+          <svg 
+            viewBox={`0 0 ${size.w} 125`} 
+            className="w-full h-full cursor-crosshair"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => setHoverIndex(null)}
+            role="img"
+            aria-label="Phase vs Frequency plot"
+          >
             <polyline points={getPoints(phase, phaseMin, phaseMax, 125)} fill="none" stroke="#fb923c" strokeWidth="2" />
+            
+            {hoverIndex !== null && (
+              <line 
+                x1={padding + (hoverIndex / (phase.length - 1)) * (size.w - padding * 2)} 
+                y1={padding} 
+                x2={padding + (hoverIndex / (phase.length - 1)) * (size.w - padding * 2)} 
+                y2={125 - padding} 
+                stroke="white" 
+                strokeWidth="1" 
+                strokeDasharray="2 2" 
+              />
+            )}
           </svg>
           <div className="absolute top-2 left-2 text-[8px] font-bold text-orange-400/60 uppercase">Phase (deg)</div>
+          
+          {hoverIndex !== null && (
+            <div className="absolute top-2 right-2 bg-[#0d1117] border border-white/10 p-2 rounded text-[9px] font-mono shadow-xl pointer-events-none">
+              <div className="text-orange-400">Phase: {phase[hoverIndex].toFixed(1)}°</div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -80,9 +141,10 @@ function SPlanePlotter({ poles, zeros }: { poles: ComplexNumber[], zeros: Comple
   const padding = 40;
   const center = size / 2;
   const scale = (size - padding * 2) / 10; // 10 units range
+  const [hoveredPoint, setHoveredPoint] = useState<{ x: number, y: number, label: string } | null>(null);
 
   return (
-    <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 space-y-4">
+    <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 space-y-4" role="region" aria-label="S-Plane Stability Analysis">
       <div className="flex justify-between items-center">
         <div>
           <h5 className="text-[10px] font-bold text-white uppercase tracking-widest">S-Domain Stability Plot</h5>
@@ -97,7 +159,7 @@ function SPlanePlotter({ poles, zeros }: { poles: ComplexNumber[], zeros: Comple
       </div>
 
       <div className="relative aspect-square w-full max-w-[300px] mx-auto bg-black/20 rounded-xl border border-white/5 overflow-hidden">
-        <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full">
+        <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full" role="img" aria-label="Pole-Zero complex plane plot">
           {/* Grid Lines */}
           {[...Array(11)].map((_, i) => {
             const pos = padding + i * scale;
@@ -123,10 +185,13 @@ function SPlanePlotter({ poles, zeros }: { poles: ComplexNumber[], zeros: Comple
               key={`z-${i}`}
               cx={center + z.real * scale}
               cy={center - z.imag * scale}
-              r="4"
-              fill="none"
+              r="6"
+              fill="rgba(96, 165, 250, 0.1)"
               stroke="#60a5fa"
               strokeWidth="2"
+              className="cursor-help transition-all hover:stroke-white"
+              onMouseEnter={(e) => setHoveredPoint({ x: e.clientX, y: e.clientY, label: `Zero: ${z.real.toFixed(2)} + ${z.imag.toFixed(2)}j` })}
+              onMouseLeave={() => setHoveredPoint(null)}
             />
           ))}
 
@@ -134,15 +199,29 @@ function SPlanePlotter({ poles, zeros }: { poles: ComplexNumber[], zeros: Comple
           {poles.map((p, i) => {
             const x = center + p.real * scale;
             const y = center - p.imag * scale;
-            const s = 4;
+            const s = 5;
             return (
-              <g key={`p-${i}`}>
-                <line x1={x - s} y1={y - s} x2={x + s} y2={y + s} stroke="#f87171" strokeWidth="2.5" strokeLinecap="round" />
-                <line x1={x + s} y1={y - s} x2={x - s} y2={y + s} stroke="#f87171" strokeWidth="2.5" strokeLinecap="round" />
+              <g 
+                key={`p-${i}`} 
+                className="cursor-help transition-all group"
+                onMouseEnter={(e) => setHoveredPoint({ x: e.clientX, y: e.clientY, label: `Pole: ${p.real.toFixed(2)} ${p.imag >= 0 ? '+' : ''} ${p.imag.toFixed(2)}j` })}
+                onMouseLeave={() => setHoveredPoint(null)}
+              >
+                <line x1={x - s} y1={y - s} x2={x + s} y2={y + s} stroke="#f87171" strokeWidth="3" strokeLinecap="round" className="group-hover:stroke-white transition-colors" />
+                <line x1={x + s} y1={y - s} x2={x - s} y2={y + s} stroke="#f87171" strokeWidth="3" strokeLinecap="round" className="group-hover:stroke-white transition-colors" />
               </g>
             );
           })}
         </svg>
+
+        {hoveredPoint && (
+          <div 
+            className="fixed z-50 bg-[#0d1117] border border-white/20 px-2 py-1 rounded text-[10px] font-mono text-white shadow-2xl pointer-events-none whitespace-nowrap"
+            style={{ left: hoveredPoint.x + 10, top: hoveredPoint.y - 20 }}
+          >
+            {hoveredPoint.label}
+          </div>
+        )}
 
         {/* Stable Region Overlay */}
         <div className="absolute inset-y-0 left-0 right-1/2 bg-emerald-500/5 pointer-events-none border-r border-emerald-500/10" />
@@ -160,10 +239,10 @@ function SPlanePlotter({ poles, zeros }: { poles: ComplexNumber[], zeros: Comple
 }
 
 function CircuitSchematic({ 
-  r, l, c, 
+  r, l, c, circuitType,
   onRChange, onLChange, onCChange 
 }: { 
-  r: number, l: number, c: number,
+  r: number, l: number, c: number, circuitType: string,
   onRChange: (val: number) => void,
   onLChange: (val: number) => void,
   onCChange: (val: number) => void
@@ -171,7 +250,7 @@ function CircuitSchematic({
   return (
     <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h5 className="text-[10px] font-bold text-white uppercase tracking-widest">Interactive RLC Schematic</h5>
+        <h5 className="text-[10px] font-bold text-white uppercase tracking-widest">Interactive {circuitType} Schematic</h5>
         <div className="flex gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-[pulse_1.5s_infinite]" />
           <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-[pulse_1.5s_infinite_0.5s]" />
@@ -183,7 +262,7 @@ function CircuitSchematic({
         {/* Schematic Drawing */}
         <svg viewBox="0 0 300 150" className="w-full h-full text-blue-400">
           {/* Wire path */}
-          <path d="M 20 75 H 60 M 100 75 H 140 M 180 75 H 220 M 260 75 H 280" fill="none" stroke="currentColor" strokeWidth="2" />
+          <path d={`M 20 75 H 60 M 100 75 H ${circuitType === "RC" ? "220" : "140"} ${circuitType !== "RC" ? "M 180 75 H 220" : ""} M 260 75 H 280`} fill="none" stroke="currentColor" strokeWidth="2" />
           
           {/* Resistor */}
           <g className="cursor-pointer hover:text-white transition-colors" onClick={() => onRChange(r + 10)}>
@@ -191,11 +270,13 @@ function CircuitSchematic({
             <text x="80" y="55" fill="currentColor" fontSize="10" textAnchor="middle" className="font-mono font-bold">R={r}Ω</text>
           </g>
 
-          {/* Inductor */}
-          <g className="cursor-pointer hover:text-white transition-colors" onClick={() => onLChange(l + 1)}>
-            <path d="M 140 75 C 145 60 155 60 160 75 C 165 60 175 60 180 75" fill="none" stroke="currentColor" strokeWidth="2" />
-            <text x="160" y="55" fill="currentColor" fontSize="10" textAnchor="middle" className="font-mono font-bold">L={l}mH</text>
-          </g>
+          {/* Inductor (Only for RLC) */}
+          {circuitType !== "RC" && (
+            <g className="cursor-pointer hover:text-white transition-colors" onClick={() => onLChange(l + 1)}>
+              <path d="M 140 75 C 145 60 155 60 160 75 C 165 60 175 60 180 75" fill="none" stroke="currentColor" strokeWidth="2" />
+              <text x="160" y="55" fill="currentColor" fontSize="10" textAnchor="middle" className="font-mono font-bold">L={l}mH</text>
+            </g>
+          )}
 
           {/* Capacitor */}
           <g className="cursor-pointer hover:text-white transition-colors" onClick={() => onCChange(c + 1)}>
@@ -235,35 +316,63 @@ export function EECircuitLab() {
   const [noiseEnabled, setNoiseEnabled] = useState(false);
   const [stabilityInsight, setStabilityInsight] = useState<string | null>(null);
   const [isThinking, setIsThinking] = useState(false);
+  const [errorStatus, setErrorStatus] = useState<string | null>(null);
 
   const [rlc, setRlc] = useState({ r: 100, l: 10, c: 1 });
 
+  const resetSimulation = () => {
+    setRlc({ r: 100, l: 10, c: 1 });
+    setStabilityInsight(null);
+    setErrorStatus(null);
+  };
+
   const bodeData = useMemo(() => {
-    const freq = Array.from({ length: 50 }, (_, i) => Math.pow(10, i / 10)); // 1Hz to 10kHz
-    const magnitude = freq.map(f => {
-      const w = 2 * Math.PI * f;
-      const R = rlc.r;
-      const L = rlc.l * 1e-3;
-      const C = rlc.c * 1e-6;
-      const zL = w * L;
-      const zC = 1 / (w * C);
-      const impedance = Math.sqrt(R*R + Math.pow(zL - zC, 2));
-      const gain = R / impedance;
-      return 20 * Math.log10(gain);
-    });
-    const phase = freq.map(f => {
-      const w = 2 * Math.PI * f;
-      const R = rlc.r;
-      const L = rlc.l * 1e-3;
-      const C = rlc.c * 1e-6;
-      return -Math.atan((w * L - 1/(w * C)) / R) * (180 / Math.PI);
-    });
-    return { magnitude, phase, freq };
-  }, [rlc]);
+    try {
+      const freq = Array.from({ length: 100 }, (_, i) => Math.pow(10, i / 20)); // 1Hz to 10kHz
+      const magnitude = freq.map(f => {
+        const w = 2 * Math.PI * f;
+        const R = rlc.r;
+        const L = circuitType === "RC" ? 0 : rlc.l * 1e-3;
+        const C = rlc.c * 1e-6;
+        
+        let gain;
+        if (circuitType === "RC") {
+          // Low pass RC: H(jw) = 1 / (1 + jwRC)
+          gain = 1 / Math.sqrt(1 + Math.pow(w * R * C, 2));
+        } else {
+          // Band pass RLC: H(jw) = R / sqrt(R^2 + (wL - 1/wC)^2)
+          const zL = w * L;
+          const zC = 1 / (w * C);
+          const impedance = Math.sqrt(R*R + Math.pow(zL - zC, 2));
+          gain = R / impedance;
+        }
+        return isFinite(gain) && gain > 0 ? 20 * Math.log10(gain) : -60;
+      });
+      const phase = freq.map(f => {
+        const w = 2 * Math.PI * f;
+        const R = rlc.r;
+        const L = circuitType === "RC" ? 0 : rlc.l * 1e-3;
+        const C = rlc.c * 1e-6;
+        
+        let val;
+        if (circuitType === "RC") {
+          val = -Math.atan(w * R * C) * (180 / Math.PI);
+        } else {
+          val = -Math.atan((w * L - 1/(w * C)) / R) * (180 / Math.PI);
+        }
+        return isFinite(val) ? val : 0;
+      });
+      return { magnitude, phase, freq };
+    } catch (e) {
+      console.error("Math Solver Error:", e);
+      return { magnitude: [], phase: [], freq: [] };
+    }
+  }, [rlc, circuitType]);
 
   const handleExplainStability = async () => {
     setIsThinking(true);
     setStabilityInsight(null);
+    setErrorStatus(null);
     try {
       const response = await ai.models.generateContent({
         model: MODELS.flash,
@@ -278,8 +387,13 @@ export function EECircuitLab() {
           systemInstruction: "You are a senior electronics design engineer. Explain control theory and stability clearly.",
         }
       });
-      setStabilityInsight(response.text || "No insight available.");
+      if (response.text) {
+        setStabilityInsight(response.text);
+      } else {
+        throw new Error("Empty response from AI");
+      }
     } catch (e) {
+      setErrorStatus("Failed to synchronize with stability engine. Please check API connection.");
       console.error("Stability Insight Error:", e);
     } finally {
       setIsThinking(false);
@@ -337,18 +451,34 @@ export function EECircuitLab() {
   return (
     <div className="space-y-6">
       {/* Module Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
-        <div>
-          <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-[0.2em] flex items-center gap-2">
-            <Zap size={14} /> S-Domain Solver Agent
-          </h3>
-          <p className="text-[10px] text-[#484f58] mt-1 font-mono uppercase tracking-widest font-bold">Electric Pal Core • Nodal Analyzer v2.4</p>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-2">
+        <div className="flex items-center justify-between flex-1">
+          <div>
+            <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-[0.2em] flex items-center gap-2">
+              <Zap size={14} /> S-Domain Solver Agent
+            </h3>
+            <p className="text-[10px] text-[#484f58] mt-1 font-mono uppercase tracking-widest font-bold">Electric Pal Core • Nodal Analyzer v2.4</p>
+          </div>
+          <div className="flex bg-[#161b22] border border-[#30363d] rounded-xl p-1 gap-1">
+            {(["RC", "RLC"] as const).map((type) => (
+              <button 
+                key={type}
+                onClick={() => setCircuitType(type)}
+                className={`px-4 py-1 text-[8px] font-bold uppercase rounded-lg transition-all ${
+                  circuitType === type ? "bg-blue-500/20 text-blue-400" : "text-[#484f58] hover:text-[#8b949e]"
+                }`}
+              >
+                {type} Mode
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex bg-[#161b22] border border-[#30363d] rounded-xl p-1">
+        <div className="flex bg-[#161b22] border border-[#30363d] rounded-xl p-1 gap-1">
           {(['s-domain', 'opamp', 'signal'] as const).map((tab) => (
             <button 
               key={tab}
               onClick={() => setActiveTab(tab)}
+              aria-pressed={activeTab === tab}
               className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${
                 activeTab === tab ? "bg-emerald-500/20 text-emerald-400 shadow-lg shadow-emerald-500/5" : "text-[#484f58] hover:text-[#8b949e]"
               }`}
@@ -356,6 +486,13 @@ export function EECircuitLab() {
               {tab === 's-domain' ? 'Laplace' : tab === 'opamp' ? 'Op-Amp Engine' : 'Signal Processing'}
             </button>
           ))}
+          <button 
+            onClick={resetSimulation}
+            aria-label="Reset Simulation"
+            className="px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all flex items-center gap-1.5"
+          >
+            <RefreshCcw size={10} className={isSolving ? "animate-spin" : ""} /> Sync & Reset
+          </button>
         </div>
       </div>
 
@@ -430,6 +567,7 @@ export function EECircuitLab() {
                   <div className="space-y-4">
                     <CircuitSchematic 
                       r={rlc.r} l={rlc.l} c={rlc.c}
+                      circuitType={circuitType}
                       onRChange={(r) => setRlc(prev => ({ ...prev, r: r > 1000 ? 100 : r }))}
                       onLChange={(l) => setRlc(prev => ({ ...prev, l: l > 100 ? 1 : l }))}
                       onCChange={(c) => setRlc(prev => ({ ...prev, c: c > 100 ? 0.1 : c }))}
@@ -450,6 +588,16 @@ export function EECircuitLab() {
                   </button>
 
                   <AnimatePresence>
+                    {errorStatus && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-3"
+                      >
+                        <AlertCircle size={16} className="text-red-400 shrink-0" />
+                        <p className="text-[10px] text-red-200 font-bold uppercase tracking-tight">{errorStatus}</p>
+                      </motion.div>
+                    )}
                     {stabilityInsight && activeTab === "s-domain" && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
