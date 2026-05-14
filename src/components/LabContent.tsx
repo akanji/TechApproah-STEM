@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { BookOpen, HelpCircle, CheckCircle2, ChevronRight, Play, ExternalLink, Info, AlertTriangle, Lightbulb, ShieldCheck, Zap, Headphones } from "lucide-react";
+import { BookOpen, HelpCircle, CheckCircle2, ChevronRight, Play, ExternalLink, Info, AlertTriangle, Lightbulb, ShieldCheck, Zap, Headphones, Sparkles, RefreshCcw, Square } from "lucide-react";
+import { ai, MODELS } from "../lib/gemini";
+import Markdown from "react-markdown";
 
 interface LabContentProps {
   data: {
@@ -33,7 +35,7 @@ interface LabContentProps {
 }
 
 export function LabContent({ data, onComplete }: LabContentProps) {
-  const [activeTab, setActiveTab] = useState<"notes" | "quiz" | "resources" | "audit">("notes");
+  const [activeTab, setActiveTab] = useState<"notes" | "quiz" | "resources" | "audit" | "multimodal">("notes");
   const [quizIndex, setQuizIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [completedQuiz, setCompletedQuiz] = useState(false);
@@ -43,6 +45,59 @@ export function LabContent({ data, onComplete }: LabContentProps) {
   const hasExtendedNotes = !!aiNotes.notes;
   const hasValidation = !!data.validation;
   const hasMultimodal = !!(aiNotes.audio_overview || aiNotes.study_guide || aiNotes.video_prompts);
+
+  const [isSynthesizing, setIsSynthesizing] = useState(false);
+  const [deepenedInsights, setDeepenedInsights] = useState<string | null>(null);
+  const [isDeepening, setIsDeepening] = useState(false);
+
+  const handleVoiceSynthesis = () => {
+    if (isSynthesizing) {
+      window.speechSynthesis.cancel();
+      setIsSynthesizing(false);
+      return;
+    }
+
+    const textToRead = aiNotes.audio_overview || aiNotes.definition || "";
+    if (!textToRead) return;
+
+    const utterance = new SpeechSynthesisUtterance(textToRead);
+    utterance.rate = 1.1;
+    utterance.pitch = 1.0;
+    
+    // Attempt to find a "nice" voice
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice = voices.find(v => v.name.includes("Google") && v.name.includes("US English")) || voices[0];
+    if (preferredVoice) utterance.voice = preferredVoice;
+
+    utterance.onstart = () => setIsSynthesizing(true);
+    utterance.onend = () => setIsSynthesizing(false);
+    utterance.onerror = () => setIsSynthesizing(false);
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleDeepenLearning = async () => {
+    setIsDeepening(true);
+    try {
+      const response = await ai.models.generateContent({
+        model: MODELS.pro,
+        contents: [{
+          role: "user",
+          parts: [{ text: `You are an advanced STEM expert. Provide 3 high-level technical insights or advanced practical applications for this topic: ${data.title}. 
+          The current definition is: ${aiNotes.definition}.
+          Format the response with bullet points and bold headers.` }]
+        }],
+        config: {
+          systemInstruction: "You are a senior engineering consultant providing deep technical insights.",
+        }
+      });
+      setDeepenedInsights(response.text || "No insights found.");
+    } catch (e) {
+      console.error("Deepen Learning Error:", e);
+    } finally {
+      setIsDeepening(false);
+    }
+  };
 
   const nextQuestion = () => {
     if (quizIndex < aiNotes.quiz.length - 1) {
@@ -187,8 +242,15 @@ export function LabContent({ data, onComplete }: LabContentProps) {
                     </div>
                   </div>
 
-                  <button className="w-full py-3 bg-white text-black rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-400 transition-colors flex items-center justify-center gap-2">
-                    Enable AI Voice Synthesis <Play size={12} fill="currentColor" />
+                  <button 
+                    onClick={handleVoiceSynthesis}
+                    className="w-full py-3 bg-white text-black rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-400 transition-colors flex items-center justify-center gap-2 group"
+                  >
+                    {isSynthesizing ? (
+                      <>Stop AI Voice Synthesis <Square size={12} fill="currentColor" /></>
+                    ) : (
+                      <>Enable AI Voice Synthesis <Play size={12} fill="currentColor" className="group-hover:translate-x-0.5 transition-transform" /></>
+                    )}
                   </button>
                 </div>
               )}
@@ -300,10 +362,46 @@ export function LabContent({ data, onComplete }: LabContentProps) {
                 </div>
               )}
 
-              <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20">
-                <p className="text-[10px] text-blue-400/80 leading-relaxed italic">
-                  Note: Technical insights derived from TechApproach AI Engine. All data is cross-verified with physics ground-truth models.
-                </p>
+              {/* Note: Technical insights derived from TechApproach AI Engine */}
+              <div className="space-y-4">
+                <AnimatePresence>
+                  {deepenedInsights && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="p-6 bg-blue-500/5 border border-blue-500/20 rounded-2xl relative"
+                    >
+                      <h4 className="text-[10px] uppercase font-bold text-blue-400 mb-4 flex items-center gap-2">
+                        <Sparkles size={14} /> Advanced Reasoning Expansion
+                      </h4>
+                      <div className="prose prose-invert prose-sm max-w-none text-blue-100/70 font-mono text-[11px] leading-relaxed">
+                        <Markdown>{deepenedInsights}</Markdown>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <button 
+                  onClick={handleDeepenLearning}
+                  disabled={isDeepening}
+                  className="w-full py-3 bg-[#161b22] border border-blue-500/20 rounded-xl text-[10px] font-bold text-blue-400 uppercase tracking-widest hover:bg-blue-500/10 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {isDeepening ? (
+                    <>
+                      <RefreshCcw size={14} className="animate-spin" /> Deepening Knowledge...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={14} /> Expand with AI Deep Reasoning
+                    </>
+                  )}
+                </button>
+
+                <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20">
+                  <p className="text-[10px] text-blue-400/80 leading-relaxed italic">
+                    Note: Technical insights derived from TechApproach AI Engine. All data is cross-verified with physics ground-truth models.
+                  </p>
+                </div>
               </div>
             </motion.div>
           )}

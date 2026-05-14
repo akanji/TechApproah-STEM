@@ -33,6 +33,10 @@ export function ThermoLab() {
     return `rgba(${239}, ${68 + ratio * 100}, ${68 - ratio * 100}, ${0.2 + ratio * 0.5})`;
   };
 
+  const [grid, setGrid] = useState<number[][]>(() => 
+    Array.from({ length: 10 }, () => Array(10).fill(20))
+  );
+
   useEffect(() => {
     let interval: number;
     if (isHeating) {
@@ -43,6 +47,28 @@ export function ThermoLab() {
           const nextTemp = initialTemp + (nextHeatTotal / (mass * material.c));
           
           setData(d => [...d, { time: nextTime, temp: Number(nextTemp.toFixed(1)) }].slice(-50));
+
+          // Update 2D Grid (simulating heat conduction)
+          setGrid(prevGrid => {
+            const newGrid = prevGrid.map(row => [...row]);
+            const center = 5;
+            newGrid[center][center] = nextTemp; // Primary heat source at center
+            
+            // simple relaxation/diffusion
+            for (let i = 1; i < 9; i++) {
+              for (let j = 1; j < 9; j++) {
+                if (i === center && j === center) continue;
+                const neighbors = [
+                  prevGrid[i-1][j], prevGrid[i+1][j],
+                  prevGrid[i][j-1], prevGrid[i][j+1]
+                ];
+                const avg = neighbors.reduce((a, b) => a + b, 0) / 4;
+                newGrid[i][j] = prevGrid[i][j] + (avg - prevGrid[i][j]) * 0.1;
+              }
+            }
+            return newGrid;
+          });
+
           return nextTime;
         });
       }, 500);
@@ -99,41 +125,50 @@ export function ThermoLab() {
         ))}
       </div>
 
-      <div 
-        className="relative h-48 rounded-2xl border border-[#30363d] overflow-hidden flex flex-col items-center justify-center transition-colors duration-1000"
-        style={{ backgroundColor: getCalorimeterColor() }}
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(0,0,0,0)_0%,rgba(0,0,0,0.6)_100%)] px-2" />
-        
-        <motion.div 
-          animate={{ scale: isHeating ? [1, 1.05, 1] : 1 }}
-          transition={{ repeat: Infinity, duration: 1 }}
-          className="relative z-10 w-24 h-24 rounded-full flex items-center justify-center"
-          style={{ 
-            boxShadow: isHeating ? `0 0 40px ${getGlowColor()}` : 'none',
-            backgroundColor: isHeating ? getGlowColor() : 'rgba(255,255,255,0.05)'
-          }}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div 
+          className="relative h-48 rounded-2xl border border-[#30363d] overflow-hidden flex flex-col items-center justify-center transition-colors duration-1000"
+          style={{ backgroundColor: getCalorimeterColor() }}
         >
-          <Thermometer size={32} className={isHeating ? "text-white" : "text-[#484f58]"} />
-        </motion.div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(0,0,0,0)_0%,rgba(0,0,0,0.6)_100%)] px-2" />
+          
+          <motion.div 
+            animate={{ scale: isHeating ? [1, 1.05, 1] : 1 }}
+            transition={{ repeat: Infinity, duration: 1 }}
+            className="relative z-10 w-20 h-20 rounded-full flex items-center justify-center"
+            style={{ 
+              boxShadow: isHeating ? `0 0 40px ${getGlowColor()}` : 'none',
+              backgroundColor: isHeating ? getGlowColor() : 'rgba(255,255,255,0.05)'
+            }}
+          >
+            <Thermometer size={24} className={isHeating ? "text-white" : "text-[#484f58]"} />
+          </motion.div>
 
-        <div className="relative z-10 mt-4 text-center">
-          <div className="text-[10px] font-bold uppercase tracking-widest text-[#8b949e] mb-1">Internal Temp</div>
-          <div className="text-4xl font-mono text-white font-bold tracking-tight">
-            {currentTemp.toFixed(1)}°<span className="text-xl">C</span>
+          <div className="relative z-10 mt-2 text-center">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-[#8b949e] mb-1">Core Temp</div>
+            <div className="text-3xl font-mono text-white font-bold tracking-tight">
+              {currentTemp.toFixed(1)}°<span className="text-xl">C</span>
+            </div>
           </div>
         </div>
-        
-        {isHeating && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="absolute bottom-4 right-4 flex items-center gap-1 text-[10px] text-red-500 font-bold"
-          >
-            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-            HEATING ACTIVE
-          </motion.div>
-        )}
+
+        <div className="h-48 bg-[#0d1117] border border-[#30363d] rounded-2xl p-2 flex flex-col items-center justify-center">
+          <div className="text-[8px] font-bold text-[#484f58] uppercase tracking-widest mb-2">2D Heat Diffusion Analysis</div>
+          <div className="grid grid-cols-10 gap-px bg-[#30363d] border border-[#30363d] p-1 rounded-sm">
+            {grid.map((row, i) => 
+              row.map((temp, j) => {
+                const ratio = Math.min(1, (temp - 20) / 80);
+                return (
+                  <div 
+                    key={`${i}-${j}`} 
+                    className="w-3.5 h-3.5"
+                    style={{ backgroundColor: `rgb(${30 + ratio * 225}, ${40 + (1-ratio) * 100}, ${100 + (1-ratio) * 155})` }}
+                  />
+                )
+              })
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="space-y-3">

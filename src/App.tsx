@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Home, BookOpen, Microscope, BarChart3, MessageSquare, 
   Sparkles, Brain, Mic, Video, Settings, Play, ChevronRight,
   Flame, Zap, Trophy, Headphones, Search, Link as LinkIcon, FileText, Info, CheckCircle2,
-  Calculator
+  Calculator, Sun, Moon
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { ThinkingChat } from "./components/ThinkingChat";
@@ -35,8 +35,17 @@ function AppContent() {
   const { playSound } = useSoundEffects();
   const [activeSubject, setActiveSubject] = useState<string | null>(() => localStorage.getItem("eng_subject") || null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeModule, setActiveModule] = useState<number | null>(null);
-  const [studyMode, setStudyMode] = useState<"theory" | "lab">("theory");
+  const [activeModule, setActiveModule] = useState<number | null>(() => {
+    const saved = localStorage.getItem("eng_module");
+    return saved ? parseInt(saved) : null;
+  });
+  const [studyMode, setStudyMode] = useState<"theory" | "lab">(() => 
+    (localStorage.getItem("eng_studymode") as "theory" | "lab") || "theory"
+  );
+  const [theme, setTheme] = useState<"dark" | "light">(() => 
+    (localStorage.getItem("eng_theme") as "dark" | "light") || "dark"
+  );
+  const [loadingMessage, setLoadingMessage] = useState("Initializing systems...");
   const [showThinkingChat, setShowThinkingChat] = useState(false);
   const [showVoicePartner, setShowVoicePartner] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -47,6 +56,8 @@ function AppContent() {
 
   const handleNavigate = (newPage: string, params?: any) => {
     playSound('transition');
+    const messages = ["Calibrating sensors...", "Processing dataset...", "Virtualizing hardware...", "Connecting to core..."];
+    setLoadingMessage(messages[Math.floor(Math.random() * messages.length)]);
     setIsLoading(true);
     setTimeout(() => {
       setPage(newPage);
@@ -55,6 +66,20 @@ function AppContent() {
       setIsLoading(false);
     }, 400);
   };
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('light', theme === 'light');
+    localStorage.setItem("eng_theme", theme);
+  }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem("eng_studymode", studyMode);
+  }, [studyMode]);
+
+  useEffect(() => {
+    if (activeModule !== null) localStorage.setItem("eng_module", activeModule.toString());
+    else localStorage.removeItem("eng_module");
+  }, [activeModule]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -557,9 +582,26 @@ function AppContent() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[60] bg-[#0d1117]/60 backdrop-blur-sm flex items-center justify-center"
+              className="fixed inset-0 z-[60] bg-[#0d1117]/80 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center"
             >
-              <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+              <div className="relative w-16 h-16 mb-6">
+                <div className="absolute inset-0 border-4 border-blue-500/10 rounded-full" />
+                <div className="absolute inset-0 border-4 border-t-blue-500 rounded-full animate-spin" />
+                <motion.div 
+                  animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute inset-4 bg-blue-500/20 rounded-full flex items-center justify-center"
+                >
+                  <Sparkles size={16} className="text-blue-500" />
+                </motion.div>
+              </div>
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-[10px] font-mono font-bold text-blue-400 uppercase tracking-[0.2em]"
+              >
+                {loadingMessage}
+              </motion.p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -584,6 +626,12 @@ function AppContent() {
               className="p-2 rounded-xl bg-[#161b22] border border-[#30363d] text-[#8b949e] hover:text-white transition-all hover:border-blue-500/30"
             >
               <Calculator size={20} />
+            </button>
+            <button 
+              onClick={() => { setTheme(t => t === 'dark' ? 'light' : 'dark'); playSound('click'); }}
+              className="p-2 rounded-xl bg-[#161b22] border border-[#30363d] text-[#8b949e] hover:text-white transition-all hover:border-blue-500/30"
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
             {user ? (
               <div className="flex items-center gap-3">

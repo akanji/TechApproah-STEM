@@ -22,12 +22,19 @@ export function StructuralLab() {
   const safetyFactor = material.yield / stress;
   const isFailing = stress > material.yield;
 
-  const getIntegrityColor = () => {
-    if (isFailing) return "bg-black shadow-[0_0_50px_rgba(239,68,68,0.3)]";
-    const risk = Math.min(1, 1 / safetyFactor);
-    if (risk < 0.3) return "bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]";
-    if (risk < 0.7) return "bg-yellow-500 shadow-[0_0_20px_rgba(234,179,8,0.2)]";
-    return "bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.2)]";
+  const nodeCount = 10;
+  const feaNodes = Array.from({ length: nodeCount }, (_, i) => {
+    // Basic FEA simulation: Stress is highest at the fixed ends (simulated cantilever or simple support)
+    const x = i / (nodeCount - 1);
+    const localFactor = 1 + Math.sin(x * Math.PI) * 0.5; // Distribute stress
+    return (stress * localFactor) / material.yield;
+  });
+
+  const getIntegrityColor = (ratio: number) => {
+    if (ratio > 1) return "bg-red-600";
+    if (ratio > 0.7) return "bg-orange-500";
+    if (ratio > 0.3) return "bg-yellow-500";
+    return "bg-emerald-500";
   };
 
   return (
@@ -35,25 +42,26 @@ export function StructuralLab() {
       <div className="relative h-40 bg-[#0d1117] border border-[#30363d] rounded-2xl overflow-hidden flex flex-col items-center justify-center">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(55,65,81,0.2)_0%,transparent_100%)]" />
         
-        <div className="w-full relative px-12">
-          <motion.div 
-            animate={{ 
-              y: isFailing ? 20 : (risk => (risk * 15))(Math.min(1, 1/safetyFactor)),
-              rotateX: isFailing ? 5 : 0
-            }}
-            className={`h-4 w-full rounded-lg transition-all duration-500 flex items-center justify-center ${getIntegrityColor()}`}
-          >
-            {isFailing && (
-              <div className="flex gap-1">
-                <div className="w-0.5 h-6 bg-red-600/50 -rotate-45" />
-                <span className="text-[10px] font-black text-white uppercase tracking-tighter">Structural Failure</span>
-                <div className="w-0.5 h-6 bg-red-600/50 rotate-45" />
-              </div>
-            )}
-          </motion.div>
+        <div className="w-full relative px-12 h-8 flex gap-0.5">
+          {feaNodes.map((ratio, i) => (
+            <motion.div 
+              key={i}
+              animate={{ 
+                y: ratio > 1 ? 20 : ratio * 10,
+                opacity: 1
+              }}
+              className={`flex-1 rounded-sm transition-all duration-500 shadow-lg ${getIntegrityColor(ratio)}`}
+            >
+              {ratio > 1 && i === Math.floor(nodeCount/2) && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <span className="text-[8px] font-black text-white uppercase tracking-tighter whitespace-nowrap bg-black/50 px-2 py-0.5 rounded-full">Yield Exceeded</span>
+                </div>
+              )}
+            </motion.div>
+          ))}
           
-          <div className="absolute -left-20 top-4 w-32 h-20 bg-[#161b22] border-r border-[#30363d] rounded-r-3xl" />
-          <div className="absolute -right-20 top-4 w-32 h-20 bg-[#161b22] border-l border-[#30363d] rounded-l-3xl" />
+          <div className="absolute -left-20 top-0 w-32 h-20 bg-[#161b22] border-r border-[#30363d] rounded-r-3xl" />
+          <div className="absolute -right-20 top-0 w-32 h-20 bg-[#161b22] border-l border-[#30363d] rounded-l-3xl" />
         </div>
       </div>
 

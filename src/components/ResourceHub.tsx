@@ -10,12 +10,14 @@ import {
   ArrowLeft,
   X,
   ExternalLink,
-  Sparkles
+  Sparkles,
+  RefreshCcw
 } from "lucide-react";
 import resourcesData from "../resources.json";
 import { useUser } from "./UserContext";
 import { useSoundEffects } from "../hooks/useSoundEffects";
-import { ai } from "../lib/gemini";
+import Markdown from "react-markdown";
+import { ai, MODELS } from "../lib/gemini";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 
@@ -56,6 +58,36 @@ export function ResourceHub() {
   const [showAiNotes, setShowAiNotes] = useState(false);
   const { user, progress } = useUser();
   const { playSound } = useSoundEffects();
+
+  const [expertResponse, setExpertResponse] = useState<string | null>(null);
+  const [askingQuestion, setAskingQuestion] = useState<string | null>(null);
+
+  const handleAskExpert = async (question: string) => {
+    setAskingQuestion(question);
+    setExpertResponse(null);
+    playSound('click');
+    try {
+      const response = await ai.models.generateContent({
+        model: MODELS.pro,
+        contents: [{
+          role: "user",
+          parts: [{ text: `You are an expert engineering mentor. Answer this question about the video "${selectedVideo?.title}": ${question}.
+          Context: ${selectedVideo?.description}.
+          Be insightful, technically accurate, and encourage curiosity.` }]
+        }],
+        config: {
+          systemInstruction: "You are a senior technical advisor for advanced engineering students.",
+        }
+      });
+      setExpertResponse(response.text || "No response received.");
+      playSound('success');
+    } catch (e) {
+      console.error("Expert Chat Error:", e);
+      setExpertResponse("Failed to connect to AI Expert.");
+    } finally {
+      setAskingQuestion(null);
+    }
+  };
 
   const filteredResources = resourcesData.filter(v => 
     v.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -277,7 +309,7 @@ export function ResourceHub() {
                     </div>
 
                     <button
-                      onClick={aiNotes ? () => setShowAiNotes(!showAiNotes) : handleGenerateAiNotes}
+                      onClick={aiNotes ? () => setShowAiNotes(!showAiNotes) : () => handleGenerateAiNotes()}
                       disabled={isGenerating}
                       className={`px-6 py-3 border font-bold rounded-2xl transition-all flex items-center justify-center gap-2 uppercase text-[10px] tracking-widest disabled:opacity-50 ${
                         aiNotes 
@@ -344,13 +376,44 @@ export function ResourceHub() {
 
                     <section className="space-y-4 pt-6 border-t border-[#30363d]">
                       <h4 className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em]">Deep Dive Questions</h4>
+                      
+                      <AnimatePresence>
+                        {expertResponse && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="p-5 bg-blue-600/10 border border-blue-500/30 rounded-2xl relative"
+                          >
+                            <button 
+                              onClick={() => setExpertResponse(null)}
+                              className="absolute top-2 right-2 p-1 hover:bg-white/10 rounded-lg text-blue-400"
+                            >
+                              <X size={14} />
+                            </button>
+                            <h5 className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                              <Sparkles size={12} /> Expert Advisor Insight
+                            </h5>
+                            <div className="prose prose-invert prose-xs max-w-none text-[#c9d1d9] leading-relaxed font-mono">
+                              <Markdown>{expertResponse}</Markdown>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
                       <div className="grid grid-cols-1 gap-3">
                         {selectedVideo.insights.deep_dive.map((q, i) => (
-                          <div key={i} className="p-4 bg-[#0d162d] border border-blue-500/10 rounded-2xl group hover:border-blue-500/30 transition-all">
-                            <p className="text-white text-xs font-medium leading-relaxed italic">"{q}"</p>
-                            <button className="mt-3 text-[9px] font-bold text-blue-400 flex items-center gap-1 uppercase tracking-widest group-hover:gap-2 transition-all">
-                              Ask AI Expert <ChevronRight size={10} />
-                            </button>
+                          <div key={i} className="p-4 bg-[#0d162d] border border-blue-500/10 rounded-2xl group hover:border-blue-500/30 transition-all flex justify-between items-center">
+                            <div>
+                              <p className="text-white text-xs font-medium leading-relaxed italic">"{q}"</p>
+                              <button 
+                                onClick={() => handleAskExpert(q)}
+                                disabled={askingQuestion === q}
+                                className="mt-3 text-[9px] font-bold text-blue-400 flex items-center gap-1 uppercase tracking-widest group-hover:gap-2 transition-all disabled:opacity-50"
+                              >
+                                {askingQuestion === q ? <RefreshCcw size={10} className="animate-spin" /> : "Ask AI Expert"} 
+                                {askingQuestion === q ? "Consulting..." : <ChevronRight size={10} />}
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>

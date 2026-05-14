@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import Markdown from "react-markdown";
+import { ai, MODELS } from "../lib/gemini";
 import { 
   ShieldCheck, 
   ExternalLink, 
@@ -12,7 +14,11 @@ import {
   Zap,
   Globe,
   Dna,
-  Building2
+  Building2,
+  RefreshCcw,
+  Sparkles,
+  Video,
+  X
 } from "lucide-react";
 import toolsData from "../specialist_tools.json";
 
@@ -34,8 +40,36 @@ const CATEGORY_ICONS: Record<string, any> = {
   "Structural & Geotechnical AI": Building2
 };
 
+import { VeoPrompter } from "./VeoPrompter";
+
 export function SpecialistHub() {
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
+  const [showVeoPrompter, setShowVeoPrompter] = useState(false);
+  const [toolSummary, setToolSummary] = useState<string | null>(null);
+  const [isSummarizing, setIsSummarizing] = useState(false);
+
+  const handleGenerateSummary = async (tool: Tool) => {
+    setIsSummarizing(true);
+    setToolSummary(null);
+    try {
+      const response = await ai.models.generateContent({
+        model: MODELS.flash,
+        contents: [{
+          role: "user",
+          parts: [{ text: `Provide a professional justification for using "${tool.name}" in a modern engineering lab. 
+          Focus on its unique capability: ${tool.capability} and technical use case: ${tool.use_case}.` }]
+        }],
+        config: {
+          systemInstruction: "You are a senior technical advisor. Summarize the value proposition of specialized AI tools.",
+        }
+      });
+      setToolSummary(response.text || "No summary available.");
+    } catch (e) {
+      console.error("Summary error:", e);
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
 
   return (
     <div className="space-y-8 pb-32">
@@ -49,6 +83,38 @@ export function SpecialistHub() {
       </header>
 
       <div className="space-y-10">
+        {/* Veo Section */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 px-1 text-indigo-400">
+            <Video size={14} />
+            <h3 className="text-xs font-bold uppercase tracking-[0.2em]">Next-Gen Media Synthesis</h3>
+          </div>
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="bg-gradient-to-r from-indigo-600/10 to-blue-600/10 border border-indigo-500/30 rounded-[2.5rem] p-8 relative overflow-hidden group cursor-pointer"
+            onClick={() => setShowVeoPrompter(true)}
+          >
+            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Video size={120} className="text-white" />
+            </div>
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-indigo-400 mb-1">
+                  <Sparkles size={16} />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Veo Prompt Lab</span>
+                </div>
+                <h3 className="text-xl font-bold text-white uppercase tracking-tight">Google Veo Synthesis Engine</h3>
+                <p className="text-[#8b949e] text-xs max-w-md leading-relaxed capitalize">
+                  Craft high-fidelity technical prompts for cinematic scientific visualizations.
+                </p>
+              </div>
+              <button className="px-8 py-3 bg-indigo-600 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-900/20">
+                Launch Assistant
+              </button>
+            </div>
+          </motion.div>
+        </section>
+
         {Object.entries(toolsData).map(([category, tools]) => {
           const Icon = CATEGORY_ICONS[category] || Globe;
           return (
@@ -100,6 +166,25 @@ export function SpecialistHub() {
       </div>
 
       <AnimatePresence>
+        {showVeoPrompter && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[#0d1117]/95 backdrop-blur-md overflow-y-auto">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full max-w-4xl relative"
+            >
+              <button 
+                onClick={() => setShowVeoPrompter(false)}
+                className="absolute -top-12 right-0 p-3 bg-white/5 border border-white/10 rounded-2xl text-white hover:bg-white/10 transition-all z-10"
+              >
+                <X size={20} />
+              </button>
+              <VeoPrompter />
+            </motion.div>
+          </div>
+        )}
+
         {selectedTool && (
           <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-[#0d1117]/80 backdrop-blur-sm">
             <motion.div
@@ -124,6 +209,23 @@ export function SpecialistHub() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4">
+                  <AnimatePresence>
+                    {toolSummary && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        className="p-5 bg-blue-600/5 border border-blue-500/20 rounded-2xl"
+                      >
+                        <h5 className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                          <Zap size={12} fill="currentColor" /> Strategic Justification
+                        </h5>
+                        <div className="text-xs text-[#c9d1d9] leading-relaxed font-mono">
+                          <Markdown>{toolSummary}</Markdown>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   <div className="p-5 bg-[#0d1117] border border-[#30363d] rounded-2xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-3 text-blue-500/20 group-hover:text-blue-500/40 transition-colors">
                       <Zap size={40} fill="currentColor" />
@@ -147,21 +249,36 @@ export function SpecialistHub() {
                   </div>
                 </div>
 
-                <div className="flex gap-3 pt-2">
-                  <button 
-                    onClick={() => setSelectedTool(null)}
-                    className="flex-1 py-4 bg-[#21262d] text-white font-bold rounded-2xl hover:bg-[#30363d] transition-all uppercase tracking-widest text-[10px]"
-                  >
-                    Keep Exploring
-                  </button>
-                  <a 
-                    href={selectedTool.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 py-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-500 transition-all uppercase tracking-widest text-[10px] flex items-center justify-center gap-2"
-                  >
-                    Open Platform <ExternalLink size={14} />
-                  </a>
+                <div className="flex flex-col gap-3 pt-2">
+                  {!toolSummary && (
+                    <button 
+                      onClick={() => handleGenerateSummary(selectedTool)}
+                      disabled={isSummarizing}
+                      className="w-full py-4 bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 font-bold rounded-2xl hover:bg-emerald-600/20 transition-all uppercase tracking-widest text-[10px] flex items-center justify-center gap-2"
+                    >
+                      {isSummarizing ? <RefreshCcw size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                      {isSummarizing ? "Synthesizing Value Prop..." : "Generate AI Strategic Case"}
+                    </button>
+                  )}
+                  <div className="flex gap-3">
+                    <button 
+                      onClick={() => {
+                        setSelectedTool(null);
+                        setToolSummary(null);
+                      }}
+                      className="flex-1 py-4 bg-[#21262d] text-white font-bold rounded-2xl hover:bg-[#30363d] transition-all uppercase tracking-widest text-[10px]"
+                    >
+                      Keep Exploring
+                    </button>
+                    <a 
+                      href={selectedTool.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 py-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-500 transition-all uppercase tracking-widest text-[10px] flex items-center justify-center gap-2"
+                    >
+                      Open Platform <ExternalLink size={14} />
+                    </a>
+                  </div>
                 </div>
 
                 {selectedTool.name.includes("Titan") && (

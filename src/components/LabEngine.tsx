@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Sparkles, Share2, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Sparkles, Share2, ShieldCheck, CheckCircle2, Search, Zap, RefreshCcw } from "lucide-react";
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { useUser } from "./UserContext";
+import { ai, MODELS } from "../lib/gemini";
+import Markdown from "react-markdown";
 import { BioSimulator } from "./BioSimulator";
 import { StructuralGeotechLab } from "./StructuralGeotechLab";
 import { PhysicsLab } from "./PhysicsLab";
@@ -31,6 +33,32 @@ export function LabEngine({ type, labId = "unknown", onComplete }: LabProps) {
     const timer = setTimeout(() => setIsValidated(true), 1500);
     return () => clearTimeout(timer);
   }, [type]);
+
+  const [analysis, setAnalysis] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const handleExplain = async () => {
+    setIsAnalyzing(true);
+    setAnalysis(null);
+    try {
+      const response = await ai.models.generateContent({
+        model: MODELS.flash,
+        contents: [{
+          role: "user",
+          parts: [{ text: `Explain the physics and engineering principles behind this specific simulation: ${type} (ID: ${labId}). 
+          Provide a concise high-level summary of the mechanics involved.` }]
+        }],
+        config: {
+          systemInstruction: "You are a laboratory supervisor. Explain the simulation principles clearly.",
+        }
+      });
+      setAnalysis(response.text || "No analysis available.");
+    } catch (e) {
+      console.error("Analysis error:", e);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   const JudgeAgentBadge = () => (
     <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold text-blue-400 uppercase tracking-widest mt-2">
@@ -63,6 +91,28 @@ export function LabEngine({ type, labId = "unknown", onComplete }: LabProps) {
       </div>
 
       <div className="min-h-[200px]">
+        <AnimatePresence>
+          {analysis && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="mb-6 p-4 bg-blue-600/5 border border-blue-500/20 rounded-xl"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-[10px] font-bold text-blue-400 uppercase tracking-widest flex items-center gap-2">
+                  <Zap size={12} fill="currentColor" /> AI Simulation Insight
+                </h4>
+                <button onClick={() => setAnalysis(null)} className="text-[#484f58] hover:text-white transition-colors">
+                  <RefreshCcw size={12} />
+                </button>
+              </div>
+              <div className="text-[11px] text-[#c9d1d9] leading-relaxed font-mono">
+                <Markdown>{analysis}</Markdown>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {type === "physics" && (
           labId === "phys_002" ? <KineticEnergyLab /> : 
           labId === "phys_003" ? <RampLab /> : 
@@ -81,6 +131,18 @@ export function LabEngine({ type, labId = "unknown", onComplete }: LabProps) {
       </div>
 
       <div className="mt-8 pt-6 border-t border-[#30363d] flex gap-3">
+        <button 
+          onClick={handleExplain}
+          disabled={isAnalyzing}
+          className="flex-1 py-3 bg-[#161b22] border border-blue-500/20 text-blue-400 font-bold rounded-xl hover:bg-blue-500/10 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          {isAnalyzing ? (
+            <RefreshCcw size={18} className="animate-spin" />
+          ) : (
+            <Search size={18} />
+          )}
+          {isAnalyzing ? "Analyzing..." : "Explain Simulation"}
+        </button>
         <button 
           onClick={async () => {
             if (user) {

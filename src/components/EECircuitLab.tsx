@@ -1,13 +1,78 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Zap, Activity, Cpu, FileText, Code, ChevronRight, 
   Terminal, Search, Play, AlertCircle, Sparkles, 
   Settings, Layers, TrendingUp, Microscope, Clock,
-  CheckCircle2, XCircle
+  CheckCircle2, XCircle, Info, Square, RefreshCcw
 } from "lucide-react";
+import { ai, MODELS } from "../lib/gemini";
+import Markdown from "react-markdown";
 
 type ComplexNumber = { real: number; imag: number };
+
+function BodePlot({ magnitude, phase, frequency, noiseEnabled }: { magnitude: number[], phase: number[], frequency: number[], noiseEnabled: boolean }) {
+  const size = { w: 400, h: 250 };
+  const padding = 40;
+
+  const getPoints = (data: number[], min: number, max: number, h: number) => {
+    return data.map((val, i) => {
+      const x = padding + (i / (data.length - 1)) * (size.w - padding * 2);
+      const noise = noiseEnabled ? (Math.random() - 0.5) * 2 : 0;
+      const y = padding + (1 - (val - min) / (max - min)) * (h - padding * 2);
+      return `${x},${y + noise}`;
+    }).join(" ");
+  };
+
+  const magMin = -60, magMax = 20;
+  const phaseMin = -180, phaseMax = 180;
+
+  return (
+    <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h5 className="text-[10px] font-bold text-white uppercase tracking-widest flex items-center gap-2">
+          <TrendingUp size={14} className="text-blue-400" /> Bode Frequency Response
+        </h5>
+        <div className="px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-400 font-mono text-[9px] font-bold">
+          {noiseEnabled ? "REAL-WORLD NOISE ACTIVE" : "IDEAL MATHEMATICAL MODEL"}
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {/* Magnitude Plot */}
+        <div className="relative h-32 bg-black/40 rounded-xl border border-white/5">
+          <svg viewBox={`0 0 ${size.w} 125`} className="w-full h-full">
+            <polyline points={getPoints(magnitude, magMin, magMax, 125)} fill="none" stroke="#60a5fa" strokeWidth="2" />
+            {/* 0dB Line */}
+            <line x1={padding} y1={padding + (1 - (0 - magMin) / (magMax - magMin)) * (125 - padding * 2)} x2={size.w - padding} y2={padding + (1 - (0 - magMin) / (magMax - magMin)) * (125 - padding * 2)} stroke="#484f58" strokeWidth="0.5" strokeDasharray="4 4" />
+          </svg>
+          <div className="absolute top-2 left-2 text-[8px] font-bold text-blue-400/60 uppercase">Magnitude (dB)</div>
+        </div>
+
+        {/* Phase Plot */}
+        <div className="relative h-32 bg-black/40 rounded-xl border border-white/5">
+          <svg viewBox={`0 0 ${size.w} 125`} className="w-full h-full">
+            <polyline points={getPoints(phase, phaseMin, phaseMax, 125)} fill="none" stroke="#fb923c" strokeWidth="2" />
+          </svg>
+          <div className="absolute top-2 left-2 text-[8px] font-bold text-orange-400/60 uppercase">Phase (deg)</div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: "Phase Margin", val: "-45.2", unit: "°", color: "text-emerald-400" },
+          { label: "Gain Margin", val: "+12.4", unit: "dB", color: "text-blue-400" },
+          { label: "Slew Rate", val: "1.2", unit: "V/μs", color: "text-purple-400" }
+        ].map((stat, i) => (
+          <div key={i} className="p-3 bg-white/5 border border-white/5 rounded-xl text-center">
+            <p className="text-[8px] text-[#484f58] uppercase font-bold mb-1">{stat.label}</p>
+            <p className={`text-[11px] font-mono font-bold ${stat.color}`}>{stat.val}<span className="text-[9px] ml-0.5">{stat.unit}</span></p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function SPlanePlotter({ poles, zeros }: { poles: ComplexNumber[], zeros: ComplexNumber[] }) {
   const isStable = useMemo(() => poles.every(p => p.real < 0), [poles]);
@@ -94,10 +159,160 @@ function SPlanePlotter({ poles, zeros }: { poles: ComplexNumber[], zeros: Comple
   );
 }
 
+function CircuitSchematic({ 
+  r, l, c, 
+  onRChange, onLChange, onCChange 
+}: { 
+  r: number, l: number, c: number,
+  onRChange: (val: number) => void,
+  onLChange: (val: number) => void,
+  onCChange: (val: number) => void
+}) {
+  return (
+    <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h5 className="text-[10px] font-bold text-white uppercase tracking-widest">Interactive RLC Schematic</h5>
+        <div className="flex gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-[pulse_1.5s_infinite]" />
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-[pulse_1.5s_infinite_0.5s]" />
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-[pulse_1.5s_infinite_1s]" />
+        </div>
+      </div>
+
+      <div className="relative h-48 bg-black/20 rounded-xl border border-white/5 flex items-center justify-center p-4">
+        {/* Schematic Drawing */}
+        <svg viewBox="0 0 300 150" className="w-full h-full text-blue-400">
+          {/* Wire path */}
+          <path d="M 20 75 H 60 M 100 75 H 140 M 180 75 H 220 M 260 75 H 280" fill="none" stroke="currentColor" strokeWidth="2" />
+          
+          {/* Resistor */}
+          <g className="cursor-pointer hover:text-white transition-colors" onClick={() => onRChange(r + 10)}>
+            <path d="M 60 75 L 65 65 L 75 85 L 85 65 L 95 85 L 100 75" fill="none" stroke="currentColor" strokeWidth="2" />
+            <text x="80" y="55" fill="currentColor" fontSize="10" textAnchor="middle" className="font-mono font-bold">R={r}Ω</text>
+          </g>
+
+          {/* Inductor */}
+          <g className="cursor-pointer hover:text-white transition-colors" onClick={() => onLChange(l + 1)}>
+            <path d="M 140 75 C 145 60 155 60 160 75 C 165 60 175 60 180 75" fill="none" stroke="currentColor" strokeWidth="2" />
+            <text x="160" y="55" fill="currentColor" fontSize="10" textAnchor="middle" className="font-mono font-bold">L={l}mH</text>
+          </g>
+
+          {/* Capacitor */}
+          <g className="cursor-pointer hover:text-white transition-colors" onClick={() => onCChange(c + 1)}>
+            <path d="M 220 60 V 90 M 260 60 V 90" fill="none" stroke="currentColor" strokeWidth="2" />
+            <text x="240" y="55" fill="currentColor" fontSize="10" textAnchor="middle" className="font-mono font-bold">C={c}μF</text>
+          </g>
+
+          {/* Ground */}
+          <path d="M 280 75 V 100 M 270 100 H 290 M 275 105 H 285 M 278 110 H 282" fill="none" stroke="#484f58" strokeWidth="1" />
+        </svg>
+
+        <div className="absolute bottom-3 right-3 text-[8px] text-[#484f58] uppercase font-bold tracking-widest">
+          Click components to adjust values
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: "Damping", val: (r / (2 * Math.sqrt(l/c))).toFixed(2), unit: "ζ" },
+          { label: "Resonance", val: (1 / (2 * Math.PI * Math.sqrt(l * 1e-3 * c * 1e-6) / 1000)).toFixed(1), unit: "kHz" },
+          { label: "Bandwidth", val: (r / (2 * Math.PI * l * 1e-3)).toFixed(1), unit: "Hz" }
+        ].map((stat, i) => (
+          <div key={i} className="p-3 bg-white/5 border border-white/5 rounded-xl text-center">
+            <div className="text-[8px] text-[#484f58] uppercase font-bold mb-1">{stat.label}</div>
+            <div className="text-[11px] font-mono text-white font-bold">{stat.val}<span className="text-[9px] ml-0.5 text-blue-400">{stat.unit}</span></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function EECircuitLab() {
   const [activeTab, setActiveTab] = useState<"s-domain" | "opamp" | "signal">("s-domain");
   const [isSolving, setIsSolving] = useState(false);
   const [circuitType, setCircuitType] = useState<"RC" | "RLC" | "Active Filter">("RC");
+  const [noiseEnabled, setNoiseEnabled] = useState(false);
+  const [stabilityInsight, setStabilityInsight] = useState<string | null>(null);
+  const [isThinking, setIsThinking] = useState(false);
+
+  const [rlc, setRlc] = useState({ r: 100, l: 10, c: 1 });
+
+  const bodeData = useMemo(() => {
+    const freq = Array.from({ length: 50 }, (_, i) => Math.pow(10, i / 10)); // 1Hz to 10kHz
+    const magnitude = freq.map(f => {
+      const w = 2 * Math.PI * f;
+      const R = rlc.r;
+      const L = rlc.l * 1e-3;
+      const C = rlc.c * 1e-6;
+      const zL = w * L;
+      const zC = 1 / (w * C);
+      const impedance = Math.sqrt(R*R + Math.pow(zL - zC, 2));
+      const gain = R / impedance;
+      return 20 * Math.log10(gain);
+    });
+    const phase = freq.map(f => {
+      const w = 2 * Math.PI * f;
+      const R = rlc.r;
+      const L = rlc.l * 1e-3;
+      const C = rlc.c * 1e-6;
+      return -Math.atan((w * L - 1/(w * C)) / R) * (180 / Math.PI);
+    });
+    return { magnitude, phase, freq };
+  }, [rlc]);
+
+  const handleExplainStability = async () => {
+    setIsThinking(true);
+    setStabilityInsight(null);
+    try {
+      const response = await ai.models.generateContent({
+        model: MODELS.flash,
+        contents: [{
+          role: "user",
+          parts: [{ text: `Explain the s-domain stability, phase margin, and damping ratio for this RLC circuit: 
+          Parameters: R=${rlc.r}Ω, L=${rlc.l}mH, C=${rlc.c}μF. 
+          Current Poles: ${JSON.stringify(poles)}.
+          Explain the relationship between pole location in the complex s-plane and the physical damping behavior of the system.` }]
+        }],
+        config: {
+          systemInstruction: "You are a senior electronics design engineer. Explain control theory and stability clearly.",
+        }
+      });
+      setStabilityInsight(response.text || "No insight available.");
+    } catch (e) {
+      console.error("Stability Insight Error:", e);
+    } finally {
+      setIsThinking(false);
+    }
+  };
+
+  useEffect(() => {
+    // Characteristic Equation: s^2 + (R/L)s + 1/LC = 0
+    // s = [-b +/- sqrt(b^2 - 4ac)] / 2a
+    const R = rlc.r;
+    const L = rlc.l * 1e-3;
+    const C = rlc.c * 1e-6;
+
+    const b = R / L;
+    const c_val = 1 / (L * C);
+    const discriminant = b * b - 4 * c_val;
+
+    if (discriminant >= 0) {
+      const s1 = (-b + Math.sqrt(discriminant)) / 2;
+      const s2 = (-b - Math.sqrt(discriminant)) / 2;
+      setPoles([
+        { real: Math.max(-10, Math.min(10, s1 / 1000)), imag: 0 },
+        { real: Math.max(-10, Math.min(10, s2 / 1000)), imag: 0 }
+      ]);
+    } else {
+      const real = -b / 2;
+      const imag = Math.sqrt(-discriminant) / 2;
+      setPoles([
+        { real: Math.max(-10, Math.min(10, real / 1000)), imag: Math.max(-10, Math.min(10, imag / 1000)) },
+        { real: Math.max(-10, Math.min(10, real / 1000)), imag: Math.max(-10, Math.min(10, -imag / 1000)) }
+      ]);
+    }
+  }, [rlc]);
 
   const [poles, setPoles] = useState<ComplexNumber[]>([
     { real: -2, imag: 2 },
@@ -204,41 +419,59 @@ export function EECircuitLab() {
                       </div>
                       <div>
                         <p className="text-[10px] font-bold text-white uppercase tracking-widest">Nodal Equation Generator</p>
-                        <p className="text-[9px] text-[#484f58] uppercase font-bold">Generated from uploaded schematic</p>
+                        <p className="text-[9px] text-[#484f58] uppercase font-bold">Dynamic S-Domain Solution</p>
                       </div>
                     </div>
                     <div className="p-5 bg-black/40 rounded-2xl border border-white/5 font-mono text-[11px] leading-relaxed text-[#c9d1d9]">
-                      <span className="text-emerald-400">Summing(Node A):</span> (V_A - V_in)/R1 + V_A*(sC1) + (V_A - V_out)/(1/sC2) = 0
+                      <span className="text-emerald-400">Summing(Node A):</span> (V_A - V_in)/{rlc.r} + V_A*(s*{rlc.c}e-6) + (V_A - V_out)/(s*{rlc.l}e-3) = 0
                     </div>
                   </div>
                   
                   <div className="space-y-4">
-                    <button 
-                      onClick={() => {
-                        setIsSolving(true);
-                        // Randomize poles for demo
-                        setTimeout(() => {
-                          setIsSolving(false);
-                          setPoles([
-                            { real: Math.random() > 0.3 ? -2 : 1, imag: 2 },
-                            { real: Math.random() > 0.3 ? -2 : 1, imag: -2 }
-                          ]);
-                        }, 2000);
-                      }}
-                      className="w-full py-4 bg-emerald-500 text-white rounded-2xl text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/10 relative overflow-hidden"
-                    >
-                      {isSolving ? "Analyzing Poles & Zeros..." : "Solve Algebraic Loop"}
-                      {isSolving && <motion.div layoutId="solving" className="absolute inset-0 bg-white/20 animate-[pulse_1s_infinite]" />}
-                    </button>
-                    <p className="text-[10px] text-[#8b949e] italic leading-relaxed text-center px-4">
-                      <Sparkles size={10} className="inline mr-1 text-emerald-400" />
-                      Powered by Electric Pal Vision: Analyzing component footprints... 100% matched.
-                    </p>
+                    <CircuitSchematic 
+                      r={rlc.r} l={rlc.l} c={rlc.c}
+                      onRChange={(r) => setRlc(prev => ({ ...prev, r: r > 1000 ? 100 : r }))}
+                      onLChange={(l) => setRlc(prev => ({ ...prev, l: l > 100 ? 1 : l }))}
+                      onCChange={(c) => setRlc(prev => ({ ...prev, c: c > 100 ? 0.1 : c }))}
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <SPlanePlotter poles={poles} zeros={zeros} />
+                  
+                  <button 
+                    onClick={handleExplainStability}
+                    disabled={isThinking}
+                    className="w-full py-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-2xl flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500/20 transition-all disabled:opacity-50"
+                  >
+                    {isThinking ? <RefreshCcw size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                    Explain Stability Mechanics
+                  </button>
+
+                  <AnimatePresence>
+                    {stabilityInsight && activeTab === "s-domain" && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl relative"
+                      >
+                        <button 
+                          onClick={() => setStabilityInsight(null)}
+                          className="absolute top-4 right-4 p-1 hover:bg-white/5 rounded-lg text-[#484f58] hover:text-white transition-colors"
+                        >
+                          <XCircle size={16} />
+                        </button>
+                        <h5 className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                          <Microscope size={12} /> S-Plane Analysis Insight
+                        </h5>
+                        <div className="text-[11px] text-[#c9d1d9] leading-relaxed font-mono">
+                          <Markdown>{stabilityInsight}</Markdown>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             </div>
@@ -351,85 +584,105 @@ export function EECircuitLab() {
             exit={{ opacity: 0, scale: 1.02 }}
             className="space-y-6"
           >
-            {/* NoteGPT Summary Section */}
-            <div className="bg-[#0b0e14] border border-[#30363d] rounded-[32px] p-8">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-white/5 mb-8">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20 shadow-xl shadow-indigo-500/5">
-                    <FileText size={32} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <BodePlot 
+                magnitude={bodeData.magnitude} 
+                phase={bodeData.phase} 
+                frequency={bodeData.freq}
+                noiseEnabled={noiseEnabled}
+              />
+              
+              <div className="space-y-6">
+                {/* Simulation Controls */}
+                <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h5 className="text-[10px] font-bold text-white uppercase tracking-widest">SPICE Analysis Parameters</h5>
+                    <button 
+                      onClick={() => setNoiseEnabled(!noiseEnabled)}
+                      className={`px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest transition-all border ${
+                        noiseEnabled ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-white/5 text-[#484f58] border-white/10"
+                      }`}
+                    >
+                      {noiseEnabled ? "Disable Thermal Noise" : "Inject Noise Simulation"}
+                    </button>
                   </div>
-                  <div>
-                    <h4 className="text-lg font-bold text-white uppercase tracking-tight">NoteGPT Multimodal Summary</h4>
-                    <p className="text-[10px] text-indigo-400 font-mono font-bold uppercase tracking-[0.2em] mt-1">Condensed: Op-Amp Signal Conditioning Masterclass</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="text-right hidden md:block">
-                    <p className="text-[9px] text-[#484f58] font-bold uppercase">Processing Time</p>
-                    <p className="text-sm font-mono text-white font-bold tracking-tighter">4.2s</p>
-                  </div>
-                  <button className="px-6 py-3 bg-indigo-500 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-400 transition-colors shadow-lg shadow-indigo-500/10">
-                    Refresh Notes
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 space-y-6">
+                  
                   <div className="space-y-4">
-                    <h5 className="text-[10px] font-bold text-white uppercase tracking-widest flex items-center gap-2">
-                       <Clock size={12} className="text-indigo-400" /> Executive Highlights
-                    </h5>
-                    {[
-                      { title: "Gain Bandwidth Product (GBW)", text: "Ideal Op-Amps have infinite bandwidth, but real ones trade gain for speed. NoteGPT identified a 1MHz limit in typical hobbyist LM358s." },
-                      { title: "Slew Rate Saturation", text: "NoteGPT flagged the 05:12 mark in the lecture: When the signal is too fast, the output turns into a ramp due to internal currents." },
-                      { title: "Phase Margin Stability", text: "Analysis of the tutorial's stability section: Multi-stage filters risk oscillation if negative feedback becomes positive at high frequencies." }
-                    ].map((h, i) => (
-                      <div key={i} className="p-5 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-colors cursor-pointer group">
-                         <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">{h.title}</div>
-                         <p className="text-[12px] text-[#8b949e] leading-relaxed group-hover:text-white transition-colors">{h.text}</p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-[8px] font-bold text-[#8b949e] uppercase">
+                        <span>Simulation Speed</span>
+                        <span>4.2 Gflops</span>
                       </div>
-                    ))}
+                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                        <motion.div animate={{ width: "65%" }} className="h-full bg-blue-500" />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3 pt-2">
+                       <div className="p-3 bg-black/40 rounded-xl border border-white/5">
+                         <p className="text-[8px] text-[#484f58] uppercase font-bold mb-1">Noise Floor</p>
+                         <p className="text-xs font-mono text-emerald-400 font-bold">-112.4 <span className="opacity-50">dBm/Hz</span></p>
+                       </div>
+                       <div className="p-3 bg-black/40 rounded-xl border border-white/5">
+                         <p className="text-[8px] text-[#484f58] uppercase font-bold mb-1">Max Slew Rate</p>
+                         <p className="text-xs font-mono text-blue-400 font-bold">12.5 <span className="opacity-50">V/μs</span></p>
+                       </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                   <div className="bg-gradient-to-br from-indigo-500/10 to-transparent p-6 rounded-[28px] border border-indigo-500/10 h-full flex flex-col justify-between">
-                     <div>
-                       <h5 className="text-[10px] font-bold text-white uppercase tracking-widest mb-4">Mindgrasp AI Map</h5>
-                       <p className="text-[11px] text-[#8b949e] leading-relaxed mb-6 italic">Visual concept map linking Laplace transforms to Filter design is currently being synthesized for your notebook.</p>
-                       <div className="space-y-3">
-                         <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                           <motion.div initial={{ width: 0 }} animate={{ width: "85%" }} transition={{ duration: 1.5, ease: "easeOut" }} className="h-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
-                         </div>
-                         <div className="flex justify-between text-[8px] font-bold text-[#484f58] uppercase">
-                           <span>Synthesizing Components</span>
-                           <span>85%</span>
-                         </div>
-                       </div>
-                     </div>
-                     <button className="mt-8 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.2em] flex items-center justify-center gap-2 py-3 border border-indigo-500/20 rounded-xl hover:bg-indigo-500/10 transition-all">
-                       Open Full Report <ChevronRight size={14} />
-                     </button>
-                   </div>
-                </div>
+                <button 
+                  onClick={handleExplainStability}
+                  disabled={isThinking}
+                  className="w-full py-4 bg-indigo-600/10 border border-indigo-500/30 text-indigo-400 rounded-2xl flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-600/20 transition-all disabled:opacity-50"
+                >
+                  {isThinking ? <RefreshCcw size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                  Explain Phase Margin Stability
+                </button>
               </div>
             </div>
-            
-            {/* VisCircuit Documentation Link */}
-            <div className="bg-[#161b22] border border-[#30363d] rounded-[32px] p-8 flex items-center justify-between group cursor-pointer hover:border-indigo-500/30 transition-all">
-              <div className="flex items-center gap-6">
-                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-[#484f58] group-hover:text-indigo-400 transition-colors border border-white/5">
-                  <Code size={32} />
-                </div>
-                <div>
-                  <h4 className="text-white font-bold text-sm uppercase tracking-tight mb-1">VisCircuit Documentation Agent</h4>
-                  <p className="text-[11px] text-[#8b949e] uppercase font-bold tracking-widest">Auto-generate Notion-style architecture docs</p>
-                </div>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-[#484f58] group-hover:bg-indigo-500/10 group-hover:text-indigo-400 transition-all">
-                <Sparkles size={20} />
-              </div>
+
+            <AnimatePresence>
+              {stabilityInsight && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-8 bg-indigo-600/5 border border-indigo-500/20 rounded-[32px] relative"
+                >
+                  <button 
+                    onClick={() => setStabilityInsight(null)}
+                    className="absolute top-6 right-6 p-2 hover:bg-white/5 rounded-xl text-[#484f58] hover:text-white transition-colors"
+                  >
+                    <XCircle size={20} />
+                  </button>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
+                      <Microscope size={20} />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white uppercase tracking-widest">Stability Reasoning Expansion</h4>
+                      <p className="text-[10px] text-indigo-400 font-mono font-bold uppercase mt-1">Control Theory Masterclass AI</p>
+                    </div>
+                  </div>
+                  <div className="prose prose-invert prose-xs max-w-none text-indigo-100/70 font-mono leading-relaxed">
+                    <Markdown>{stabilityInsight}</Markdown>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* SPICE Log Console */}
+            <div className="bg-[#0b0e14] border border-[#30363d] rounded-[32px] p-6 font-mono overflow-hidden">
+               <div className="flex items-center gap-2 text-emerald-400/50 mb-4 text-[10px] font-bold uppercase tracking-widest">
+                 <Terminal size={12} /> SPICE Analysis Log
+               </div>
+               <div className="space-y-1 text-[10px] text-[#8b949e]">
+                 <p className="text-emerald-400">[0.000s] .TRAN 1e-9 1e-4 ... OK</p>
+                 <p>[0.002s] Measuring V(OUT) Phase vs V(IN) ... -42.8 deg @ Unity Gain</p>
+                 <p>[0.005s] Calculating PSRR and Noise Figures ... Done.</p>
+                 <p>[0.008s] Slew rate limited by internal mirror currents: 10.4V/μs estimated.</p>
+                 <p className="text-blue-400">[READY] Analysis synchronized with current S-Domain ROC.</p>
+               </div>
             </div>
           </motion.div>
         )}

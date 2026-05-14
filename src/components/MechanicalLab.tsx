@@ -14,7 +14,11 @@ import {
   Activity,
   Layers,
   Save,
-  Trash2
+  Trash2,
+  ChevronDown,
+  ChevronUp,
+  Database,
+  History
 } from "lucide-react";
 import { 
   LineChart, 
@@ -31,10 +35,12 @@ import { db, auth, OperationType, handleFirestoreError } from "../lib/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const MATERIALS = [
-  { id: "steel", name: "Steel (AISI 1045)", yieldStrength: 530, modulus: 200, kFactor: 1.0, color: "text-zinc-400" },
+  { id: "steel", name: "Steel (AISI 1045)", yieldStrength: 530, modulus: 200, kFactor: 1.0, color: "text-zinc-300" },
   { id: "aluminum", name: "Aluminum (6061)", yieldStrength: 275, modulus: 69, kFactor: 0.6, color: "text-blue-300" },
   { id: "titanium", name: "Titanium (Gr 5)", yieldStrength: 880, modulus: 114, kFactor: 2.2, color: "text-purple-400" },
-  { id: "carbide", name: "Tungsten Carbide", yieldStrength: 5000, modulus: 600, kFactor: 5.0, color: "text-orange-400" }
+  { id: "carbide", name: "Tungsten Carbide", yieldStrength: 5000, modulus: 600, kFactor: 5.0, color: "text-orange-400" },
+  { id: "copper", name: "Copper (Pure)", yieldStrength: 70, modulus: 117, kFactor: 0.5, color: "text-orange-300" },
+  { id: "castiron", name: "Gray Cast Iron", yieldStrength: 240, modulus: 100, kFactor: 0.8, color: "text-zinc-500" }
 ];
 
 export function MechanicalLab() {
@@ -44,6 +50,7 @@ export function MechanicalLab() {
   const [isSimulating, setIsSimulating] = useState(false);
   const [history, setHistory] = useState<{time: number, stress: number, temp: number}[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isTableOpen, setIsTableOpen] = useState(false);
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -276,6 +283,78 @@ export function MechanicalLab() {
         </div>
       </div>
 
+      {/* Material Intelligence Table */}
+      <div className="bg-[#161b22] border border-[#30363d] rounded-2xl overflow-hidden shadow-2xl">
+        <button 
+          onClick={() => setIsTableOpen(!isTableOpen)}
+          className="w-full px-8 py-5 flex items-center justify-between hover:bg-white/5 transition-colors group"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+              <Database size={20} />
+            </div>
+            <div className="text-left">
+              <h3 className="text-white font-bold text-sm uppercase tracking-widest">Material Intelligence Repository</h3>
+              <p className="text-[10px] text-[#8b949e] font-mono mt-0.5">V{MATERIALS.length}.0 Protocol • Synchronized with AI Engine</p>
+            </div>
+          </div>
+          <div className={`p-2 rounded-lg bg-white/5 border border-white/10 text-white transition-all ${isTableOpen ? "rotate-180" : ""}`}>
+            <ChevronDown size={16} />
+          </div>
+        </button>
+
+        <AnimatePresence>
+          {isTableOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="px-8 pb-8"
+            >
+              <div className="overflow-x-auto border border-white/5 rounded-2xl">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-black/40">
+                      <th className="px-6 py-4 text-[10px] font-bold text-[#8b949e] uppercase tracking-widest border-b border-white/5">Grade</th>
+                      <th className="px-6 py-4 text-[10px] font-bold text-[#8b949e] uppercase tracking-widest border-b border-white/5">Yield [MPa]</th>
+                      <th className="px-6 py-4 text-[10px] font-bold text-[#8b949e] uppercase tracking-widest border-b border-white/5">Young's Modulus [GPa]</th>
+                      <th className="px-6 py-4 text-[10px] font-bold text-[#8b949e] uppercase tracking-widest border-b border-white/5">K-Factor</th>
+                      <th className="px-6 py-4 text-[10px] font-bold text-center text-[#8b949e] uppercase tracking-widest border-b border-white/5">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {MATERIALS.map(m => (
+                      <tr key={m.id} className={`hover:bg-white/5 transition-colors ${selectedMaterial.id === m.id ? "bg-emerald-500/5" : ""}`}>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-2 h-2 rounded-full ${m.id === "carbide" ? "bg-orange-500" : m.id === "titanium" ? "bg-purple-500" : m.id === "copper" ? "bg-orange-300" : "bg-zinc-400"}`} />
+                            <span className="text-xs font-bold text-white">{m.name}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-xs font-mono text-[#c9d1d9]">{m.yieldStrength}</td>
+                        <td className="px-6 py-4 text-xs font-mono text-[#c9d1d9]">{m.modulus}</td>
+                        <td className="px-6 py-4 text-xs font-mono text-[#c9d1d9]">{m.kFactor.toFixed(1)}</td>
+                        <td className="px-6 py-4 text-center">
+                          <button 
+                            onClick={(e) => {
+                              setSelectedMaterial(m);
+                              setIsTableOpen(false);
+                            }}
+                            className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold text-white hover:bg-emerald-500 hover:text-white transition-all uppercase tracking-widest"
+                          >
+                            Set Active
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
       {/* Visual Analytics */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-[#0d1117] border border-[#30363d] rounded-2xl p-6">
@@ -443,7 +522,7 @@ export function MechanicalLab() {
             <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#8b949e]">Mechanical Masterclass</h4>
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <a href="https://youtu.be/kDJ3QzTCgXM" target="_blank" className="bg-[#0b0e14] border border-[#30363d] rounded-xl overflow-hidden hover:border-emerald-500/50 transition-all group">
               <div className="aspect-video bg-[#161b22] relative flex items-center justify-center">
                 <Play size={24} className="text-white/20 group-hover:text-emerald-500 group-hover:scale-125 transition-all" />
@@ -459,7 +538,16 @@ export function MechanicalLab() {
               </div>
               <div className="p-3">
                 <div className="text-[10px] font-bold text-white mb-1">Mechanical Fundamentals</div>
-                <div className="text-[8px] text-[#484f58] uppercase">Mechanical Made Easy</div>
+                <div className="text-[8px] text-[#484f58] uppercase">Basics & Physics</div>
+              </div>
+            </a>
+            <a href="https://youtu.be/m9pQvF6N7zM" target="_blank" className="bg-[#0b0e14] border border-[#30363d] rounded-xl overflow-hidden hover:border-orange-500/50 transition-all group">
+              <div className="aspect-video bg-[#161b22] relative flex items-center justify-center">
+                <Play size={24} className="text-white/20 group-hover:text-orange-500 group-hover:scale-125 transition-all" />
+              </div>
+              <div className="p-3">
+                <div className="text-[10px] font-bold text-white mb-1">Tool Life Mastery</div>
+                <div className="text-[8px] text-[#484f58] uppercase">Taylor's Equations</div>
               </div>
             </a>
           </div>

@@ -2,11 +2,40 @@
 
 @theme {
   --color-brand-blue: #0066ff;
-  --color-brand-bg: #0d1117;
-  --color-brand-surface: #161b22;
-  --color-brand-border: #30363d;
+  --color-brand-bg: var(--bg-primary);
+  --color-brand-surface: var(--bg-secondary);
+  --color-brand-tertiary: var(--bg-tertiary);
+  --color-brand-border: var(--border-primary);
+  
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
   
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --border-primary: #30363d;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+}
+
+:root.light {
+  --bg-primary: #f6f8fa;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #eff2f5;
+  --border-primary: #d0d7de;
+  --text-primary: #1f2328;
+  --text-secondary: #656d76;
+  --text-muted: #8c959f;
+}
+
+body {
+  @apply bg-brand-bg text-text-primary transition-colors duration-300;
 }
 
 @layer components {
@@ -19,7 +48,7 @@
   }
   
   .btn-secondary {
-    @apply bg-[#21262d] border border-[#30363d] text-[#c9d1d9] hover:bg-[#30363d] hover:border-[#8b949e]/30;
+    @apply bg-brand-tertiary border border-brand-border text-text-secondary hover:bg-brand-border hover:text-text-primary;
   }
   
   .btn-glass {
@@ -27,7 +56,7 @@
   }
   
   .card-tech {
-    @apply bg-[#161b22] border border-[#30363d] rounded-2xl p-6 transition-all hover:border-blue-500/20 shadow-sm;
+    @apply bg-brand-surface border border-brand-border rounded-2xl p-6 transition-all hover:border-blue-500/20 shadow-sm;
   }
   
   .label-mono {
