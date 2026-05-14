@@ -383,7 +383,7 @@ export const MODULES: Record<string, any[]> = {
       active: true, 
       labType: "structural",
       content: {
-        lab_id: "mech_001",
+        lab_id: "civil_001",
         title: "Automated Standards & Site Modeling",
         validation: {
           status: "validated",
