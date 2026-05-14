@@ -15,6 +15,7 @@ import {
   collection
 } from 'firebase/firestore';
 import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { checkSubscriptionStatus } from '../lib/auth-service';
 
 interface UserProfile {
   uid: string;
@@ -24,6 +25,9 @@ interface UserProfile {
   xp: number;
   specialization?: string;
   avatarId?: string;
+  trialStartedAt?: string;
+  trialExpiresAt?: string;
+  isSubscribed: boolean;
 }
 
 interface LabProgressRecord {
@@ -81,14 +85,27 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         
         unsubProfile = onSnapshot(userDocRef, (docSnap) => {
           if (docSnap.exists()) {
-            setProfile(docSnap.data() as UserProfile);
+            const data = docSnap.data() as UserProfile;
+            // Ensure defaults for trial fields
+            if (data.isSubscribed === undefined) data.isSubscribed = false;
+            
+            setProfile(data);
+            
+            // Check subscription/trial status
+            checkSubscriptionStatus(data, setPage);
           } else {
+            const trialEndDate = new Date();
+            trialEndDate.setDate(trialEndDate.getDate() + 7);
+
             const newProfile: UserProfile = {
               uid: user.uid,
               email: user.email || '',
               displayName: user.displayName || 'Scientist',
               photoURL: user.photoURL || '',
-              xp: 0
+              xp: 0,
+              isSubscribed: false,
+              trialStartedAt: new Date().toISOString(),
+              trialExpiresAt: trialEndDate.toISOString()
             };
             setDoc(userDocRef, {
               ...newProfile,

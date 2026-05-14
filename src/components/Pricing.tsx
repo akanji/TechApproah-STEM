@@ -3,7 +3,7 @@ import { CheckCircle2, Zap, Shield, Sparkles, ArrowRight } from "lucide-react";
 import { useUser } from "./UserContext";
 
 export function Pricing() {
-  const { user } = useUser();
+  const { user, setPage } = useUser();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -100,12 +100,11 @@ export function Pricing() {
 
         <div className="relative z-10 p-1 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-500">
           <button
-            onClick={() => handleSubscribe("price_1TWUtuBMbxh6jv0Ca30P5IY1")}
-            disabled={loading}
+            onClick={() => setPage('success')}
             className="w-full py-5 bg-[#0d162d] hover:bg-[#161b22] text-white font-bold rounded-[14px] transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span className="bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent uppercase tracking-[0.2em] text-sm font-black">
-              Start 7-Day Free Trial
+              Simulate Pro Upgrade (Demo)
             </span>
             <ArrowRight size={18} className="text-blue-400 group-hover:translate-x-1 transition-transform" />
           </button>

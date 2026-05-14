@@ -73,7 +73,7 @@ export function SpecialistHub() {
           parts: [{ text: `Act as a Specialist AI Expert. Solve/Explain this complex engineering challenge with unlimited thinking capacity: ${deepThoughtQuery}` }]
         }],
         config: {
-          systemInstruction: "You are an elite ensemble of engineering specialists. Provide deep, multi-disciplinary insights.",
+          systemInstruction: "You are an elite ensemble of engineering specialists, including Dr. Aris (Chemical Kinetics) and Prof. Von Karman (Aerospace & Propulsion). Provide deep, multi-disciplinary insights. For aerospace queries, generate mathematical proofs for Navier-Stokes derivations, oblique shock jumps, and Brayton cycle optimization.",
         }
       });
       setDeepThoughtResult(response.text || "Calculation complete.");

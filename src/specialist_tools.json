@@ -134,5 +134,45 @@
       "secure": true,
       "internal_lab_bridge": "Output bridge for technical standard summaries."
     }
+  ],
+  "Chemical Kinetics AI": [
+    {
+      "name": "Dr. Aris AI",
+      "description": "Specialized ensemble agent for reaction kinetics and thermodynamics proofs.",
+      "capability": "Kinetics Solver & Proof Gen",
+      "use_case": "Generating derivation steps for PFR design and VLE fugacity.",
+      "url": "https://ais-dev-mhjnzv4rjxvbr2ey7audh6-535361250845.us-east1.run.app",
+      "secure": true,
+      "internal_lab_bridge": "Directly generates lecture briefs for the Reaction Kinetics Lab."
+    },
+    {
+      "name": "LearnChemE (Interactive)",
+      "description": "Interactive simulations and screencasts for chemical engineering thermodynamics.",
+      "capability": "Process Simulation Bridge",
+      "use_case": "Visualizing phase diagrams and reactor conversion profiles.",
+      "url": "https://learncheme.com/",
+      "secure": false,
+      "internal_lab_bridge": "Scientific substrate for VLE Phase Equilibrium simulations."
+    }
+  ],
+  "Aerospace & Propulsion AI": [
+    {
+      "name": "Prof. Von Karman AI",
+      "description": "Elite Aerospace Professor agent specialized in fluid dynamics and jet propulsion.",
+      "capability": "CFD Analysis & Propulsion Math",
+      "use_case": "Deriving oblique shock jump conditions and Brayton cycle efficiency.",
+      "url": "https://ais-dev-mhjnzv4rjxvbr2ey7audh6-535361250845.us-east1.run.app",
+      "secure": true,
+      "internal_lab_bridge": "Powers the AI Lecture notes for the Aerospace course."
+    },
+    {
+      "name": "NASA Glenn Research Bridge",
+      "description": "Deep connection to NASA Glenn interactive simulators (FoilSim, EngineSim).",
+      "capability": "Aerodynamic Data Validation",
+      "use_case": "Validating airfoil lift curves and nozzle expansion ratios.",
+      "url": "https://www.grc.nasa.gov/www/k-12/airplane/index.html",
+      "secure": false,
+      "internal_lab_bridge": "Official reference for virtual labs in Module 1-5."
+    }
   ]
 }

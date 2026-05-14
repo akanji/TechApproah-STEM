@@ -50,6 +50,16 @@ export function UserProfile() {
   const xpToNextLevel = 1000 - (profile.xp % 1000);
   const progressPercent = (profile.xp % 1000) / 10;
 
+  const getTrialDaysRemaining = () => {
+    if (!profile.trialExpiresAt) return 0;
+    const expiry = new Date(profile.trialExpiresAt);
+    const now = new Date();
+    const diff = expiry.getTime() - now.getTime();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  };
+
+  const daysLeft = getTrialDaysRemaining();
+
   return (
     <div className="space-y-8 pb-32">
       <header className="flex flex-col items-center text-center space-y-4">
@@ -67,7 +77,14 @@ export function UserProfile() {
         </div>
         <div>
           <h2 className="text-2xl font-bold text-white tracking-tight uppercase">{profile.displayName}</h2>
-          <p className="text-[#8b949e] text-xs font-mono uppercase tracking-widest">Level {level} Elite Scientist</p>
+          <div className="flex items-center justify-center gap-2 mt-1">
+            <p className="text-[#8b949e] text-xs font-mono uppercase tracking-widest">Level {level} Elite Scientist</p>
+            {profile.isSubscribed ? (
+              <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[8px] font-bold border border-emerald-500/20 uppercase tracking-widest">Pro Member</span>
+            ) : (
+              <span className="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 text-[8px] font-bold border border-blue-500/20 uppercase tracking-widest">Trial: {daysLeft}d left</span>
+            )}
+          </div>
         </div>
       </header>
 
@@ -78,37 +95,44 @@ export function UserProfile() {
         
         <div className="relative z-10 space-y-4">
           <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest w-fit">
-            <Sparkles size={12} /> Membership
+            <Sparkles size={12} /> {profile.isSubscribed ? "Premium Access" : "Trial Membership"}
           </div>
-          <h3 className="text-2xl font-bold text-white tracking-tight uppercase">Upgrade Your Research</h3>
+          <h3 className="text-2xl font-bold text-white tracking-tight uppercase">
+            {profile.isSubscribed ? "Pro Features Active" : "Upgrade Your Research"}
+          </h3>
           <p className="text-[#8b949e] text-xs leading-relaxed max-w-sm">
-            Unlock advanced virtual labs, exclusive engineering specialist tools, and unlimited AI sessions with Gemini 3.1.
+            {profile.isSubscribed 
+              ? "Your Pro subscription is active. You have full access to all engineering specialist tools, virtual labs, and Gemini 3.1 AI integration."
+              : "Unlock advanced virtual labs, exclusive engineering specialist tools, and unlimited AI sessions with Gemini 3.1."
+            }
           </p>
 
-          <div className="grid grid-cols-1 gap-3 pt-2">
-            <button 
-              onClick={handleUpgrade}
-              className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 uppercase tracking-widest text-[10px]"
-            >
-              Start 7-Day Free Trial
-            </button>
-            <div className="grid grid-cols-2 gap-3">
+          {!profile.isSubscribed && (
+            <div className="grid grid-cols-1 gap-3 pt-2">
               <button 
                 onClick={handleUpgrade}
-                className="py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition-all flex flex-col items-center justify-center gap-0.5 uppercase tracking-tighter text-[9px]"
+                className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 uppercase tracking-widest text-[10px]"
               >
-                <span>Pro Subscription</span>
-                <span className="opacity-80">$19.99 / Monthly</span>
+                {daysLeft > 0 ? `Resume Trial (${daysLeft} Days Left)` : "Start 7-Day Free Trial"}
               </button>
-              <button 
-                onClick={handleUpgrade}
-                className="py-3 bg-[#161b22] hover:bg-[#1f2937] text-white font-bold rounded-2xl border border-blue-500/30 transition-all shadow-blue-900/20 flex flex-col items-center justify-center gap-0.5 uppercase tracking-tighter text-[9px]"
-              >
-                <span>Premium Access</span>
-                <span className="text-blue-400">$199.99 / Yearly</span>
-              </button>
+              <div className="grid grid-cols-2 gap-3">
+                <button 
+                  onClick={handleUpgrade}
+                  className="py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition-all flex flex-col items-center justify-center gap-0.5 uppercase tracking-tighter text-[9px]"
+                >
+                  <span>Pro Subscription</span>
+                  <span className="opacity-80">$19.99 / Monthly</span>
+                </button>
+                <button 
+                  onClick={handleUpgrade}
+                  className="py-3 bg-[#161b22] hover:bg-[#1f2937] text-white font-bold rounded-2xl border border-blue-500/30 transition-all shadow-blue-900/20 flex flex-col items-center justify-center gap-0.5 uppercase tracking-tighter text-[9px]"
+                >
+                  <span>Premium Access</span>
+                  <span className="text-blue-400">$199.99 / Yearly</span>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 

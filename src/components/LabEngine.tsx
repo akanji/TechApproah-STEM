@@ -19,9 +19,11 @@ import { RampLab } from "./RampLab";
 import { MechanicalLab } from "./MechanicalLab";
 import { BridgeDesignLab } from "./BridgeDesignLab";
 import { FluidDynamicsLab } from "./FluidDynamicsLab";
+import { ReactionKineticsLab } from "./ReactionKineticsLab";
+import { AerospaceLab } from "./AerospaceLab";
 
 interface LabProps {
-  type: "physics" | "ee" | "thermo" | "bio" | "structural" | "mechanical" | "fluid";
+  type: "physics" | "ee" | "thermo" | "bio" | "structural" | "mechanical" | "fluid" | "chemical" | "aerospace";
   labId?: string;
   onComplete: () => void;
 }
@@ -133,6 +135,8 @@ export function LabEngine({ type, labId = "unknown", onComplete }: LabProps) {
         )}
         {type === "mechanical" && <MechanicalLab />}
         {type === "fluid" && <FluidDynamicsLab />}
+        {type === "chemical" && <ReactionKineticsLab labId={labId} />}
+        {type === "aerospace" && <AerospaceLab labId={labId} />}
       </div>
 
       <div className="mt-8 pt-6 border-t border-[#30363d] flex gap-3">

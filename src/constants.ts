@@ -113,15 +113,22 @@ export const LAB_CATALOG = [
   { id: "bio_009", name: "Metabolic Pathway Balancer", category: "bio", type: "bio" },
   { id: "bio_010", name: "Bio-Reactor Fluid Dynamics", category: "bio", type: "bio" },
 
-  // Aerospace (Labs 51-55)
+  // Aerospace (Labs 51-60)
   { id: "aero_001", name: "Wind Tunnel Lift Analyzer", category: "aerospace", type: "physics" },
-  { id: "fluid_001", name: "Bernoulli Flow Dynamics", category: "aerospace", type: "fluid" },
+  { id: "aero_006", name: "NACA 0012 Airfoil Simulator", category: "aerospace", type: "aerospace" },
+  { id: "aero_007", name: "Compressible Mach Calculator", category: "aerospace", type: "aerospace" },
+  { id: "aero_008", name: "Engine Cycle Performance Lab", category: "aerospace", type: "aerospace" },
+  { id: "aero_009", name: "Rocket Nozzle Optimizer", category: "aerospace", type: "aerospace" },
   { id: "aero_002", name: "Orbital Injection Simulator", category: "aerospace", type: "physics" },
   { id: "aero_003", name: "Rocket Engine ISP Bench", category: "aerospace", type: "physics" },
   { id: "aero_004", name: "Avionics Logic Debugger", category: "aerospace", type: "ee" },
   { id: "aero_005", name: "Composite Stress Mapping", category: "aerospace", type: "mechanical" },
   { id: "thermo_001", name: "Conductive Heat Transfer Lab", category: "mechanical", type: "thermo" },
   { id: "fluid_001", name: "Hydrodynamic Pressure Lab", category: "aerospace", type: "fluid" },
+  { id: "chem_001", name: "CSTR Reaction Kinetics Lab", category: "chemical", type: "chemical" },
+  { id: "chem_002", name: "PFR Performance & Design Lab", category: "chemical", type: "chemical" },
+  { id: "chem_003", name: "VLE Phase Diagram Simulator", category: "chemical", type: "chemical" },
+  { id: "chem_004", name: "Catalytic Reactor Bench", category: "chemical", type: "chemical" },
 ];
 
 export const MODULES: Record<string, any[]> = {
@@ -858,6 +865,425 @@ Critical processes include project scheduling, estimating, site investigation, a
         resources: [
           { type: "video", url: "https://youtu.be/V-IwuBEa0PE", desc: "Fluids in Engineering" }
         ]
+      }
+    }
+  ],
+  chemical: [
+    {
+      id: 1,
+      title: "Classical Thermodynamics",
+      duration: "45 min",
+      xp: 500,
+      active: true,
+      content: {
+        title: "Classical Thermodynamics",
+        ai_notes: {
+          definition: "First and Second Laws, Entropy, Equations of State (EOS), Volumetric properties of pure fluids.",
+          technical_breakdown: [
+            "Energy Conservation (1st Law)",
+            "Entropy & Irreversibility (2nd Law)",
+            "Equations of State (PVT relationships)",
+            "Volumetric properties of pure fluids"
+          ],
+          study_guide: `# Classical Thermodynamics
+## 1. Core Principles
+- **First Law**: Energy conservation in closed and open systems.
+- **Second Law**: Entropy generation and the directionality of processes.
+- **PVT Behavior**: Modeling real gases using Cubic Equations of State (e.g., SRK, PR).
+
+## 2. Key Learnings
+Consult *A Textbook of Chemical Engineering Thermodynamics* for detailed explanations of entropy and phase transitions.`,
+          quiz: [
+            { q: "What does the Second Law of Thermodynamics primarily define?", a: "The concept of entropy and the irreversibility of natural processes." },
+            { q: "Which property relates pressure, volume, and temperature for a fluid?", a: "Equation of State (EOS)." }
+          ]
+        },
+        resources: [
+          { type: "video", url: "https://www.youtube.com/playlist?list=PL647D5C5A8B88C430", desc: "MIT 5.60 Thermodynamics & Kinetics" },
+          { type: "video", url: "https://youtu.be/QTeZrEx1muM", desc: "Chemical Engineering Thermodynamics" },
+          { type: "link", url: "https://www.scribd.com/document/461028708/Kinetics-and-Thermodynamics-Course-Overview", desc: "Course Overview on Scribd" }
+        ]
+      }
+    },
+    {
+      id: 2,
+      title: "Solution Thermodynamics",
+      duration: "60 min",
+      xp: 650,
+      active: true,
+      labType: "chemical",
+      content: {
+        lab_id: "chem_003",
+        title: "Solution Thermodynamics & VLE",
+        ai_notes: {
+          definition: "Partial molar properties, Fugacity, Activity Coefficient models, Vapor-Liquid Equilibrium (VLE).",
+          technical_breakdown: [
+            "Chemical Potential & Partial Molar Properties",
+            "Fugacity & Fugacity Coefficient",
+            "Activity Coefficients & Excess Gibbs Free Energy",
+            "Vapor-Liquid Equilibrium (VLE)"
+          ],
+          study_guide: `# Solution Thermodynamics
+## 1. Key Concepts
+- **Chemical Potential**: The driving force for mass transfer and phase change.
+- **Fugacity**: A measure of the chemical potential in a more manageable form.
+- **Activity Coefficients**: Correcting for non-ideality in liquid phases.
+
+## 2. Modeling VLE
+Learn to derive Activity Coefficients from Excess Gibbs Free Energy equations.`,
+          quiz: [
+            { q: "What is fugacity used for in solution thermodynamics?", a: "To represent chemical potential in a way that simplifies equilibrium calculations." },
+            { q: "What does VLE stand for?", a: "Vapor-Liquid Equilibrium." }
+          ]
+        },
+        resources: [
+          { type: "video", url: "https://www.youtube.com/playlist?list=PL4xAk5aclnUjJg9vL268b8bI_UOpv1V-I", desc: "Chemical Engineering Thermodynamics I" },
+          { type: "link", url: "https://learncheme.com/", desc: "LearnChemE - Interactive Simulations" }
+        ]
+      }
+    },
+    {
+      id: 3,
+      title: "Chemical Reaction Kinetics",
+      duration: "50 min",
+      xp: 600,
+      active: true,
+      content: {
+        title: "Chemical Reaction Kinetics",
+        ai_notes: {
+          definition: "Homogeneous rate laws, Reaction orders, Temperature dependence (Arrhenius equation).",
+          technical_breakdown: [
+            "Rate of Reaction & Stoichiometry",
+            "Reaction Order & Rate Constants",
+            "Temperature Dependence (Arrhenius Law)",
+            "Reaction Mechanisms"
+          ],
+          study_guide: `# Chemical Reaction Kinetics
+## 1. Fundamentals
+- **Rate Laws**: Mathematical expressions relating reaction rate to concentrations.
+- **Arrhenius Equation**: $k = A e^{-E_a/RT}$. Defines how temperature affects reaction speed.
+- **Global Activation Energy**: Understanding $E_a$ through Arrhenius plots.`,
+          quiz: [
+            { q: "What is the Arrhenius equation used for?", a: "To model the temperature dependence of reaction rate constants." },
+            { q: "Define reaction order.", a: "The power to which a concentration term is raised in the rate law." }
+          ]
+        },
+        resources: [
+          { type: "video", url: "https://youtu.be/0E5j91s1kRo", desc: "Chemical Reaction Engineering" },
+          { type: "video", url: "https://www.youtube.com/watch?v=5-EisYVbXQk", desc: "MIT Lecture: Intro to Thermodynamics" }
+        ]
+      }
+    },
+    {
+      id: 4,
+      title: "Ideal & Real Reactor Design",
+      duration: "55 min",
+      xp: 700,
+      active: true,
+      labType: "chemical",
+      content: {
+        lab_id: "chem_001",
+        title: "Ideal & Real Reactor Design",
+        ai_notes: {
+          definition: "Material balances for Batch, Continuous Stirred-Tank (CSTR), and Plug Flow Reactors (PFR).",
+          technical_breakdown: [
+            "Batch Reactor Kinetics",
+            "CSTR Design Equations",
+            "PFR Performance & Design",
+            "Non-isothermal Reactor Operation"
+          ],
+          study_guide: `# Reactor Design
+## 1. Types of Reactors
+- **Batch**: Uniform concentration, varying with time.
+- **CSTR**: Perfectly mixed, steady-state operation.
+- **PFR**: Concentration varies along the reactor length.
+
+## 2. Mass & Energy Balances
+Equations for non-isothermal, second-order kinetics in CSTRs.`,
+          quiz: [
+            { q: "What is the primary assumption of a CSTR?", a: "Perfect mixing, resulting in uniform concentration throughout the reactor." },
+            { q: "Which reactor type has properties that vary with length?", a: "Plug Flow Reactor (PFR)." }
+          ]
+        },
+        resources: [
+          { type: "video", url: "https://youtu.be/UxPQwTLk54c", desc: "Chemical Reaction Engineering - Overview" },
+          { type: "link", url: "https://colab.research.google.com/", desc: "Google Colab for Reactor Modeling" }
+        ]
+      }
+    },
+    {
+      id: 5,
+      title: "Heterogeneous Catalysis",
+      duration: "40 min",
+      xp: 550,
+      active: true,
+      labType: "chemical",
+      content: {
+        lab_id: "chem_004",
+        title: "Heterogeneous Catalysis",
+        ai_notes: {
+          definition: "Langmuir-Hinshelwood kinetics, Catalytic mechanisms, Intraparticle diffusion, Fixed-bed reactors.",
+          technical_breakdown: [
+            "Adsorption, Surface Reaction, & Desorption",
+            "Langmuir-Hinshelwood Models",
+            "Diffusion Limitations",
+            "Fixed-bed Reactor Design"
+          ],
+          study_guide: `# Heterogeneous Catalysis
+## 1. Catalytic Mechanisms
+- **Adsorption**: Reactants binding to the catalyst surface.
+- **Surface Reaction**: The core chemical transformation.
+- **Desorption**: Products leaving the surface.
+
+## 2. Kinetics
+Understanding Langmuir-Hinshelwood models for solid-catalyzed gas reactions.`,
+          quiz: [
+            { q: "What are the three main steps in a catalytic surface reaction?", a: "Adsorption, surface reaction, and desorption." },
+            { q: "How does a catalyst affect a reaction?", a: "By providing an alternative pathway with a lower activation energy." }
+          ]
+        },
+        resources: [
+          { type: "link", url: "https://uclouvain.be/en/study-guide/course-2023-lmapr1310.html", desc: "UCLouvain Kinetics Guide" }
+        ]
+      }
+    },
+    {
+      id: 6,
+      title: "AI Studio Prompt Frameworks",
+      duration: "20 min",
+      xp: 400,
+      active: true,
+      content: {
+        title: "Chemical Eng. AI Prompts",
+        ai_notes: {
+          definition: "Curated blueprints for Google AI Studio to generate technical content and virtual lab guides.",
+          study_guide: `# AI Studio Prompt Frameworks
+To generate customized text content, lecture materials, and step-by-step mathematical proofs, use these prompt blueprints in Google AI Studio.
+
+## 1. Prompt for Lecture Notes & AI Briefs
+**System Prompt**: You are an expert university professor in Chemical Engineering.
+**User Prompt**: *Generate a comprehensive, highly technical lecture note overview for a module on Solution Thermodynamics. Ensure you explicitly cover the definition of the Chemical Potential, the physical significance of Fugacity and the Fugacity Coefficient, and the mathematical derivation of Activity Coefficients from Excess Gibbs Free Energy equations. Include markdown tables summarizing the most common cubic equations of state (SRK and PR) alongside their specific advantages and engineering limitations.*
+
+## 2. Prompt for Virtual Lab Guides
+**System Prompt**: You are a senior Chemical Process Engineer and Lab Instructor.
+**User Prompt**: *Create a detailed digital laboratory guide for an undergraduate experiment centered on a non-isothermal, second-order liquid-phase saponification reaction occurring inside a Continuous Stirred-Tank Reactor (CSTR). Provide the exact governing differential equations for both mass and energy balances, outline a step-by-step procedural workflow for a simulated environment, and define data analysis parameters requiring the student to calculate the global activation energy ($E_{a}$) using an Arrhenius plot.*`
+        }
+      }
+    }
+  ],
+  aerospace: [
+    {
+      id: 1,
+      title: "Fundamentals of Aerodynamics",
+      duration: "45 min",
+      xp: 500,
+      active: true,
+      content: {
+        lab_id: "aero_001",
+        title: "Fundamentals of Aerodynamics",
+        ai_notes: {
+          definition: "Fluid properties, continuity, momentum, energy equations, and potential flow theory.",
+          technical_breakdown: [
+            "Fluid Properties",
+            "Continuity Equation",
+            "Momentum & Energy Balances",
+            "Potential Flow Theory"
+          ],
+          study_guide: `# Fundamentals of Aerodynamics
+## 1. Navier-Stokes Equations
+The governing equations for viscous fluid flow, derived from momentum conservation:
+$\rho (\frac{\partial \mathbf{u}}{\partial t} + \mathbf{u} \cdot \nabla \mathbf{u}) = -\nabla p + \mu \nabla^2 \mathbf{u} + \mathbf{f}$
+
+## 2. Boundary Layer Theory
+Focus on how boundary layer thickness ($\delta$) and skin friction ($C_f$) are dictated by the Reynolds number ($Re$).
+
+## 3. Potential Flow Theory
+Using Laplace's Equation ($\nabla^2 \phi = 0$) to model ideal, irrotational flow patterns around airfoils.`,
+          quiz: [
+            { q: "What does boundary layer theory help determine?", a: "Skin friction drag." },
+            { q: "Which equations govern viscous fluid flows?", a: "Navier-Stokes equations." }
+          ]
+        },
+        resources: [
+          { type: "video", url: "https://youtu.be/kIGOr3xHYmQ", desc: "Fundamentals of Aerodynamics" },
+          { type: "video", url: "https://youtu.be/wqdbpiYpsyE", desc: "Kinematics of Fluid Motion" },
+          { type: "video", url: "https://youtu.be/OZtBkfnhsU0", desc: "What is Aerospace Engineering?" },
+          { type: "link", url: "https://www.grc.nasa.gov/www/k-12/airplane/foil2.html", desc: "NASA Glenn FoilSim Simulator" }
+        ]
+      }
+    },
+    {
+      id: 2,
+      title: "Incompressible Flow & Airfoil Theory",
+      duration: "60 min",
+      xp: 650,
+      active: true,
+      labType: "aerospace",
+      content: {
+        lab_id: "aero_006",
+        title: "Incompressible Flow & Airfoil Theory",
+        ai_notes: {
+          definition: "Kutta-Joukowski theorem, thin airfoil theory, finite wing theory, and induced drag.",
+          technical_breakdown: [
+            "Lift Generation (Kutta-Joukowski)",
+            "Thin Airfoil Theory Predictions",
+            "Finite Wing & Induced Drag",
+            "Lift-to-Drag Ratios"
+          ],
+          study_guide: `# Airfoil Theory
+## 1. Key Concepts
+- **Thin Airfoil Theory**: Predicts a lift curve slope of 2π per radian for symmetric airfoils.
+- **Kutta-Joukowski Theorem**: Relates lift to circulation around an airfoil.
+- **Induced Drag**: Drag caused by the creation of lift on a finite wing.
+
+## 2. Practical Analysis
+Visualizing lift and downwash vectors helps understand wing performance at various angles of attack.`,
+          quiz: [
+            { q: "What is the lift curve slope predicted by thin airfoil theory?", a: "2π per radian." },
+            { q: "What causes induced drag?", a: "The creation of lift on a wing of finite span." }
+          ]
+        },
+        resources: [
+          { type: "video", url: "https://youtu.be/7HGlHvkKoKc", desc: "Laboratories of Aerospace Engineering" },
+          { type: "link", url: "https://web.mit.edu/drela/Public/web/xfoil/", desc: "XFOIL Airfoil Analysis" }
+        ]
+      }
+    },
+    {
+      id: 3,
+      title: "Compressible Flow & Shock Waves",
+      duration: "50 min",
+      xp: 600,
+      active: true,
+      labType: "aerospace",
+      content: {
+        lab_id: "aero_007",
+        title: "Compressible Flow & Shock Waves",
+        ai_notes: {
+          definition: "Isentropic flow, normal and oblique shock waves, expansion fans, and De Laval nozzles.",
+          technical_breakdown: [
+            "Mach Number Distributions",
+            "Shock Wave Discontinuities",
+            "Stagnation Pressure Losses",
+            "Nozzle Expansion Ratios"
+          ],
+          study_guide: `# Compressible Flow
+## 1. Core Principles
+- **Shock Waves**: Cause discontinuous jumps in pressure, density, and temperature.
+- **De Laval Nozzles**: Converging-diverging geometry for accelerating flows to supersonic speeds.
+- **Expansion Fans**: Smooth transitions from high to low pressure in supersonic regimes.
+
+## 2. AI Study Brief
+Stagnation pressure always decreases across a shock wave, representing an increase in entropy.`,
+          quiz: [
+            { q: "What happens to stagnation pressure across a shock wave?", a: "It decreases." },
+            { q: "What type of nozzle is used to accelerate flow to supersonic speeds?", a: "De Laval (converging-diverging) nozzle." }
+          ]
+        },
+        resources: [
+          { type: "link", url: "https://www.grc.nasa.gov/www/k-12/airplane/compressible.html", desc: "NASA Glenn Compressible Aerodynamics" }
+        ]
+      }
+    },
+    {
+      id: 4,
+      title: "Aircraft Propulsion Systems",
+      duration: "55 min",
+      xp: 700,
+      active: true,
+      labType: "aerospace",
+      content: {
+        lab_id: "aero_008",
+        title: "Aircraft Propulsion & Air-Breathing Engines",
+        ai_notes: {
+          definition: "Brayton cycle efficiency, turbojets, turbofans, turboprops, and ramjets.",
+          technical_breakdown: [
+            "Engine Cycle Performance",
+            "Brayton Cycle Analysis",
+            "Thrust Generation Mechanics",
+            "Specific Fuel Consumption"
+          ],
+          study_guide: `# Aircraft Propulsion
+## 1. Engine Types
+- **Turbojet**: Pure jet thrust.
+- **Turbofan**: High efficiency via bypass air.
+- **Ramjet**: High-speed propulsion without moving parts.
+
+## 2. Thermodynamics
+Thrust is generated by maximizing the mass flow rate of air and the change in velocity through the engine core.`,
+          quiz: [
+            { q: "Which thermodynamic cycle describes the operation of gas turbine engines?", a: "Brayton cycle." },
+            { q: "What is the primary way thrust is maximized in jet engines?", a: "By maximizing mass flow rate and velocity change of exhaust gases." }
+          ]
+        },
+        resources: [
+          { type: "link", url: "https://www.rolls-royce.com/sustainability/learning/", desc: "Rolls-Royce Learning Hub" },
+          { type: "link", url: "https://www.grc.nasa.gov/www/k-12/airplane/ngmsim.html", desc: "NASA Glenn EngineSim" }
+        ]
+      }
+    },
+    {
+      id: 5,
+      title: "Rocket Propulsion & Space Dynamics",
+      duration: "40 min",
+      xp: 550,
+      active: true,
+      labType: "aerospace",
+      content: {
+        lab_id: "aero_009",
+        title: "Rocket Propulsion & Space Dynamics",
+        ai_notes: {
+          definition: "The Tsiolkovsky Rocket Equation, Isp, chemical rockets, and optimal nozzle design.",
+          technical_breakdown: [
+            "Rocket Equation Derivation",
+            "Specific Impulse (Isp)",
+            "Solid vs. Liquid Propellants",
+            "Nozzle Expansion for Vacuum"
+          ],
+          study_guide: `# Rocket Propulsion & Dynamics
+## 1. Derivation of the Rocket Equation
+The Tsiolkovsky rocket equation relates the change in velocity ($\Delta v$) to the effective exhaust velocity ($v_e$) and the initial and final mass of the rocket ($m_0, m_f$).
+
+**Derivation steps:**
+1. Momentum conservation: $m v = (m - dm)(v + dv) + dm(v - v_e)$
+2. Expand: $m v = m v + m dv - v dm - dm dv + v dm - v_e dm$
+3. Simplify (neglect $dm dv$): $m dv = v_e dm$
+4. Separate variables: $dv = v_e \frac{dm}{m}$
+5. Integrate: $\int_0^{\Delta v} dv = v_e \int_{m_f}^{m_0} \frac{1}{m} dm$
+6. Result: **$\Delta v = v_e \ln(\frac{m_0}{m_f})$** or **$\Delta v = I_{sp} g_0 \ln(\frac{m_0}{m_f})$**
+
+## 2. Specific Impulse ($I_{sp}$)
+$I_{sp}$ is a measure of how effectively a rocket uses propellant. High combustion temperatures and low molecular weight exhaust gases maximize $I_{sp}$.`,
+          quiz: [
+            { q: "What does Isp measure in rocketry?", a: "Propellant efficiency (Specific Impulse)." },
+            { q: "How can you maximize Specific Impulse?", a: "By using high combustion temperatures and low molecular weight exhaust gases." }
+          ]
+        },
+        resources: [
+          { type: "link", url: "https://www.propulsion-analysis.com/", desc: "Rocket Propulsion Analysis Software" }
+        ]
+      }
+    },
+    {
+      id: 6,
+      title: "AI Studio Aerospace Prompts",
+      duration: "20 min",
+      xp: 400,
+      active: true,
+      content: {
+        title: "Aerospace AI Prompts",
+        ai_notes: {
+          definition: "BLUEPRINTS for Google AI Studio to generate aerospace lecture content and Lab manuals.",
+          study_guide: `# AI Studio Aerospace Prompts
+
+## 1. Prompt for Detailed Lecture Notes
+**System Prompt**: You are an expert Aerospace Engineering Professor.
+**User Prompt**: *Generate highly detailed academic notes for a lecture on Oblique Shock Waves, including core mathematical derivations, physical interpretations, and three practice problems with step-by-step solutions.*
+
+## 2. Prompt for CFD Lab Guides
+**System Prompt**: Act as a lab instructor.
+**User Prompt**: *Create a step-by-step PDF manual for an open-source CFD lab using XFOIL to analyze the aerodynamic stall characteristics of a NACA 4412 airfoil.*`
+        }
       }
     }
   ]
