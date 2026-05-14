@@ -46,6 +46,8 @@ interface UserContextType {
   logout: () => Promise<void>;
   updateXP: (amount: number) => Promise<void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<void>;
+  theme: "dark" | "blue" | "emerald";
+  setTheme: (theme: "dark" | "blue" | "emerald") => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -56,6 +58,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [progress, setProgress] = useState<Record<string, LabProgressRecord>>({});
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(() => localStorage.getItem("eng_page") || "home");
+  const [theme, setThemeState] = useState<"dark" | "blue" | "emerald">(() => (localStorage.getItem("eng_theme") as any) || "dark");
+
+  const setTheme = (t: "dark" | "blue" | "emerald") => {
+    setThemeState(t);
+    localStorage.setItem("eng_theme", t);
+  };
 
   useEffect(() => {
     localStorage.setItem("eng_page", page);
@@ -162,7 +170,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <UserContext.Provider value={{ user, profile, progress, loading, page, setPage, login, logout, updateXP, updateProfile }}>
+    <UserContext.Provider value={{ user, profile, progress, loading, page, setPage, login, logout, updateXP, updateProfile, theme, setTheme }}>
       {children}
     </UserContext.Provider>
   );

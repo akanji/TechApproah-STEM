@@ -115,10 +115,13 @@ export const LAB_CATALOG = [
 
   // Aerospace (Labs 51-55)
   { id: "aero_001", name: "Wind Tunnel Lift Analyzer", category: "aerospace", type: "physics" },
+  { id: "fluid_001", name: "Bernoulli Flow Dynamics", category: "aerospace", type: "fluid" },
   { id: "aero_002", name: "Orbital Injection Simulator", category: "aerospace", type: "physics" },
   { id: "aero_003", name: "Rocket Engine ISP Bench", category: "aerospace", type: "physics" },
   { id: "aero_004", name: "Avionics Logic Debugger", category: "aerospace", type: "ee" },
   { id: "aero_005", name: "Composite Stress Mapping", category: "aerospace", type: "mechanical" },
+  { id: "thermo_001", name: "Conductive Heat Transfer Lab", category: "mechanical", type: "thermo" },
+  { id: "fluid_001", name: "Hydrodynamic Pressure Lab", category: "aerospace", type: "fluid" },
 ];
 
 export const MODULES: Record<string, any[]> = {
@@ -806,6 +809,54 @@ Critical processes include project scheduling, estimating, site investigation, a
           {type: "video", url: "https://youtu.be/dhyAjUuDEGs", desc: "Production Engineering Essentials"},
           {type: "video", url: "https://youtu.be/kDJ3QzTCgXM", desc: "CNC Machining Process"},
           {type: "video", url: "https://youtu.be/-53F9sxYKi4", desc: "Intro to Thermodynamics"}
+        ]
+      }
+    },
+    {
+      id: 3,
+      title: "Heat Transfer & Thermodynamics",
+      duration: "35 min",
+      xp: 400,
+      active: true,
+      labType: "thermo",
+      content: {
+        lab_id: "thermo_001",
+        title: "Conductive Heat Transfer Lab",
+        ai_notes: {
+          definition: "Analysis of heat energy transfer through solid materials via molecular vibration (Conduction).",
+          formulas: ["q = -k * A * (dT/dx)", "R_th = L / (k * A)"],
+          technical_breakdown: [
+            "Fourier's Law applications",
+            "Thermal conductivity (k) comparison",
+            "Insulation efficiency in high-temp environments"
+          ]
+        },
+        resources: [
+          { type: "video", url: "https://youtu.be/Lu76Ua2AR4w", desc: "Heat Transfer Fundamentals" }
+        ]
+      }
+    },
+    {
+      id: 4,
+      title: "Pipe Flow & Bernoulli",
+      duration: "40 min",
+      xp: 450,
+      active: true,
+      labType: "fluid",
+      content: {
+        lab_id: "fluid_001",
+        title: "Hydrodynamic Pressure Lab",
+        ai_notes: {
+          definition: "Deep dive into internal flows, Reynolds numbers, and pressure losses in plumbing systems.",
+          formulas: ["Re = (ρvD)/μ", "hL = f(L/D)(v²/2g)"],
+          technical_breakdown: [
+            "Laminar vs Turbulent regimes",
+            "Darcy-Weisbach head loss",
+            "Bernoulli's Principle for pressure-velocity trade-off"
+          ]
+        },
+        resources: [
+          { type: "video", url: "https://youtu.be/V-IwuBEa0PE", desc: "Fluids in Engineering" }
         ]
       }
     }

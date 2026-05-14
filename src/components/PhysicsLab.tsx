@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Box, Info, ChevronDown, ChevronUp, Scale, Settings2, BarChart2 } from "lucide-react";
+import { Box, Info, ChevronDown, ChevronUp, Scale, Settings2, BarChart2, Zap } from "lucide-react";
 import { 
   ScatterChart, 
   Scatter, 
@@ -11,6 +11,10 @@ import {
   ResponsiveContainer,
   Cell
 } from "recharts";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { useUser } from "./UserContext";
+import { db, auth, handleFirestoreError, OperationType } from "../lib/firebase";
+import { Save, RefreshCcw } from "lucide-react";
 
 interface PhysicsLabProps {
   onComplete?: () => void;
@@ -23,16 +27,63 @@ export function PhysicsLab({ onComplete }: PhysicsLabProps) {
   const [force, setForce] = useState(20);
   const [friction, setFriction] = useState(0.1);
   const [drag, setDrag] = useState(0); // Air Resistance
-  const [gravityType, setGravityType] = useState<"earth" | "moon" | "mars">("earth");
+  const [gravityType, setGravityType] = useState<"earth" | "moon" | "mars" | "zero">("earth");
   const [velocity, setVelocity] = useState(0);
   const [position, setPosition] = useState(0);
   const [isSimulating, setIsSimulating] = useState(false);
   const [unitSystem, setUnitSystem] = useState<UnitSystem>("metric");
   const [showTheory, setShowTheory] = useState(false);
   const [graphData, setGraphData] = useState<{force: number, velocity: number}[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const { theme, setTheme } = useUser();
+
+  // Persistence: Load
+  useEffect(() => {
+    const loadConfig = async () => {
+      if (!auth.currentUser) return;
+      try {
+        const docRef = doc(db, "users", auth.currentUser.uid, "labConfigs", "physics");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setMass(data.mass ?? 5);
+          setForce(data.force ?? 20);
+          setFriction(data.friction ?? 0.1);
+          setDrag(data.drag ?? 0);
+          setGravityType(data.gravityType ?? "earth");
+          setUnitSystem(data.unitSystem ?? "metric");
+        }
+      } catch (error) {
+        handleFirestoreError(error, OperationType.GET, "labConfigs/physics");
+      }
+    };
+    loadConfig();
+  }, []);
+
+  // Persistence: Save
+  const saveConfig = async () => {
+    if (!auth.currentUser) return;
+    setIsSaving(true);
+    try {
+      const docRef = doc(db, "users", auth.currentUser.uid, "labConfigs", "physics");
+      await setDoc(docRef, {
+        mass,
+        force,
+        friction,
+        drag,
+        gravityType,
+        unitSystem,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, "labConfigs/physics");
+    } finally {
+      setIsSaving(false);
+    }
+  };
   
   // Constants
-  const GRAVITY_MAP = { earth: 9.81, moon: 1.62, mars: 3.71 };
+  const GRAVITY_MAP = { earth: 9.81, moon: 1.62, mars: 3.71, zero: 0 };
   const baseG = GRAVITY_MAP[gravityType];
   const gravity = unitSystem === "metric" ? baseG : baseG * 3.2808;
   
@@ -101,23 +152,55 @@ export function PhysicsLab({ onComplete }: PhysicsLabProps) {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6 max-w-4xl mx-auto pb-12">
+      {/* Module Header */}
+      <div className="flex justify-between items-center bg-[#161b22] border border-[#30363d] px-6 py-3 rounded-2xl">
+         <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[10px] font-bold text-white uppercase tracking-[0.2em]">Physics Dynamics Lab</span>
+         </div>
+         <div className="flex items-center gap-2">
+            <span className="text-[9px] font-bold text-[#484f58] uppercase">Theme:</span>
+            <div className="flex bg-black/40 rounded-lg p-1 border border-white/5">
+              {(["dark", "blue", "emerald"] as const).map(t => (
+                <button 
+                  key={t}
+                  onClick={() => setTheme(t)}
+                  className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${theme === t ? "bg-white/10 text-white" : "text-[#484f58] hover:text-[#8b949e]"}`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+         </div>
+      </div>
+
       {/* Header with Unit Toggle */}
-      <div className="flex justify-between items-center bg-[#161b22] border border-[#30363d] p-3 rounded-xl">
+      <div className="flex justify-between items-center bg-[#161b22] border border-[#30363d] p-3 rounded-xl shadow-lg">
         <div className="flex items-center gap-2 text-white font-semibold">
           <Settings2 size={16} className="text-blue-400" />
           <span>Simulation Controls</span>
         </div>
-        <button 
-          onClick={() => setUnitSystem(u => u === "metric" ? "imperial" : "metric")}
-          className="flex items-center gap-2 px-3 py-1 bg-[#21262d] border border-[#30363d] rounded-lg text-xs font-bold text-[#8b949e] hover:text-white transition-all"
-        >
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={saveConfig}
+            disabled={isSaving}
+            className="flex items-center gap-2 px-3 py-1 bg-[#21262d] border border-[#30363d] rounded-lg text-xs font-bold text-[#8b949e] hover:text-white transition-all disabled:opacity-50"
+          >
+            {isSaving ? <RefreshCcw size={12} className="animate-spin" /> : <Save size={12} />}
+            {isSaving ? "Saving..." : "Save State"}
+          </button>
+          <button 
+            onClick={() => setUnitSystem(u => u === "metric" ? "imperial" : "metric")}
+            className="flex items-center gap-2 px-3 py-1 bg-[#21262d] border border-[#30363d] rounded-lg text-xs font-bold text-[#8b949e] hover:text-white transition-all"
+          >
           <Scale size={14} />
           {unitSystem === "metric" ? "Metric (SI)" : "Imperial"}
         </button>
       </div>
+    </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Controls */}
         <div className="space-y-4 col-span-1">
           <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-4">
@@ -143,8 +226,8 @@ export function PhysicsLab({ onComplete }: PhysicsLabProps) {
           </div>
           <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-4">
             <div className="text-[10px] uppercase font-bold text-purple-400 mb-2">Gravity Presets</div>
-            <div className="grid grid-cols-3 gap-2 mt-2">
-              {(['earth', 'moon', 'mars'] as const).map(g => (
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {(['earth', 'moon', 'mars', 'zero'] as const).map(g => (
                 <button 
                   key={g}
                   onClick={() => setGravityType(g)}

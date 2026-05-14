@@ -12,7 +12,9 @@ import {
   Waves,
   Activity,
   PlayCircle,
-  Save
+  Save,
+  Sun,
+  Moon
 } from "lucide-react";
 import { 
   BarChart, 
@@ -29,6 +31,7 @@ import {
 } from "recharts";
 import { db, auth, OperationType, handleFirestoreError } from "../lib/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { useUser } from "./UserContext";
 
 interface LoadData {
   name: string;
@@ -55,6 +58,7 @@ export function BridgeDesignLab() {
   const [activeTab, setActiveTab] = useState<"simulator" | "fea">("simulator");
   const [simulationActive, setSimulationActive] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const { theme, setTheme } = useUser();
   const [history, setHistory] = useState<{ time: number; load: number }[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -151,7 +155,29 @@ export function BridgeDesignLab() {
   }));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
+      {/* Module Header */}
+      <div className="flex justify-between items-center bg-[#161b22] border border-[#30363d] px-6 py-3 rounded-2xl">
+         <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+            <span className="text-[10px] font-bold text-white uppercase tracking-[0.2em]">Bridge Architecture Lab</span>
+         </div>
+         <div className="flex items-center gap-2">
+            <span className="text-[9px] font-bold text-[#484f58] uppercase">Theme:</span>
+            <div className="flex bg-black/40 rounded-lg p-1 border border-white/5">
+              {(["dark", "blue", "emerald"] as const).map(t => (
+                <button 
+                  key={t}
+                  onClick={() => setTheme(t)}
+                  className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${theme === t ? "bg-white/10 text-white" : "text-[#484f58] hover:text-[#8b949e]"}`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+         </div>
+      </div>
+
       {/* Simulation Header */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-[#161b22] border border-[#30363d] rounded-2xl p-8 relative overflow-hidden">

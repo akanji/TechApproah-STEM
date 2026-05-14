@@ -168,6 +168,21 @@ export function UserProfile() {
             >
               Sign Out session
             </button>
+
+            <div className="pt-4 border-t border-[#30363d] flex justify-center gap-6">
+              <button 
+                onClick={() => setPage('privacy')}
+                className="text-[10px] text-[#484f58] uppercase font-bold hover:text-white transition-colors"
+              >
+                Privacy Policy
+              </button>
+              <button 
+                onClick={() => setPage('support')}
+                className="text-[10px] text-[#484f58] uppercase font-bold hover:text-white transition-colors"
+              >
+                Support Center
+              </button>
+            </div>
           </div>
         </div>
 

@@ -11,15 +11,17 @@ import { StructuralGeotechLab } from "./StructuralGeotechLab";
 import { PhysicsLab } from "./PhysicsLab";
 import { EELab } from "./EELab";
 import { ThermoLab } from "./ThermoLab";
+import { ThermodynamicsLab } from "./ThermodynamicsLab";
 import { BioLabSimple } from "./BioLabSimple";
 import { StructuralLab } from "./StructuralLab";
 import { KineticEnergyLab } from "./KineticEnergyLab";
 import { RampLab } from "./RampLab";
 import { MechanicalLab } from "./MechanicalLab";
 import { BridgeDesignLab } from "./BridgeDesignLab";
+import { FluidDynamicsLab } from "./FluidDynamicsLab";
 
 interface LabProps {
-  type: "physics" | "ee" | "thermo" | "bio" | "structural" | "mechanical";
+  type: "physics" | "ee" | "thermo" | "bio" | "structural" | "mechanical" | "fluid";
   labId?: string;
   onComplete: () => void;
 }
@@ -120,7 +122,9 @@ export function LabEngine({ type, labId = "unknown", onComplete }: LabProps) {
           <PhysicsLab />
         )}
         {type === "ee" && <EELab labId={labId} />}
-        {type === "thermo" && <ThermoLab />}
+        {type === "thermo" && (
+          labId === "thermo_001" ? <ThermodynamicsLab /> : <ThermoLab />
+        )}
         {type === "bio" && <BioSimulator labId={labId} onComplete={onComplete} />}
         {type === "structural" && (
           labId === "mech_001" ? <StructuralGeotechLab /> : 
@@ -128,6 +132,7 @@ export function LabEngine({ type, labId = "unknown", onComplete }: LabProps) {
           <StructuralLab />
         )}
         {type === "mechanical" && <MechanicalLab />}
+        {type === "fluid" && <FluidDynamicsLab />}
       </div>
 
       <div className="mt-8 pt-6 border-t border-[#30363d] flex gap-3">

@@ -4,10 +4,14 @@ import {
   Zap, Activity, Cpu, FileText, Code, ChevronRight, 
   Terminal, Search, Play, AlertCircle, Sparkles, 
   Settings, Layers, TrendingUp, Microscope, Clock,
-  CheckCircle2, XCircle, Info, Square, RefreshCcw
+  CheckCircle2, XCircle, Info, Square, RefreshCcw,
+  Save
 } from "lucide-react";
 import { ai, MODELS } from "../lib/gemini";
 import Markdown from "react-markdown";
+import { useUser } from "./UserContext";
+import { db, auth, handleFirestoreError, OperationType } from "../lib/firebase";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 type ComplexNumber = { real: number; imag: number };
 
@@ -313,12 +317,53 @@ export function EECircuitLab() {
   const [activeTab, setActiveTab] = useState<"s-domain" | "opamp" | "signal">("s-domain");
   const [isSolving, setIsSolving] = useState(false);
   const [circuitType, setCircuitType] = useState<"RC" | "RLC" | "Active Filter">("RC");
+  const [topology, setTopology] = useState<"Series" | "Parallel">("Series");
   const [noiseEnabled, setNoiseEnabled] = useState(false);
   const [stabilityInsight, setStabilityInsight] = useState<string | null>(null);
   const [isThinking, setIsThinking] = useState(false);
   const [errorStatus, setErrorStatus] = useState<string | null>(null);
+  const { theme, setTheme } = useUser();
 
   const [rlc, setRlc] = useState({ r: 100, l: 10, c: 1 });
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Persistence: Load
+  useEffect(() => {
+    const loadConfig = async () => {
+      if (!auth.currentUser) return;
+      try {
+        const docRef = doc(db, "users", auth.currentUser.uid, "labConfigs", "ee");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.rlc) setRlc(data.rlc);
+          if (data.circuitType) setCircuitType(data.circuitType);
+          if (data.topology) setTopology(data.topology);
+        }
+      } catch (error) {
+        handleFirestoreError(error, OperationType.GET, "labConfigs/ee");
+      }
+    };
+    loadConfig();
+  }, []);
+
+  const saveConfig = async () => {
+    if (!auth.currentUser) return;
+    setIsSaving(true);
+    try {
+      const docRef = doc(db, "users", auth.currentUser.uid, "labConfigs", "ee");
+      await setDoc(docRef, {
+        rlc,
+        circuitType,
+        topology,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, "labConfigs/ee");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const resetSimulation = () => {
     setRlc({ r: 100, l: 10, c: 1 });
@@ -337,14 +382,23 @@ export function EECircuitLab() {
         
         let gain;
         if (circuitType === "RC") {
-          // Low pass RC: H(jw) = 1 / (1 + jwRC)
+          // Low pass RC: H(jw) = (1/jwC) / (R + 1/jwC) = 1 / (1 + jwRC)
           gain = 1 / Math.sqrt(1 + Math.pow(w * R * C, 2));
         } else {
-          // Band pass RLC: H(jw) = R / sqrt(R^2 + (wL - 1/wC)^2)
-          const zL = w * L;
-          const zC = 1 / (w * C);
-          const impedance = Math.sqrt(R*R + Math.pow(zL - zC, 2));
-          gain = R / impedance;
+          // RLC
+          if (topology === "Series") {
+            // Series Band Pass: H(s) = sL / (sL + R + 1/sC)
+            const zL = w * L;
+            const zC = 1 / (w * C);
+            const den = Math.sqrt(R*R + Math.pow(zL - zC, 2));
+            gain = zL / den; // Specific gain chosen for visualization
+          } else {
+            // Parallel: H(s) = R / (R + sL || 1/sC)
+            const zL = w * L;
+            const zC = 1 / (w * C);
+            const zParallel = (zL * zC) / Math.sqrt(Math.pow(zL - zC, 2) + 0.001);
+            gain = R / (R + zParallel);
+          }
         }
         return isFinite(gain) && gain > 0 ? 20 * Math.log10(gain) : -60;
       });
@@ -453,24 +507,56 @@ export function EECircuitLab() {
       {/* Module Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-2">
         <div className="flex items-center justify-between flex-1">
-          <div>
-            <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-[0.2em] flex items-center gap-2">
-              <Zap size={14} /> S-Domain Solver Agent
-            </h3>
-            <p className="text-[10px] text-[#484f58] mt-1 font-mono uppercase tracking-widest font-bold">Electric Pal Core • Nodal Analyzer v2.4</p>
+          <div className="flex items-center gap-4">
+            <div>
+              <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                <Zap size={14} /> S-Domain Solver Agent
+              </h3>
+              <p className="text-[10px] text-[#484f58] mt-1 font-mono uppercase tracking-widest font-bold">Electric Pal Core • Nodal Analyzer v2.4</p>
+            </div>
+            <div className="h-8 w-px bg-white/5 hidden md:block" />
+            <div className="hidden md:flex items-center gap-2">
+               <span className="text-[8px] font-bold text-[#484f58] uppercase">Theme:</span>
+               <div className="flex bg-black/40 rounded-lg p-1 border border-white/5">
+                 {(["dark", "blue", "emerald"] as const).map(t => (
+                   <button 
+                     key={t}
+                     onClick={() => setTheme(t)}
+                     className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${theme === t ? "bg-white/10 text-white" : "text-[#484f58] hover:text-[#8b949e]"}`}
+                   >
+                     {t}
+                   </button>
+                 ))}
+               </div>
+            </div>
           </div>
-          <div className="flex bg-[#161b22] border border-[#30363d] rounded-xl p-1 gap-1">
-            {(["RC", "RLC"] as const).map((type) => (
-              <button 
-                key={type}
-                onClick={() => setCircuitType(type)}
-                className={`px-4 py-1 text-[8px] font-bold uppercase rounded-lg transition-all ${
-                  circuitType === type ? "bg-blue-500/20 text-blue-400" : "text-[#484f58] hover:text-[#8b949e]"
-                }`}
-              >
-                {type} Mode
-              </button>
-            ))}
+          <div className="flex items-center gap-3">
+             <div className="flex bg-[#161b22] border border-[#30363d] rounded-xl p-1 gap-1">
+               {(["Series", "Parallel"] as const).map((top) => (
+                 <button 
+                   key={top}
+                   onClick={() => setTopology(top)}
+                   className={`px-4 py-1 text-[8px] font-bold uppercase rounded-lg transition-all ${
+                     topology === top ? "bg-emerald-500/20 text-emerald-400" : "text-[#484f58] hover:text-[#8b949e]"
+                   }`}
+                 >
+                   {top}
+                 </button>
+               ))}
+             </div>
+             <div className="flex bg-[#161b22] border border-[#30363d] rounded-xl p-1 gap-1">
+               {(["RC", "RLC"] as const).map((type) => (
+                 <button 
+                   key={type}
+                   onClick={() => setCircuitType(type)}
+                   className={`px-4 py-1 text-[8px] font-bold uppercase rounded-lg transition-all ${
+                     circuitType === type ? "bg-blue-500/20 text-blue-400" : "text-[#484f58] hover:text-[#8b949e]"
+                   }`}
+                 >
+                   {type} Mode
+                 </button>
+               ))}
+             </div>
           </div>
         </div>
         <div className="flex bg-[#161b22] border border-[#30363d] rounded-xl p-1 gap-1">
@@ -487,9 +573,17 @@ export function EECircuitLab() {
             </button>
           ))}
           <button 
+            onClick={saveConfig}
+            disabled={isSaving}
+            className="px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
+          >
+            {isSaving ? <RefreshCcw size={10} className="animate-spin" /> : <Save size={10} />}
+            {isSaving ? "Syncing..." : "Save Config"}
+          </button>
+          <button 
             onClick={resetSimulation}
             aria-label="Reset Simulation"
-            className="px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all flex items-center gap-1.5"
+            className="px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 transition-all flex items-center gap-1.5"
           >
             <RefreshCcw size={10} className={isSolving ? "animate-spin" : ""} /> Sync & Reset
           </button>

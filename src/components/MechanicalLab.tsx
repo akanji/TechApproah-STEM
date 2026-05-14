@@ -33,24 +33,35 @@ import {
 } from "recharts";
 import { db, auth, OperationType, handleFirestoreError } from "../lib/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { useUser } from "./UserContext";
 
 const MATERIALS = [
-  { id: "steel", name: "Steel (AISI 1045)", yieldStrength: 530, modulus: 200, thermalConductivity: 45, kFactor: 1.0, color: "text-zinc-300" },
-  { id: "aluminum", name: "Aluminum (6061)", yieldStrength: 275, modulus: 69, thermalConductivity: 167, kFactor: 0.6, color: "text-blue-300" },
-  { id: "titanium", name: "Titanium (Gr 5)", yieldStrength: 880, modulus: 114, thermalConductivity: 6.7, kFactor: 2.2, color: "text-purple-400" },
-  { id: "carbide", name: "Tungsten Carbide", yieldStrength: 5000, modulus: 600, thermalConductivity: 110, kFactor: 5.0, color: "text-orange-400" },
-  { id: "copper", name: "Copper (Pure)", yieldStrength: 70, modulus: 117, thermalConductivity: 401, kFactor: 0.5, color: "text-orange-300" },
-  { id: "castiron", name: "Gray Cast Iron", yieldStrength: 240, modulus: 100, thermalConductivity: 52, kFactor: 0.8, color: "text-zinc-500" }
+  { id: "steel_low", name: "Mild Steel (A36)", yieldStrength: 250, modulus: 200, thermalConductivity: 50, kFactor: 1.0, color: "text-zinc-400" },
+  { id: "steel_high", name: "Alloy Steel (4140)", yieldStrength: 655, modulus: 210, thermalConductivity: 42, kFactor: 1.2, color: "text-zinc-300" },
+  { id: "aluminum_6061", name: "Aluminum (6061-T6)", yieldStrength: 275, modulus: 69, thermalConductivity: 167, kFactor: 0.6, color: "text-blue-300" },
+  { id: "aluminum_7075", name: "Aluminum (7075-T6)", yieldStrength: 503, modulus: 72, thermalConductivity: 130, kFactor: 0.7, color: "text-blue-400" },
+  { id: "titanium_gr5", name: "Titanium (Grade 5)", yieldStrength: 880, modulus: 114, thermalConductivity: 6.7, kFactor: 2.2, color: "text-purple-400" },
+  { id: "carbide", name: "Tungsten Carbide", yieldStrength: 5500, modulus: 600, thermalConductivity: 110, kFactor: 5.0, color: "text-orange-600" },
+  { id: "copper_pure", name: "Copper (C11000)", yieldStrength: 70, modulus: 117, thermalConductivity: 391, kFactor: 0.4, color: "text-orange-400" },
+  { id: "brass", name: "Brass (C360)", yieldStrength: 310, modulus: 97, thermalConductivity: 115, kFactor: 0.8, color: "text-yellow-600" },
+  { id: "stainless_304", name: "Stainless Steel (304)", yieldStrength: 215, modulus: 193, thermalConductivity: 16.2, kFactor: 1.5, color: "text-zinc-200" },
+  { id: "inconel_718", name: "Inconel 718", yieldStrength: 1035, modulus: 200, thermalConductivity: 11.4, kFactor: 3.5, color: "text-cyan-400" },
+  { id: "graphene", name: "Graphene Plate", yieldStrength: 130000, modulus: 1000, thermalConductivity: 5000, kFactor: 10.0, color: "text-emerald-300" },
+  { id: "bakelite", name: "Bakelite (Phenolic)", yieldStrength: 50, modulus: 8, thermalConductivity: 0.2, kFactor: 0.2, color: "text-red-900" }
 ];
 
 export function MechanicalLab() {
   const [cuttingSpeed, setCuttingSpeed] = useState(150); // m/min
   const [feedRate, setFeedRate] = useState(0.2); // mm/rev
+  const [depthOfCut, setDepthOfCut] = useState(2.0); // mm
+  const [environmentFriction, setEnvironmentFriction] = useState(0.3);
+  const [rakeAngle, setRakeAngle] = useState(10); // degrees
   const [selectedMaterial, setSelectedMaterial] = useState(MATERIALS[0]);
   const [isSimulating, setIsSimulating] = useState(false);
   const [history, setHistory] = useState<{time: number, stress: number, temp: number}[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isTableOpen, setIsTableOpen] = useState(false);
+  const { theme, setTheme } = useUser();
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -61,7 +72,8 @@ export function MechanicalLab() {
   const toolLife = Math.pow(C / (cuttingSpeed * selectedMaterial.kFactor), 1 / n) * (1 - feedRate);
   
   // Revised Stress Calculation: Force = Kc * b * h (Kc = specific cutting energy)
-  const cuttingForce = 2000 * selectedMaterial.kFactor * feedRate * 2.0; // 2.0 = depth of cut
+  const Kc = 2000 * selectedMaterial.kFactor * (1 - rakeAngle/90);
+  const cuttingForce = Kc * feedRate * depthOfCut * (1 + environmentFriction); 
   const currentStress = cuttingForce / 4.0; // dummy area
 
   // Surface Roughness Ra approx proportional to f^2 / (32 * r)
@@ -142,6 +154,27 @@ export function MechanicalLab() {
   return (
     <div className="space-y-6">
       {/* Simulation Header */}
+      <div className="flex justify-between items-center bg-[#161b22] border border-[#30363d] px-6 py-3 rounded-2xl">
+         <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[10px] font-bold text-white uppercase tracking-[0.2em]">Mechanical Lab Runtime</span>
+         </div>
+         <div className="flex items-center gap-2">
+            <span className="text-[9px] font-bold text-[#484f58] uppercase">Active Theme:</span>
+            <div className="flex bg-black/40 rounded-lg p-1 border border-white/5">
+              {(["dark", "blue", "emerald"] as const).map(t => (
+                <button 
+                  key={t}
+                  onClick={() => setTheme(t)}
+                  className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${theme === t ? "bg-white/10 text-white" : "text-[#484f58] hover:text-[#8b949e]"}`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+         </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-[#161b22] border border-[#30363d] rounded-2xl p-8 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-6 opacity-10">
@@ -210,23 +243,24 @@ export function MechanicalLab() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="bg-black/40 border border-[#30363d] p-4 rounded-xl flex flex-col justify-between">
                 <div>
-                  <div className="text-[9px] uppercase font-bold text-[#8b949e] mb-1">Tool Life</div>
-                  <div className="text-xl font-mono text-emerald-400 font-bold">{toolLife.toFixed(0)}<span className="text-[10px] ml-1">min</span></div>
+                  <div className="text-[9px] uppercase font-bold text-[#8b949e] mb-1">Depth of Cut</div>
+                  <div className="text-xl font-mono text-blue-400 font-bold">{depthOfCut.toFixed(1)}<span className="text-[10px] ml-1">mm</span></div>
                 </div>
+                <input type="range" min="0.1" max="5" step="0.1" value={depthOfCut} onChange={(e) => setDepthOfCut(Number(e.target.value))} className="w-full h-1 bg-[#30363d] rounded-lg appearance-none cursor-pointer accent-blue-500" />
               </div>
               <div className="bg-black/40 border border-[#30363d] p-4 rounded-xl flex flex-col justify-between">
                 <div>
-                  <div className="text-[9px] uppercase font-bold text-[#8b949e] mb-1">Current Stress</div>
-                  <div className={`text-xl font-mono font-bold ${isFailing ? "text-red-500" : "text-blue-400"}`}>
-                    {currentStress.toFixed(0)}<span className="text-[10px] ml-1">MPa</span>
-                  </div>
+                  <div className="text-[9px] uppercase font-bold text-[#8b949e] mb-1">Rake Angle</div>
+                  <div className="text-xl font-mono text-purple-400 font-bold">{rakeAngle}<span className="text-[10px] ml-1">°</span></div>
                 </div>
+                <input type="range" min="-10" max="30" step="1" value={rakeAngle} onChange={(e) => setRakeAngle(Number(e.target.value))} className="w-full h-1 bg-[#30363d] rounded-lg appearance-none cursor-pointer accent-purple-500" />
               </div>
               <div className="bg-black/40 border border-[#30363d] p-4 rounded-xl flex flex-col justify-between">
                 <div>
-                  <div className="text-[9px] uppercase font-bold text-[#8b949e] mb-1">Surface Ra</div>
-                  <div className="text-xl font-mono text-purple-400 font-bold">{surfaceRoughness.toFixed(3)}<span className="text-[10px] ml-1">µm</span></div>
+                  <div className="text-[9px] uppercase font-bold text-[#8b949e] mb-1">Env Friction</div>
+                  <div className="text-xl font-mono text-yellow-400 font-bold">{environmentFriction.toFixed(2)}</div>
                 </div>
+                <input type="range" min="0.01" max="0.8" step="0.01" value={environmentFriction} onChange={(e) => setEnvironmentFriction(Number(e.target.value))} className="w-full h-1 bg-[#30363d] rounded-lg appearance-none cursor-pointer accent-yellow-500" />
               </div>
               <div className="bg-black/40 border border-[#30363d] p-4 rounded-xl flex flex-col justify-between">
                 <div>

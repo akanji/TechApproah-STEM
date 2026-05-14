@@ -19,6 +19,7 @@ import { Success } from "./components/Success";
 import { GlobalSearch } from "./components/GlobalSearch";
 import { UserProfile } from "./components/UserProfile";
 import { UnitConverter } from "./components/UnitConverter";
+import { PrivacyPolicy } from "./components/PrivacyPolicy";
 import { useSoundEffects } from "./hooks/useSoundEffects";
 import { SUBJECTS, MODULES, BADGES, NAV_ITEMS, RESOURCES, LAB_CATALOG } from "./constants";
 
@@ -31,7 +32,7 @@ export default function App() {
 }
 
 function AppContent() {
-  const { user, profile, progress, login, logout, updateXP, page, setPage } = useUser();
+  const { user, profile, progress, login, logout, updateXP, page, setPage, theme, setTheme } = useUser();
   const { playSound } = useSoundEffects();
   const [activeSubject, setActiveSubject] = useState<string | null>(() => localStorage.getItem("eng_subject") || null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,9 +42,6 @@ function AppContent() {
   });
   const [studyMode, setStudyMode] = useState<"theory" | "lab">(() => 
     (localStorage.getItem("eng_studymode") as "theory" | "lab") || "theory"
-  );
-  const [theme, setTheme] = useState<"dark" | "light">(() => 
-    (localStorage.getItem("eng_theme") as "dark" | "light") || "dark"
   );
   const [offlineMode, setOfflineMode] = useState(() => localStorage.getItem("eng_offline") === "true");
   const [loadingMessage, setLoadingMessage] = useState("Initializing systems...");
@@ -69,8 +67,9 @@ function AppContent() {
   };
 
   useEffect(() => {
-    document.documentElement.classList.toggle('light', theme === 'light');
-    localStorage.setItem("eng_theme", theme);
+    document.documentElement.classList.remove('theme-blue', 'theme-emerald');
+    if (theme === 'blue') document.documentElement.classList.add('theme-blue');
+    if (theme === 'emerald') document.documentElement.classList.add('theme-emerald');
   }, [theme]);
 
   useEffect(() => {
@@ -734,10 +733,15 @@ function AppContent() {
               <Download size={20} />
             </button>
             <button 
-              onClick={() => { setTheme(t => t === 'dark' ? 'light' : 'dark'); playSound('click'); }}
+              onClick={() => { 
+                const themes: ("dark" | "blue" | "emerald")[] = ["dark", "blue", "emerald"];
+                const next = themes[(themes.indexOf(theme) + 1) % themes.length];
+                setTheme(next); 
+                playSound('click'); 
+              }}
               className="p-2 rounded-xl bg-[#161b22] border border-[#30363d] text-[#8b949e] hover:text-white transition-all hover:border-blue-500/30"
             >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+              {theme === 'dark' ? <Moon size={20} /> : theme === 'blue' ? <Zap size={20} className="text-blue-400" /> : <Flame size={20} className="text-emerald-400" />}
             </button>
             {user ? (
               <div className="flex items-center gap-3">
@@ -797,8 +801,18 @@ function AppContent() {
               {page === "analytics" && <ProgressPage />}
               {page === "community" && <CommunityPage />}
               {page === "support" && <SupportPage />}
+              {page === "privacy" && <PrivacyPolicy />}
             </motion.div>
           </AnimatePresence>
+
+          <footer className="mt-12 py-8 border-t border-[#30363d] text-center">
+            <p className="text-[9px] text-[#484f58] uppercase font-bold tracking-[0.2em] mb-4">TechApproach Scientific • v1.0.4</p>
+            <div className="flex justify-center gap-4">
+              <button onClick={() => setPage('privacy')} className="text-[8px] text-[#8b949e] uppercase font-bold hover:text-blue-400 transition-colors">Privacy Policy</button>
+              <button onClick={() => setPage('support')} className="text-[8px] text-[#8b949e] uppercase font-bold hover:text-blue-400 transition-colors">Support</button>
+              <button onClick={() => setPage('pricing')} className="text-[8px] text-[#8b949e] uppercase font-bold hover:text-blue-400 transition-colors">Pricing</button>
+            </div>
+          </footer>
         </div>
 
         <AnimatePresence>

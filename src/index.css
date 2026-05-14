@@ -34,6 +34,26 @@
   --text-muted: #8c959f;
 }
 
+:root.theme-blue {
+  --bg-primary: #050a14;
+  --bg-secondary: #0a162d;
+  --bg-tertiary: #162a52;
+  --border-primary: #1e3a8a;
+  --text-primary: #eff6ff;
+  --text-secondary: #93c5fd;
+  --text-muted: #60a5fa;
+}
+
+:root.theme-emerald {
+  --bg-primary: #022c22;
+  --bg-secondary: #064e3b;
+  --bg-tertiary: #065f46;
+  --border-primary: #059669;
+  --text-primary: #ecfdf5;
+  --text-secondary: #6ee7b7;
+  --text-muted: #34d399;
+}
+
 body {
   @apply bg-brand-bg text-text-primary transition-colors duration-300;
 }
