@@ -102,8 +102,9 @@ async function startServer() {
       const origin = req.headers.origin || process.env.APP_URL || `http://localhost:${PORT}`;
       
       const session = await stripeInstance.checkout.sessions.create({
-        // ✅ FIX: Remove 'link' to skip the SMS code prompt
-        payment_method_types: ["card"], 
+        // ✅ Enable 'link' for "Pay with Link". 
+        // Note: Code delivery (SMS vs Email) is managed by Stripe/Link account settings.
+        payment_method_types: ["card", "link"], 
         mode: "subscription",
         line_items: [{
           price: priceId, 
