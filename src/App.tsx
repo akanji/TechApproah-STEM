@@ -214,11 +214,11 @@ function AppContent() {
             </div>
             <div>
               <p className="text-[10px] uppercase tracking-widest font-bold text-blue-400/70">Source Grounding Ready</p>
-              <h1 className="text-2xl font-bold text-white tracking-tight leading-none uppercase">TechApproach</h1>
+              <h1 className="text-2xl font-bold text-white tracking-tight leading-none uppercase">TECHAPPROACH — The Future of Engineering Learning Starts Here!</h1>
             </div>
           </div>
           <p className="text-blue-100/60 text-sm leading-relaxed mb-6">
-            Master laws of nature. Use the <strong className="text-white">(+) icon</strong> in the chat sidebar to upload manuals for NotebookLM-style reasoning.
+            The all-in-one AI-powered engineering education platform built for future engineers, creators, and innovators.
           </p>
           <div className="flex gap-2">
             <button 

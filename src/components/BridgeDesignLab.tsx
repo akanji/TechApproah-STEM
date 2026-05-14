@@ -42,18 +42,18 @@ interface LoadData {
 
 const BRIDGE_MATERIALS = [
   { id: "concrete", name: "Reinforced Concrete", capacity: 1800, color: "text-zinc-400" },
-  { id: "steel", name: "Structural Steel", capacity: 2800, color: "text-blue-400" },
-  { id: "carbon", name: "High-Modulus Carbon", capacity: 4500, color: "text-emerald-400" }
+  { id: "steel", name: "Structural Steel", capacity: 3200, color: "text-blue-400" },
+  { id: "carbon", name: "Carbon Fiber Composite", capacity: 5000, color: "text-emerald-400" },
+  { id: "wood", name: "Glulam Timber", capacity: 1200, color: "text-orange-900" }
 ];
 
 export function BridgeDesignLab() {
-  const [selectedMaterial, setSelectedMaterial] = useState(BRIDGE_MATERIALS[0]);
-  const [deadLoad, setDeadLoad] = useState(500); // kN
-  const [superDeadLoad, setSuperDeadLoad] = useState(150); // kN
-  const [hydrostaticLoad, setHydrostaticLoad] = useState(50); // kN
+  const [selectedMaterial, setSelectedMaterial] = useState(BRIDGE_MATERIALS[1]); // Default to Steel
+  const [deadLoad, setDeadLoad] = useState(600); // kN
+  const [liveLoad, setLiveLoad] = useState(300); // kN
   
   const [gammaD, setGammaD] = useState(1.25);
-  const [gammaSD, setGammaSD] = useState(1.50);
+  const [gammaL, setGammaL] = useState(1.50);
   
   const [activeTab, setActiveTab] = useState<"simulator" | "fea">("simulator");
   const [simulationActive, setSimulationActive] = useState(false);
@@ -62,13 +62,13 @@ export function BridgeDesignLab() {
   const [history, setHistory] = useState<{ time: number; load: number }[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Ultimate Design Value U = γD * D + γSD * SD
-  const ultimateLoad = (gammaD * deadLoad) + (gammaSD * superDeadLoad) + hydrostaticLoad;
+  // Ultimate Design Value U = γD * D + γL * L
+  const ultimateLoad = (gammaD * deadLoad) + (gammaL * liveLoad);
   
-  // Total Static Load for Equilibrium visualization
-  const totalStaticLoad = deadLoad + superDeadLoad + hydrostaticLoad;
+  // Safety Factor = Capacity / Ultimate Load
+  const safetyFactor = selectedMaterial.capacity / ultimateLoad;
 
-  // Failure Condition based on selected material
+  // Failure Condition
   const isFailed = ultimateLoad > selectedMaterial.capacity;
 
   // Firebase: Load saved config
@@ -80,11 +80,10 @@ export function BridgeDesignLab() {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
-          setDeadLoad(data.deadLoad ?? 500);
-          setSuperDeadLoad(data.superDeadLoad ?? 150);
-          setHydrostaticLoad(data.hydrostaticLoad ?? 50);
+          setDeadLoad(data.deadLoad ?? 600);
+          setLiveLoad(data.liveLoad ?? 300);
           setGammaD(data.gammaD ?? 1.25);
-          setGammaSD(data.gammaSD ?? 1.50);
+          setGammaL(data.gammaL ?? 1.50);
           const mat = BRIDGE_MATERIALS.find(m => m.id === data.materialId);
           if (mat) setSelectedMaterial(mat);
         }
@@ -103,10 +102,9 @@ export function BridgeDesignLab() {
       const docRef = doc(db, "users", auth.currentUser.uid, "labConfigs", "bridge");
       await setDoc(docRef, {
         deadLoad,
-        superDeadLoad,
-        hydrostaticLoad,
+        liveLoad,
         gammaD,
-        gammaSD,
+        gammaL,
         materialId: selectedMaterial.id,
         updatedAt: serverTimestamp()
       }, { merge: true });
@@ -132,20 +130,18 @@ export function BridgeDesignLab() {
   }, [simulationActive, ultimateLoad, isFailed]);
 
   const resetSimulator = () => {
-    setDeadLoad(500);
-    setSuperDeadLoad(150);
-    setHydrostaticLoad(50);
+    setDeadLoad(600);
+    setLiveLoad(300);
     setGammaD(1.25);
-    setGammaSD(1.50);
-    setSelectedMaterial(BRIDGE_MATERIALS[0]);
+    setGammaL(1.50);
+    setSelectedMaterial(BRIDGE_MATERIALS[1]);
     setHistory([]);
     setSimulationActive(false);
   };
 
   const loadData: LoadData[] = [
-    { name: "Dead (D)", value: deadLoad, factor: gammaD, color: "#3b82f6" },
-    { name: "Super Dead (SD)", value: superDeadLoad, factor: gammaSD, color: "#8b5cf6" },
-    { name: "Hydrostatic (H)", value: hydrostaticLoad, factor: 1.0, color: "#ef4444" }
+    { name: "Dead Load (D)", value: deadLoad, factor: gammaD, color: "#3b82f6" },
+    { name: "Live Load (L)", value: liveLoad, factor: gammaL, color: "#8b5cf6" }
   ];
 
   const designData = loadData.map(d => ({
@@ -207,31 +203,54 @@ export function BridgeDesignLab() {
             <div className="relative h-40 bg-black/40 rounded-xl border border-white/5 mb-8 flex items-end justify-center px-10 pb-10 overflow-hidden">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(59,130,246,0.1)_0%,transparent_70%)]" />
               
-              {/* Bridge Deck */}
+              {/* Bridge Deck with Stress Heatmap Overlay */}
               <motion.div 
                 animate={{ 
                   y: simulationActive ? [0, 2, 0] : 0,
-                  scaleY: 1 + (ultimateLoad / 5000)
+                  transition: { duration: 2, repeat: Infinity, ease: "easeInOut" }
                 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className={`relative w-full h-4 ${isFailed ? "bg-red-900 border-red-500" : "bg-[#30363d] border-[#484f58]"} rounded-sm border z-20 flex justify-around`}
+                className={`relative w-full h-4 rounded-sm border z-20 flex justify-around items-center transition-colors duration-500 overflow-hidden ${
+                  isFailed ? "bg-red-950 border-red-500" : "bg-[#30363d] border-white/10"
+                }`}
               >
-                {/* Visual Load Indicators */}
-                {!isFailed && [...Array(5)].map((_, i) => (
+                {/* Stress Distribution Overlay */}
+                <div 
+                  className="absolute inset-0 opacity-40 transition-all duration-500"
+                  style={{
+                    background: `linear-gradient(to right, transparent, ${
+                      safetyFactor < 1.1 ? '#ef4444' : safetyFactor < 1.5 ? '#f59e0b' : '#10b981'
+                    }, transparent)`
+                  }}
+                />
+
+                {/* Localized Stress Visual (Center usually highest moment) */}
+                <div 
+                  className="absolute top-0 bottom-0 transition-all duration-700 blur-md"
+                  style={{
+                    left: '25%', 
+                    right: '25%',
+                    backgroundColor: safetyFactor < 1.2 ? '#ef444422' : 'transparent'
+                  }}
+                />
+
+                {/* Visual Load Indicators (Forces) */}
+                {!isFailed && [...Array(8)].map((_, i) => (
                   <motion.div 
                     key={i}
                     animate={{ 
-                      height: simulationActive ? [10, 20, 10] : 15,
-                      opacity: [0.3, 0.6, 0.3]
+                      height: simulationActive ? [10, 25, 10] : 15,
+                      opacity: [0.3, 0.8, 0.3],
+                      y: simulationActive ? [0, 5, 0] : 0
                     }}
-                    transition={{ duration: 1.5, delay: i * 0.2, repeat: Infinity }}
-                    className="w-0.5 bg-red-400"
-                    style={{ marginTop: -15 }}
+                    transition={{ duration: 1.2, delay: i * 0.15, repeat: Infinity }}
+                    className={`w-0.5 ${ultimateLoad > 1000 ? "bg-red-400" : "bg-blue-400"}`}
+                    style={{ position: 'absolute', top: -20, left: `${(i + 1) * 11}%` }}
                   />
                 ))}
+                
                 {isFailed && (
                   <div className="absolute -top-10 inset-0 flex items-center justify-center">
-                    <Zap size={32} className="text-yellow-500 animate-bounce" />
+                    <Zap size={32} className="text-yellow-500 animate-pulse" />
                   </div>
                 )}
               </motion.div>
@@ -243,20 +262,7 @@ export function BridgeDesignLab() {
               {/* Foundation/Soil */}
               <div className="absolute bottom-0 inset-x-0 h-4 bg-[#0d1117] border-t border-[#30363d] z-10" />
               
-              {/* Lateral Pressure Visual */}
-              <AnimatePresence>
-                {hydrostaticLoad > 0 && (
-                  <motion.div 
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="absolute left-2 bottom-6 flex flex-col gap-1 items-start"
-                  >
-                    <Waves size={16} className="text-blue-500 animate-pulse" />
-                    <div className="text-[8px] font-bold text-blue-500 uppercase">H-Pressure</div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              
+              {/* AI Insight Info */}
               <div className="absolute top-4 right-4 flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${simulationActive ? "bg-green-500 animate-pulse" : "bg-[#30363d]"}`} />
                 <span className="text-[10px] font-mono text-[#484f58] uppercase">Equilibrium Engine</span>
@@ -265,16 +271,18 @@ export function BridgeDesignLab() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-black/40 border border-[#30363d] p-4 rounded-xl">
-                <div className="text-[9px] uppercase font-bold text-[#8b949e] mb-1">Σ Force</div>
-                <div className="text-lg font-mono text-white font-bold">0.00</div>
+                <div className="text-[9px] uppercase font-bold text-[#8b949e] mb-1">Safety Factor</div>
+                <div className={`text-lg font-mono font-bold ${safetyFactor < 1 ? "text-red-500" : safetyFactor < 1.5 ? "text-yellow-500" : "text-emerald-400"}`}>
+                  {safetyFactor.toFixed(2)}
+                </div>
               </div>
               <div className="bg-black/40 border border-[#30363d] p-4 rounded-xl">
                 <div className="text-[9px] uppercase font-bold text-[#8b949e] mb-1">γ_D Factor</div>
-                <div className="text-lg font-mono text-blue-400 font-bold">{gammaD.toFixed(2)}</div>
+                <div className={`text-lg font-mono font-bold text-blue-400`}>{gammaD.toFixed(2)}</div>
               </div>
               <div className="bg-black/40 border border-[#30363d] p-4 rounded-xl">
-                <div className="text-[9px] uppercase font-bold text-[#8b949e] mb-1">γ_SD Factor</div>
-                <div className="text-lg font-mono text-purple-400 font-bold">{gammaSD.toFixed(2)}</div>
+                <div className="text-[9px] uppercase font-bold text-[#8b949e] mb-1">γ_L Factor</div>
+                <div className={`text-lg font-mono font-bold text-purple-400`}>{gammaL.toFixed(2)}</div>
               </div>
               <div className="bg-black/40 border border-[#30363d] p-4 rounded-xl">
                 <div className="text-[9px] uppercase font-bold text-[#8b949e] mb-1">Status</div>
@@ -376,7 +384,7 @@ export function BridgeDesignLab() {
                       <span className="text-[#8b949e] font-mono">{deadLoad} kN</span>
                     </div>
                     <input 
-                      type="range" min="100" max="1000" step="50" value={deadLoad} 
+                      type="range" min="100" max="1500" step="50" value={deadLoad} 
                       onChange={(e) => setDeadLoad(Number(e.target.value))}
                       className="w-full h-2 bg-[#30363d] rounded-lg appearance-none cursor-pointer accent-blue-500"
                     />
@@ -384,25 +392,13 @@ export function BridgeDesignLab() {
 
                   <div className="space-y-4">
                     <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-                      <span className="text-purple-400">Super Dead Load (SD)</span>
-                      <span className="text-[#8b949e] font-mono">{superDeadLoad} kN</span>
+                      <span className="text-purple-400">Live Load (L)</span>
+                      <span className="text-[#8b949e] font-mono">{liveLoad} kN</span>
                     </div>
                     <input 
-                      type="range" min="50" max="500" step="10" value={superDeadLoad} 
-                      onChange={(e) => setSuperDeadLoad(Number(e.target.value))}
+                      type="range" min="50" max="1000" step="10" value={liveLoad} 
+                      onChange={(e) => setLiveLoad(Number(e.target.value))}
                       className="w-full h-2 bg-[#30363d] rounded-lg appearance-none cursor-pointer accent-purple-500"
-                    />
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-                      <span className="text-red-400">Hydrostatic (H)</span>
-                      <span className="text-[#8b949e] font-mono">{hydrostaticLoad} kN</span>
-                    </div>
-                    <input 
-                      type="range" min="0" max="200" step="10" value={hydrostaticLoad} 
-                      onChange={(e) => setHydrostaticLoad(Number(e.target.value))}
-                      className="w-full h-2 bg-[#30363d] rounded-lg appearance-none cursor-pointer accent-red-500"
                     />
                   </div>
 
@@ -444,9 +440,9 @@ export function BridgeDesignLab() {
                       <Settings2 size={14} />
                       Governing Formulation
                     </div>
-                    <p className="mb-2">U = (γD * D) + (γSD * SD) + H</p>
+                    <p className="mb-2">U = (γD * D) + (γL * L)</p>
                     <p className="text-white font-bold">
-                      U = ({gammaD.toFixed(2)} * {deadLoad}) + ({gammaSD.toFixed(2)} * {superDeadLoad}) + {hydrostaticLoad}
+                      U = ({gammaD.toFixed(2)} * {deadLoad}) + ({gammaL.toFixed(2)} * {liveLoad})
                     </p>
                     <div className="mt-4 pt-4 border-t border-[#30363d] flex justify-between items-center">
                       <span className="text-blue-400">U_output = {ultimateLoad.toFixed(2)} kN</span>
@@ -464,18 +460,18 @@ export function BridgeDesignLab() {
                       >
                         <option value={1.25}>1.25 (Standard)</option>
                         <option value={1.40}>1.40 (Aggressive)</option>
-                        <option value={1.60}>1.60 (Extreme)</option>
+                        <option value={1.50}>1.50 (Extreme)</option>
                       </select>
                     </div>
                     <div className="space-y-4">
-                      <label className="text-[10px] font-bold text-[#484f58] uppercase">γSD Load Factor</label>
+                      <label className="text-[10px] font-bold text-[#484f58] uppercase">γL Load Factor</label>
                       <select 
-                        value={gammaSD} 
-                        onChange={(e) => setGammaSD(Number(e.target.value))}
+                        value={gammaL} 
+                        onChange={(e) => setGammaL(Number(e.target.value))}
                         className="w-full bg-[#161b22] border border-[#30363d] rounded-xl p-3 text-xs text-white"
                       >
                         <option value={1.50}>1.50 (Standard)</option>
-                        <option value={1.75}>1.75 (Dense Asphalt)</option>
+                        <option value={1.75}>1.75 (Dense Traffic)</option>
                         <option value={2.00}>2.00 (Maximum)</option>
                       </select>
                     </div>
