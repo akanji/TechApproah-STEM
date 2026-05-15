@@ -16,9 +16,9 @@ export function PrivacyPolicy() {
           <ChevronLeft size={20} />
         </button>
         <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight uppercase text-wrap">Privacy Policy</h2>
-          <p className="text-[#8b949e] text-xs font-mono uppercase tracking-widest">Protocol Version 1.0.4 • TechApproach Learning Platform</p>
-          <p className="text-[9px] text-[#484f58] uppercase font-bold mt-1">Effective Date: May 14, 2026</p>
+          <h2 className="text-2xl font-bold text-white tracking-tight uppercase">Privacy Policy</h2>
+          <p className="text-[#8b949e] text-xs font-mono uppercase tracking-widest">Protocol Version 1.0.4 • TechApproach Core</p>
+          <p className="text-[9px] text-[#484f58] uppercase font-bold mt-1">Last Updated: May 14, 2026</p>
         </div>
       </header>
 
@@ -28,7 +28,7 @@ export function PrivacyPolicy() {
           <h3 className="text-lg font-bold uppercase tracking-tight">Our Commitment</h3>
         </div>
         <p className="text-sm text-[#c9d1d9] leading-relaxed">
-          We collect your <strong>Full Name</strong> and <strong>Email Address</strong> solely to provide access to our 7-day trial and manage your subscription. We do not sell your data to third parties.
+          At TechApproach, we prioritize the integrity of your scientific research and personal data. This policy outlines how we handle information across our virtual labs, AI specialist engines, and cloud synchronization services.
         </p>
       </section>
 
@@ -37,21 +37,32 @@ export function PrivacyPolicy() {
         <div className="bg-[#161b22] border border-[#30363d] rounded-3xl p-6 space-y-4">
           <div className="flex items-center gap-3 text-emerald-400">
             <Database size={20} />
-            <h4 className="text-sm font-bold uppercase tracking-wider">Google Data</h4>
+            <h4 className="text-sm font-bold uppercase tracking-wider">Data Collection</h4>
           </div>
-          <p className="text-xs text-[#8b949e] leading-relaxed">
-            We only use your Google profile to identify you within our system. We follow Google's Limited Use requirements to ensure your information is strictly used for platform functionality.
-          </p>
+          <ul className="space-y-3 text-xs text-[#8b949e]">
+            <li className="flex gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1 shrink-0" />
+              <span><strong>Identity:</strong> Google Auth provided email, name, and profile picture for account personalization.</span>
+            </li>
+            <li className="flex gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1 shrink-0" />
+              <span><strong>Research Progress:</strong> XP points, completed modules, and automated AI study notes generated during resource interaction ({">"}30s).</span>
+            </li>
+            <li className="flex gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1 shrink-0" />
+              <span><strong>Laboratory Data:</strong> Simulation parameters, circuit configurations, and materials selection history.</span>
+            </li>
+          </ul>
         </div>
 
         {/* AI Processing */}
         <div className="bg-[#161b22] border border-[#30363d] rounded-3xl p-6 space-y-4">
           <div className="flex items-center gap-3 text-purple-400">
             <Cpu size={20} />
-            <h4 className="text-sm font-bold uppercase tracking-wider">AI Training</h4>
+            <h4 className="text-sm font-bold uppercase tracking-wider">AI Integration</h4>
           </div>
-          <p className="text-[11px] text-[#8b949e] leading-relaxed font-mono">
-            Your laboratory queries and Thinking Chat interactions are processed by Google Gemini. This data is used solely for real-time insight and is not used for model training without consent.
+          <p className="text-[11px] text-[#8b949e] leading-relaxed">
+            Your laboratory queries and Thinking Chat interactions are processed by <strong>Google Gemini</strong> models. This includes automated note synthesis in the ResourceHub and <strong>Veo</strong> video generation for circuit visualizations. Data is used solely for real-time insight and is not used for model training without consent.
           </p>
         </div>
       </div>
@@ -59,11 +70,22 @@ export function PrivacyPolicy() {
       <section className="bg-[#0d162d] border border-blue-500/20 rounded-3xl p-8 space-y-6">
         <div className="flex items-center gap-3 text-blue-400">
           <Globe size={24} />
-          <h3 className="text-lg font-bold uppercase tracking-tight">Payments</h3>
+          <h3 className="text-lg font-bold uppercase tracking-tight">Third-Party Infrastructure</h3>
         </div>
-        <p className="text-sm text-[#c9d1d9] leading-relaxed">
-          All payments are processed by <strong>Stripe</strong>. We do not store your credit card information on our servers. TechApproach maintains a zero-retention policy for sensitive financial credentials.
-        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-4 bg-[#161b22] border border-[#30363d] rounded-2xl">
+            <p className="text-[10px] font-bold text-white uppercase mb-1">Hosting/Auth</p>
+            <p className="text-[10px] text-blue-400 font-mono">Google Firebase</p>
+          </div>
+          <div className="p-4 bg-[#161b22] border border-[#30363d] rounded-2xl">
+            <p className="text-[10px] font-bold text-white uppercase mb-1">AI Engine</p>
+            <p className="text-[10px] text-purple-400 font-mono">Gemini Flash/Pro</p>
+          </div>
+          <div className="p-4 bg-[#161b22] border border-[#30363d] rounded-2xl">
+            <p className="text-[10px] font-bold text-white uppercase mb-1">Payments</p>
+            <p className="text-[10px] text-emerald-400 font-mono">Stripe Connect</p>
+          </div>
+        </div>
       </section>
 
       <div className="bg-[#161b22] border border-[#30363d] rounded-3xl p-8 space-y-4">

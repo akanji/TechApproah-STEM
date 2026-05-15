@@ -11,12 +11,9 @@
         "photoURL": { "type": "string", "description": "URL to the user's avatar." },
         "xp": { "type": "number", "description": "Experience points earned across labs." },
         "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" },
-        "trialStartedAt": { "type": "string", "description": "ISO timestamp for trial start or numeric timestamp." },
-        "trialExpiresAt": { "type": "string", "description": "ISO timestamp for trial expiration." },
-        "isSubscribed": { "type": "boolean", "description": "Whether the user has an active pro subscription." }
+        "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["uid", "email", "xp", "createdAt", "updatedAt", "isSubscribed"]
+      "required": ["uid", "email", "xp", "createdAt", "updatedAt"]
     },
     "LabProgress": {
       "title": "Lab Progress",
